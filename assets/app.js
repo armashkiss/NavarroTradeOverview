@@ -91,7 +91,7 @@ function renderCanvas(cid){
  function attach(n,side){const x=n.x,y=n.y;return side==='top'?[x+n.w/2,y]:side==='bottom'?[x+n.w/2,y+n.h]:side==='left'?[x,y+n.h/2]:[x+n.w,y+n.h/2];}
  const connected={};
  const labelPosition=(edge,n1,n2,x1,y1,x2,y2)=>{
-  const width=Math.max(48,edge.label.length*10+18),midX=(x1+x2)/2,midY=(y1+y2)/2;
+  const width=Math.max(60,edge.label.length*13+24),midX=(x1+x2)/2,midY=(y1+y2)/2;
   const horizontal=(edge.fs==='right'&&edge.ts==='left')||(edge.fs==='left'&&edge.ts==='right');
   const offsets=[20,140,280,420];
   const candidates=horizontal
