@@ -3,6 +3,16 @@
 'use strict';
 const DB=window.NAVARRO_DATA;
 if(!DB){ document.getElementById('main').textContent='Не удалось загрузить данные сайта.'; return; }
+// The published vault uses the current legal/brand names throughout the UI,
+// including titles, card contents and full-text search.
+const companyNames=[['Достык Рефайнери','Dostyk Refinery'],['Достыком','Dostyk Refinery'],['Достыка','Dostyk Refinery'],['Достыке','Dostyk Refinery'],['Достык','Dostyk Refinery'],['Меркури','Mercury Energy']];
+function renameCompanies(value){
+ if(typeof value==='string')return companyNames.reduce((text,[from,to])=>text.split(from).join(to),value);
+ if(Array.isArray(value)){value.forEach((item,index)=>{value[index]=renameCompanies(item)});return value;}
+ if(value&&typeof value==='object')Object.keys(value).forEach(key=>{value[key]=renameCompanies(value[key])});
+ return value;
+}
+renameCompanies(DB);
 const DOCS=DB.notes, MAPS=DB.canvases;
 const noteById=Object.fromEntries(DOCS.map(d=>[d.id,d]));
 const mapById=Object.fromEntries(MAPS.map(m=>[m.id,m]));
@@ -46,7 +56,7 @@ function renderHome(){
  // Canvases sorted by filenames: c01 org, c02 holding, c03 route deal, c04 scenarios
  highlights[2].id='c03';
  const flow=['Инициирование','Закупка / продажа','Расчёт сделки','Согласования','Договор','Ж/д логистика','Перевалка / отпуск','Расчёты','Закрытие и KPI'];
- const companies=[['Sterling Energy','Управление группой','S'],['JetWayLogistics','Железнодорожные перевозки','J'],['Достык Рефайнери','Приграничная перевалка','Д'],['Меркури','Нефтебаза','М'],['Алматинский терминал','Терминал / авиа ГСМ*','A'],['ION','Цифровые интеграции*','I']];
+ const companies=[['Sterling Energy','Управление группой','S'],['JetWayLogistics','Железнодорожные перевозки','J'],['Dostyk Refinery','Приграничная перевалка','D'],['Mercury Energy','Нефтебаза','M'],['Алматинский терминал','Терминал / авиа ГСМ*','A'],['ION','Цифровые интеграции*','I']];
  const companyDoc=(n)=>DOCS.find(d=>d.section==='04_Холдинг'&&d.name===n);
  main.innerHTML=`<div class="overview">
  <section class="hero"><div class="hero-content"><div class="eyebrow">STERLING GROUP · OPERATING MODEL</div><h1>Коммерция. Логистика.<br/>Единая ответственность.</h1><p>Проект целевой структуры Navarro Trade: руководители и отделы, связи с предприятиями холдинга, сквозные процессы нефтетрейдинга и зоны принятия решений.</p><div class="hero-actions"><a class="primary-link" href="#/canvas/c01">Исследовать оргструктуру <span>↗</span></a><a class="ghost-link" href="#/canvas/c03">Маршрут сделки →</a></div></div><div class="hero-stamp"><b>N.</b><span>TRADE<br/>ORGANIZATION</span></div></section>
@@ -67,7 +77,7 @@ function mapColors(t){return {blue:'#6385b0',green:'#5b9b80',gold:'#b8a06c',viol
 let graphCleanup=null;
 function renderCanvas(cid){
  const m=mapById[cid];if(!m){main.innerHTML='<div class="canvas-page">Схема не найдена.</div>';return;}
- main.innerHTML=`<div class="canvas-page"><div class="canvas-header"><div><div class="overline">NAVARRO TRADE / ИНТЕРАКТИВНЫЕ СХЕМЫ</div><h1>${ehtml(m.title)}</h1><p>Масштабируйте колесом мыши, перетаскивайте поле. Нажмите на карточку, чтобы прочитать подробности.</p></div><div class="canvas-links">${MAPS.map(x=>`<a class="mini-link ${m.id===x.id?'selected':''}" href="${mapurl(x)}">${ehtml(x.name.split(' ')[0])} · ${ehtml(abbreviate(x.title,20))}</a>`).join('')}</div></div><div class="canvas-layout"><div class="graph-shell"><div class="map-floating-top"><span class="tool-label">ИНТЕРАКТИВНАЯ КАРТА · ${m.nodes.length} УЗЛОВ</span><button class="focus-button" data-focus="fit">Вся схема</button><button class="focus-button" data-focus="leader">Руководство</button><button class="focus-button" data-focus="commercial">Коммерция</button><button class="focus-button" data-focus="finance">Финансы</button></div><div class="graph-viewport" id="graph-viewport"><div class="graph-stage" id="graph-stage"><svg class="graph-lines" id="graph-lines" aria-hidden="true"></svg></div></div><div class="canvas-controls"><button id="zoom-out" title="Уменьшить">−</button><span class="zoom-label" id="zoom-label">—</span><button id="zoom-in" title="Увеличить">+</button><button id="zoom-fit" title="Уместить схему">⊡</button></div></div><aside class="inspector"><div class="inspector-head"><span class="tiny-dot"></span>ПАСПОРТ УЗЛА</div><div class="inspector-content" id="inspector-content"><p class="empty"><b>Выберите элемент схемы.</b><br/>Откройте карточку подразделения, должности или компании, чтобы увидеть её функции и перейти к полному документу.</p><p class="hint">Сплошные линии — административная подчинённость или последовательность этапов. Пунктир — функциональное взаимодействие (по подписи линии).</p></div></aside></div></div>`;
+ main.innerHTML=`<div class="canvas-page"><div class="canvas-header"><div><div class="overline">NAVARRO TRADE / ИНТЕРАКТИВНЫЕ СХЕМЫ</div><h1>${ehtml(m.title)}</h1><p>Масштабируйте колесом мыши. Чтобы передвинуть схему, потяните мышью за любое место карты; щелчок по карточке открывает подробности.</p></div><div class="canvas-links">${MAPS.map(x=>`<a class="mini-link ${m.id===x.id?'selected':''}" href="${mapurl(x)}">${ehtml(x.name.split(' ')[0])} · ${ehtml(abbreviate(x.title,20))}</a>`).join('')}</div></div><div class="canvas-layout"><div class="graph-shell"><div class="map-floating-top"><span class="tool-label">ИНТЕРАКТИВНАЯ КАРТА · ${m.nodes.length} УЗЛОВ</span><button class="focus-button" data-focus="fit">Вся схема</button><button class="focus-button" data-focus="leader">Руководство</button><button class="focus-button" data-focus="commercial">Коммерция</button><button class="focus-button" data-focus="finance">Финансы</button></div><div class="graph-viewport" id="graph-viewport"><div class="graph-stage" id="graph-stage"><svg class="graph-lines" id="graph-lines" aria-hidden="true"></svg></div></div><div class="canvas-controls"><button id="zoom-out" title="Уменьшить">−</button><span class="zoom-label" id="zoom-label">—</span><button id="zoom-in" title="Увеличить">+</button><button id="zoom-fit" title="Уместить схему">⊡</button></div></div><aside class="inspector"><div class="inspector-head"><span class="tiny-dot"></span>ПАСПОРТ УЗЛА</div><div class="inspector-content" id="inspector-content"><p class="empty"><b>Выберите элемент схемы.</b><br/>Откройте карточку подразделения, должности или компании, чтобы увидеть её функции и перейти к полному документу.</p><p class="hint">Сплошные линии — административная подчинённость или последовательность этапов. Пунктир — функциональное взаимодействие (по подписи линии).</p></div></aside></div></div>`;
  const vp=document.getElementById('graph-viewport'),stage=document.getElementById('graph-stage'),svg=document.getElementById('graph-lines'),insp=document.getElementById('inspector-content'),zoomLabel=document.getElementById('zoom-label');
  let pad=115, minX=Math.min(...m.nodes.map(n=>n.x)),minY=Math.min(...m.nodes.map(n=>n.y));let maxX=Math.max(...m.nodes.map(n=>n.x+n.w)),maxY=Math.max(...m.nodes.map(n=>n.y+n.h));
  const totalW=maxX-minX+2*pad,totalH=maxY-minY+2*pad;
@@ -91,26 +101,26 @@ function renderCanvas(cid){
   // labels only at close zoom; avoid flood in overview
   if(e.label){const label=document.createElementNS('http://www.w3.org/2000/svg','text');label.setAttribute('class','edge-label');label.setAttribute('x',(x1+x2)/2);label.setAttribute('y',(y1+y2)/2-12);label.textContent=e.label;svg.appendChild(label);}
  });
- let selected=null;
+ let selected=null,skipNodeClick=null;
  m.nodes.forEach(n=>{
   const v=pos[n.id],el=document.createElement('div');el.className=`canvas-node tone-${n.tone}`;el.style.cssText=`left:${v.x}px;top:${v.y}px;width:${n.w}px;height:${n.h}px;`;el.innerHTML=n.html;el.dataset.node=n.id;stage.appendChild(el);
-  el.addEventListener('click',ev=>{if(ev.target.closest('a'))return;selected=n.id;stage.querySelectorAll('.canvas-node.active').forEach(e=>e.classList.remove('active'));el.classList.add('active');svg.querySelectorAll('.edge-graph.highlight').forEach(e=>e.classList.remove('highlight'));(connected[n.id]||[]).forEach(e=>e.classList.add('highlight'));insp.innerHTML=`${n.html}<div class="node-metadata">Узел организационной карты · ${ehtml(m.title)}<br/>Ссылки в тексте открывают соответствующий документ.</div>`;});
+  el.addEventListener('click',ev=>{if(skipNodeClick===n.id){skipNodeClick=null;return;}if(ev.target.closest('a'))return;selected=n.id;stage.querySelectorAll('.canvas-node.active').forEach(e=>e.classList.remove('active'));el.classList.add('active');svg.querySelectorAll('.edge-graph.highlight').forEach(e=>e.classList.remove('highlight'));(connected[n.id]||[]).forEach(e=>e.classList.add('highlight'));insp.innerHTML=`${n.html}<div class="node-metadata">Узел организационной карты · ${ehtml(m.title)}<br/>Ссылки в тексте открывают соответствующий документ.</div>`;});
  });
  let scale=1,tx=0,ty=0;
  const clamp=(z)=>Math.min(2.3,Math.max(.075,z));
  function setTransform(){stage.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;zoomLabel.textContent=`${Math.round(scale*100)}%`;}
- function fit(){let w=vp.clientWidth,h=vp.clientHeight;scale=clamp(Math.min((w-65)/totalW,(h-50)/totalH));tx=(w-totalW*scale)/2;ty=(h-totalH*scale)/2;setTransform();}
+ function fit(multiplier=1){let w=vp.clientWidth,h=vp.clientHeight;scale=clamp(Math.min((w-65)/totalW,(h-50)/totalH)*multiplier);tx=(w-totalW*scale)/2;ty=(h-totalH*scale)/2;setTransform();}
  function center(n,desired=.70){if(!n)return fit();scale=clamp(desired);tx=vp.clientWidth/2-(n.x+n.w/2)*scale;ty=vp.clientHeight/2-(n.y+n.h/2)*scale;setTransform();}
  function zoom(mult,px=vp.clientWidth/2,py=vp.clientHeight/2){let next=clamp(scale*mult),ratio=next/scale;tx=px-(px-tx)*ratio;ty=py-(py-ty)*ratio;scale=next;setTransform();}
  vp.addEventListener('wheel',ev=>{ev.preventDefault();const r=vp.getBoundingClientRect();zoom(ev.deltaY>0?.82:1.22,ev.clientX-r.left,ev.clientY-r.top)},{passive:false});
- let dragging=false,dragId=null,lx=0,ly=0;
- vp.addEventListener('pointerdown',ev=>{if(ev.target.closest('a')||ev.target.closest('.canvas-node'))return;dragging=true;dragId=ev.pointerId;lx=ev.clientX;ly=ev.clientY;vp.classList.add('grabbing');vp.setPointerCapture(dragId)});
- vp.addEventListener('pointermove',ev=>{if(!dragging)return;tx+=ev.clientX-lx;ty+=ev.clientY-ly;lx=ev.clientX;ly=ev.clientY;setTransform()});
- const endDrag=()=>{dragging=false;vp.classList.remove('grabbing')};vp.addEventListener('pointerup',endDrag);vp.addEventListener('pointercancel',endDrag);
+ let dragging=false,dragId=null,lx=0,ly=0,dragStart=null,dragNode=null;
+ vp.addEventListener('pointerdown',ev=>{if(ev.button!==0||ev.target.closest('a'))return;dragId=ev.pointerId;lx=ev.clientX;ly=ev.clientY;dragStart={x:lx,y:ly};dragNode=ev.target.closest('.canvas-node')?.dataset.node||null;vp.setPointerCapture(dragId)});
+ vp.addEventListener('pointermove',ev=>{if(ev.pointerId!==dragId)return;const moved=Math.hypot(ev.clientX-dragStart.x,ev.clientY-dragStart.y)>4;if(!dragging&&!moved)return;if(!dragging){dragging=true;vp.classList.add('grabbing');}ev.preventDefault();tx+=ev.clientX-lx;ty+=ev.clientY-ly;lx=ev.clientX;ly=ev.clientY;setTransform()});
+ const endDrag=ev=>{if(ev.pointerId!==dragId)return;if(dragging&&dragNode)skipNodeClick=dragNode;dragging=false;dragId=null;dragStart=null;dragNode=null;vp.classList.remove('grabbing')};vp.addEventListener('pointerup',endDrag);vp.addEventListener('pointercancel',endDrag);
  document.querySelector('#zoom-out').onclick=()=>zoom(.77);document.querySelector('#zoom-in').onclick=()=>zoom(1.3);document.querySelector('#zoom-fit').onclick=fit;
  const choices={leader:['генеральный директор','руководство'],commercial:['коммерческий департамент','коммерческ'],finance:['финансовая дирекция','финансовый директор']};
  document.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>{let k=b.dataset.focus;if(k==='fit')return fit();let matches=choices[k];let candidates=m.nodes.filter(n=>matches.some(term=>n.text.toLowerCase().includes(term)));let chosen=candidates.find(n=>n.text.toLowerCase().includes(matches[0]))||candidates[0];center(chosen?pos[chosen.id]:null)});
- requestAnimationFrame(fit);graphCleanup=()=>{};
+ requestAnimationFrame(()=>fit(3));graphCleanup=()=>{};
 }
 function navigate(){const r=route();buildMenu(r);setLoc(r);if(r.type==='home')renderHome();else if(r.type==='canvas')renderCanvas(r.id);else if(r.type==='doc')renderDoc(r.id);else if(r.type==='section')renderSection(r.id);else renderHome();document.querySelector('#sidebar').classList.remove('open');document.querySelector('#mobile-backdrop').hidden=true;if(!scrollRestore)window.scrollTo({top:0});}
 window.addEventListener('hashchange',navigate);navigate();
