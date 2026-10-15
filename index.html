@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="NAVARRO TRADE — проект организационной структуры, взаимодействий предприятий группы Sterling и процессов нефтетрейдинга." />
+  <meta name="theme-color" content="#101d34" />
+  <title>NAVARRO TRADE — Организационная модель</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div id="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#/" aria-label="NAVARRO TRADE — на главную">
+        <span class="brand-mark"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 34V14h5l14 15V14h5v20h-5L17 19v15z" fill="currentColor"/></svg></span>
+        <span class="brand-name">NAVARRO<span>TRADE</span><small>GROUP OPERATING MODEL</small></span>
+      </a>
+      <div class="sidebar-scroll" id="sidebar-nav"></div>
+      <div class="sidebar-bottom"><span class="status-circle"></span><span>Проект организационной модели</span><small>TO-BE · 2026–2027</small></div>
+    </aside>
+    <div class="page-column">
+      <header class="topbar">
+        <button class="mobile-menu icon-button" id="mobile-menu" title="Открыть меню" aria-label="Открыть меню"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <div class="top-location" id="top-location"><span>Рабочее пространство</span><span class="breadcrumb-divider">/</span><strong>Обзор модели</strong></div>
+        <div class="top-actions">
+          <span class="project-pill"><i></i> ПРОЕКТ · TO-BE</span>
+          <button class="top-action search-trigger" id="open-search" aria-label="Поиск по документам"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg> Поиск <kbd>Ctrl K</kbd></button>
+          <button class="top-action copy-link" id="copy-link"><svg viewBox="0 0 24 24"><path d="M8 12h8M10 8H7a4 4 0 0 0 0 8h3m4-8h3a4 4 0 0 1 0 8h-3"/></svg><span>Ссылка</span></button>
+        </div>
+      </header>
+      <main id="main" tabindex="-1"></main>
+      <footer class="footer"><span>NAVARRO TRADE · STERLING GROUP</span><span>Рабочий проект — не утверждённая структура · октябрь 2026</span></footer>
+    </div>
+  </div>
+  <div class="overlay" id="search-overlay" hidden>
+    <div class="search-dialog" role="dialog" aria-modal="true" aria-label="Поиск по материалам">
+      <div class="dialog-input"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input type="search" id="search-input" placeholder="Поиск по должностям, отделам, процессам..." autocomplete="off"/><kbd>ESC</kbd></div>
+      <div id="search-results"></div>
+      <div class="dialog-bottom">Поиск по <strong id="docs-counter"></strong> материалам · Enter — открыть первый результат</div>
+    </div>
+  </div>
+  <div class="mobile-backdrop" id="mobile-backdrop" hidden></div>
+  <div class="toast" id="toast"></div>
+  <script src="site-data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
