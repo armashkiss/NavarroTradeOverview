@@ -90,6 +90,16 @@ function renderCanvas(cid){
  }
  function attach(n,side){const x=n.x,y=n.y;return side==='top'?[x+n.w/2,y]:side==='bottom'?[x+n.w/2,y+n.h]:side==='left'?[x,y+n.h/2]:[x+n.w,y+n.h/2];}
  const connected={};
+ const labelPosition=(edge,n1,n2,x1,y1,x2,y2)=>{
+  const width=Math.max(48,edge.label.length*10+18),midX=(x1+x2)/2,midY=(y1+y2)/2;
+  const horizontal=(edge.fs==='right'&&edge.ts==='left')||(edge.fs==='left'&&edge.ts==='right');
+  const offsets=[20,140,280,420];
+  const candidates=horizontal
+   ? offsets.flatMap(offset=>[{x:midX,y:Math.min(n1.y,n2.y)-offset},{x:midX,y:Math.max(n1.y+n1.h,n2.y+n2.h)+offset+12}])
+   : [{x:midX,y:midY-12},...offsets.flatMap(offset=>[{x:Math.min(n1.x,n2.x)-width/2-offset,y:midY},{x:Math.max(n1.x+n1.w,n2.x+n2.w)+width/2+offset,y:midY}])];
+  const intersectsNode=point=>Object.values(pos).some(node=>point.x-width/2<node.x+node.w&&point.x+width/2>node.x&&point.y-20<node.y+node.h&&point.y+5>node.y);
+  return candidates.find(point=>!intersectsNode(point));
+ };
  m.edges.forEach(e=>{
   const n1=pos[e.from],n2=pos[e.to];if(!n1||!n2)return;
   const [x1,y1]=attach(n1,e.fs),[x2,y2]=attach(n2,e.ts);
@@ -99,7 +109,7 @@ function renderCanvas(cid){
   const el=document.createElementNS('http://www.w3.org/2000/svg','path');el.setAttribute('d',d);el.setAttribute('class',`edge-graph edge-${e.tone} ${e.arrow?'':'functional'}`);if(e.arrow)el.setAttribute('marker-end',`url(#arrow-${e.tone})`);svg.appendChild(el);
   (connected[e.from]??=[]).push(el);(connected[e.to]??=[]).push(el);
   // labels only at close zoom; avoid flood in overview
-  if(e.label){const label=document.createElementNS('http://www.w3.org/2000/svg','text');label.setAttribute('class','edge-label');label.setAttribute('x',(x1+x2)/2);label.setAttribute('y',(y1+y2)/2-12);label.textContent=e.label;svg.appendChild(label);}
+  if(e.label){const point=labelPosition(e,n1,n2,x1,y1,x2,y2);if(point){const label=document.createElementNS('http://www.w3.org/2000/svg','text');label.setAttribute('class','edge-label');label.setAttribute('x',point.x);label.setAttribute('y',point.y);label.textContent=e.label;svg.appendChild(label);}}
  });
  let selected=null,skipNodeClick=null;
  m.nodes.forEach(n=>{
@@ -120,7 +130,8 @@ function renderCanvas(cid){
  document.querySelector('#zoom-out').onclick=()=>zoom(.77);document.querySelector('#zoom-in').onclick=()=>zoom(1.3);document.querySelector('#zoom-fit').onclick=fit;
  const choices={leader:['генеральный директор','руководство'],commercial:['коммерческий департамент','коммерческ'],finance:['финансовая дирекция','финансовый директор']};
  document.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>{let k=b.dataset.focus;if(k==='fit')return fit();let matches=choices[k];let candidates=m.nodes.filter(n=>matches.some(term=>n.text.toLowerCase().includes(term)));let chosen=candidates.find(n=>n.text.toLowerCase().includes(matches[0]))||candidates[0];center(chosen?pos[chosen.id]:null)});
- requestAnimationFrame(()=>fit(3));graphCleanup=()=>{};
+ function readableStart(){fit(3);if(scale<.6){scale=.6;tx=(vp.clientWidth-totalW*scale)/2;ty=(vp.clientHeight-totalH*scale)/2;setTransform();}}
+ requestAnimationFrame(readableStart);graphCleanup=()=>{};
 }
 function navigate(){const r=route();buildMenu(r);setLoc(r);if(r.type==='home')renderHome();else if(r.type==='canvas')renderCanvas(r.id);else if(r.type==='doc')renderDoc(r.id);else if(r.type==='section')renderSection(r.id);else renderHome();document.querySelector('#sidebar').classList.remove('open');document.querySelector('#mobile-backdrop').hidden=true;if(!scrollRestore)window.scrollTo({top:0});}
 window.addEventListener('hashchange',navigate);navigate();
