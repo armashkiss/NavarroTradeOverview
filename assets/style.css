@@ -5,3 +5,18 @@
 /* Readable top-level hierarchy, with detailed interactive canvas below. */
 .org-summary{border:1px solid #dbe8e8;border-radius:13px;background:#fff;padding:16px 19px 15px;margin-bottom:17px;box-shadow:var(--shadow)}.org-ceo{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;width:min(350px,100%);margin:0 auto 18px;border:0;border-radius:10px;background:#173b4e;color:white;padding:13px 18px;position:relative}.org-ceo:after{content:"";position:absolute;width:2px;height:18px;background:#a9bfcc;bottom:-18px}.org-ceo small{font-size:9px;letter-spacing:.12em;color:#a2d4ce}.org-ceo strong{font-size:14px}.org-summary-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px}.org-summary-card{background:#f7faf9;border:1px solid #ddeae7;border-radius:8px;text-align:center;min-width:0;padding:13px 7px;min-height:85px}.org-summary-card:hover,.org-summary-card.selected{border-color:#48a393;background:#eaf6f0}.org-summary-card b{display:block;font-size:11px;line-height:1.45;color:#224a56}.org-summary-card span{display:block;color:#728b96;font-size:10px;line-height:1.4;margin-top:4px}.org-summary-note{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;border-top:1px solid #ecf1f1;padding-top:11px;font-size:10.8px;color:#5d7c86}.org-summary-note b{color:#1f5b60}@media(max-width:1150px){.org-summary-row{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:620px){.org-summary-row{grid-template-columns:repeat(2,minmax(0,1fr))}.org-summary{padding:13px}.org-summary-card{min-height:75px}.org-summary-note{flex-direction:column;gap:6px}}
 .staff-btn{font-family:inherit;color:inherit;border:0;border-bottom:1px solid #eef2f5;background:#fff;width:100%;text-align:left;cursor:pointer}.staff-btn:hover,.staff-btn.selected{background:#f0f8f5}.staff-btn.selected{box-shadow:inset 3px 0 #168676}.role-profile{scroll-margin-top:90px}.role-profile h2{font-size:21px;margin:3px 0 14px}
+
+/* Clear reporting lanes (organization hierarchy v2.1). */
+.org-zone rect{stroke-width:2;fill-opacity:.93}
+.org-zone.zone-commercial rect{fill:#eff9f6;stroke:#b4dbd0}
+.org-zone.zone-logistics rect{fill:#f2f7fb;stroke:#c4d8e8}
+.org-zone.zone-finance rect{fill:#fff8ed;stroke:#ead7ad}
+.org-zone-title{font-size:15px;font-weight:800;letter-spacing:.045em;fill:#27596a}
+.zone-finance .org-zone-title{fill:#8c622c}
+.org-zone-note{font-size:11.5px;fill:#577987}
+.zone-finance .org-zone-note{fill:#8e7458}
+.org-edge-commerce{stroke:#62a89a;stroke-width:2.2}
+.org-edge-finance{stroke:#b9995b;stroke-width:2.2}
+.org-edge-management{stroke:#9bafbb;stroke-width:2.1}
+.org-function-caption{fill:#18867d;font-size:10.2px;font-weight:700}
+.org-toolbar button{white-space:nowrap}
