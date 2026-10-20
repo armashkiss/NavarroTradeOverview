@@ -1,0 +1,10 @@
+# Do not publish sensitive project context or original кадровые files
+.codex/private/
+09_Исходники/
+*.key
+*.pem
+.env
+.env.*
+__pycache__/
+*.log
+*штатное*скан*
