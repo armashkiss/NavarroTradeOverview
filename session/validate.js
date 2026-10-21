@@ -12,6 +12,7 @@ for(const f of d.dealflows){const notes=d.details.flows[f.id];assert.strictEqual
 for(const dir of d.directions){assert(d.details.directions[dir.id].cases,'direction case references');}
 for(const c of d.cases){assert(d.details.cases[c.id].process,'case process');}
 const ui=read('assets/app.js');
+const css=read('assets/style.css');
 assert(ui.includes('requestFullscreen'),'fullscreen behavior');
 assert(ui.includes("e.key==='PageDown'"),'presentation clicker');
 assert(ui.includes('data-open-case'),'linked case navigation');
@@ -21,8 +22,15 @@ assert(ui.includes('detailSerial'),'animated focus panel state');
 assert(ui.includes('adaptDetailColumns'),'responsive case layout');
 assert(ui.includes('zoomToDetail'),'zoom-to-case behavior');
 assert(read('index.html').includes('id="detail-zoom"'),'focus overlay');
+assert(read('index.html').includes('aria-describedby="detail-subtitle"'),'dialog description');
+assert(ui.includes('detailLastFocus'),'dialog focus restoration');
+assert(ui.includes('shell.inert=true'),'background isolation while dialog is open');
+assert(ui.includes('window.innerWidth>620'),'mobile-safe dialog animation');
+assert(ui.includes('el.dataset.item===`case:${dest}`'),'linked-case focus restoration');
 assert(ui.includes("type!=='flow'"),'flow inspector fix');
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen button');
-assert(read('assets/style.css').includes('.org-overview-label'),'org hierarchy text layout');
+assert(css.includes('.org-overview-label'),'org hierarchy text layout');
+assert(css.includes('@media(max-width:680px){.side{position:fixed}}'),'mobile menu remains an overlay');
+assert(css.includes('height:min(760px,100%)'),'short-viewport dialog bounds');
 assert(read('assets/app.js').includes('ПРЯМОЕ ПОДЧИНЕНИЕ CEO'),'exec hierarchy legend');
-console.log(`PASS · NAVARRO Session v4.2: ${d.navigation.length} экранов, ${d.dealflows.reduce((n,f)=>n+f.steps.length,0)} этапа, ${d.cases.length} кейсов, полноэкранный режим и кликер`);
+console.log(`PASS · NAVARRO Session v4.3: ${d.navigation.length} экранов, ${d.dealflows.reduce((n,f)=>n+f.steps.length,0)} этапа, ${d.cases.length} кейсов, доступный диалог, полноэкранный режим и кликер`);

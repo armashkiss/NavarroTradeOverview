@@ -7,7 +7,7 @@ const itemById=(t,id)=>({direction:D.directions,exec:D.executives,case:D.cases,c
 const current={slide:0,selected:{},orgParent:null,orgSelection:'ceo',flow:'wholesale',decisions:(()=>{try{return JSON.parse(localStorage.getItem('navarro-session-decisions')||'{}')}catch{return {}}})()};
 const slides=D.navigation;
 const bullet=list=>`<ul>${list.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
-const block=(name,html)=>`<div class="section"><h4>${esc(name)}</h4>${html}</div>`;
+const block=(name,html)=>{const label=name.toLowerCase();const tone=/решени|ответствен|владел|контрол|что нужно/.test(label)?'action':/проблем|риск|последств|произошло|узкое/.test(label)?'risk':/документ|подтвержден/.test(label)?'evidence':'context';return `<div class="section section-${tone}"><h4>${esc(name)}</h4>${html}</div>`};
 const p=s=>`<p>${esc(s)}</p>`;
 const pill=s=>`<span class="pill">${esc(s)}</span>`;
 const extra=D.details||{};
@@ -85,7 +85,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
  }
  return `<div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div><h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p>${inner}`;
 }
-// v4.2: a compact on-slide preview, plus a cinematic no-scroll case focus.
+// v4.3: a compact on-slide preview, plus an accessible executive insight dialog.
 function preview(type,id){
  const i=itemById(type,id);let title='',sub='',tag='INSIGHT PANEL';
  if(type==='flow'){
@@ -97,39 +97,53 @@ function preview(type,id){
  <button class="detail-cta" type="button" data-expand-current>Развернуть разбор <span>↗</span></button>
  <p class="detail-hint">Нажмите на карточку слева — описание, кейс, последствия и решение откроются крупно на экране без прокрутки.</p>`;
 }
-let detailState={type:null,id:null},detailSerial=0;
+let detailState={type:null,id:null},detailSerial=0,detailLastFocus=null;
 const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function finishZoomClose(layer,{restoreFocus=true}={}){
+ layer.hidden=true;layer.setAttribute('aria-hidden','true');document.body.classList.remove('has-detail-zoom');
+ const shell=$('.shell');if(shell)shell.inert=false;
+ let restoreTarget=detailLastFocus;
+ if(!restoreTarget?.isConnected||restoreTarget.closest?.('#detail-zoom')||restoreTarget.offsetParent===null){
+  const key=`${detailState.type}:${detailState.id}`;
+  restoreTarget=[...document.querySelectorAll('[data-item]')].find(el=>el.dataset.item===key);
+ }
+ if(restoreFocus&&restoreTarget?.isConnected)restoreTarget.focus({preventScroll:true});
+ detailLastFocus=null;
+}
 function hideZoom({instant=false}={}){
  const layer=$('#detail-zoom');if(!layer||layer.hidden)return;
  const serial=++detailSerial;
- if(instant||reduced()){layer.hidden=true;document.body.classList.remove('has-detail-zoom');return;}
+ if(instant||reduced()){finishZoomClose(layer,{restoreFocus:!instant});return;}
  const win=layer.querySelector('.detail-window');
  const a=win.animate([{opacity:1,transform:'translateY(0) scale(1)',filter:'blur(0)'},{opacity:0,transform:'translateY(18px) scale(.97)',filter:'blur(3px)'}],{duration:240,easing:'ease-in',fill:'forwards'});
- Promise.resolve(a.finished).catch(()=>{}).then(()=>{if(detailSerial!==serial)return;a.cancel();layer.hidden=true;document.body.classList.remove('has-detail-zoom')});
+ Promise.resolve(a.finished).catch(()=>{}).then(()=>{if(detailSerial!==serial)return;a.cancel();finishZoomClose(layer)});
 }
 function adaptDetailColumns(){
  const layer=$('#detail-zoom'),win=layer?.querySelector('.detail-window'),grid=layer?.querySelector('.detail-columns');
  if(!win||!grid||layer.hidden)return;
  const source=layer.querySelector('.detail-source');
- const nodes=[...source.children].map(n=>n.cloneNode(true));
- const width=win.clientWidth;
+ const width=layer.querySelector('.detail-content')?.clientWidth||win.clientWidth;
  const columns=width>=1060?3:width>=930&&layer.dataset.focusType!=='direction'?3:width>=720?2:1;
- // Preserve top-to-bottom reading order, balance content by approximate visual weight.
- let lanes=Array.from({length:columns},()=>document.createElement('div'));
- lanes.forEach(n=>n.className='detail-lane');
- const weights=nodes.map(n=>{let t=n.textContent||'';return t.length+115+(n.querySelectorAll('li,.case-reference').length*60)});
- const total=weights.reduce((x,y)=>x+y,0),target=total/columns;
- let lane=0,load=0;
- nodes.forEach((node,i)=>{
-  if(lane<columns-1&&load>target*.62&&(load+weights[i]*.55)>target){lane++;load=0;}
-  lanes[lane].appendChild(node);load+=weights[i];
- });
- grid.replaceChildren(...lanes);
+ let lanes=[...grid.children];
+ if(layer.dataset.columns!==String(columns)||lanes.length!==columns){
+  const nodes=[...source.children].map(n=>n.cloneNode(true));
+  // Preserve top-to-bottom reading order, balance content by approximate visual weight.
+  lanes=Array.from({length:columns},()=>document.createElement('div'));
+  lanes.forEach(n=>n.className='detail-lane');
+  const weights=nodes.map(n=>{let t=n.textContent||'';return t.length+115+(n.querySelectorAll('li,.case-reference').length*60)});
+  const total=weights.reduce((x,y)=>x+y,0),target=total/columns;
+  let lane=0,load=0;
+  nodes.forEach((node,i)=>{
+   if(lane<columns-1&&load>target*.62&&(load+weights[i]*.55)>target){lane++;load=0;}
+   lanes[lane].appendChild(node);load+=weights[i];
+  });
+  grid.replaceChildren(...lanes);layer.dataset.columns=String(columns);
+ }
  layer.dataset.density='0';layer.classList.remove('detail-unavoidable-scroll');
  const content=layer.querySelector('.detail-content');
  const contentEnd=()=>content.getBoundingClientRect().bottom-parseFloat(getComputedStyle(content).paddingBottom);
  const spilling=()=>lanes.some(l=>[...l.children].some(c=>c.getBoundingClientRect().bottom>contentEnd()+2));
- for(let i=0;i<5;i++){
+ for(let i=0;i<1;i++){
   // Real bounding boxes catch overflow even when flex lanes are exactly 100% tall.
   if(!spilling())break;
   layer.dataset.density=String(i+1);
@@ -148,20 +162,32 @@ function zoomToDetail(type,id){
  const title=temp.querySelector('h2'),sub=temp.querySelector('.sub');
  const source=layer.querySelector('.detail-source');
  source.replaceChildren(...[...temp.children].filter(x=>x!==header&&x!==title&&x!==sub));
+ delete layer.dataset.columns;
  layer.querySelector('#detail-topic').textContent=header?.querySelector('.inspector-tag')?.textContent||'ПОДРОБНОСТИ';
  layer.querySelector('#detail-title').textContent=title?.textContent||'';
  layer.querySelector('#detail-subtitle').textContent=sub?.textContent||'';
+ const metric=layer.querySelector('#detail-metric'),item=itemById(type,id);
+ metric.textContent=type==='case'&&item?.metric?item.metric:'';metric.hidden=!metric.textContent;
+ const contextLabels={case:'КЕЙС',flow:'ЭТАП',exec:'СТРУКТУРА',direction:'НАПРАВЛЕНИЕ',company:'КОНТУР',change:'ИНИЦИАТИВА',growth:'РОСТ',decision:'РЕШЕНИЕ'};
+ layer.querySelector('#detail-context-mark').textContent=contextLabels[type]||'INSIGHT';
  ++detailSerial;
  layer.dataset.focusType=type;
- layer.hidden=false;document.body.classList.add('has-detail-zoom');
+ if(layer.hidden)detailLastFocus=document.activeElement;
+ layer.hidden=false;layer.setAttribute('aria-hidden','false');document.body.classList.add('has-detail-zoom');
+ const shell=$('.shell');if(shell)shell.inert=true;
  win.getAnimations().forEach(a=>a.cancel());
  // Wait for fixed positioning to be measured, then animate from the former right panel.
  adaptDetailColumns();
- if(start&&!reduced()&&win.animate){
+ const content=layer.querySelector('.detail-content');if(content)content.scrollTop=0;
+ const canMorph=start&&window.innerWidth>620&&start.bottom>0&&start.top<window.innerHeight&&start.right>0&&start.left<window.innerWidth;
+ if(canMorph&&!reduced()&&win.animate){
   const end=win.getBoundingClientRect(),sx=Math.min(1.0,Math.max(.22,start.width/end.width)),sy=Math.min(1.0,Math.max(.22,start.height/end.height));
   const tx=(start.left+start.width/2)-(end.left+end.width/2),ty=(start.top+start.height/2)-(end.top+end.height/2);
   win.animate([{opacity:.64,transform:`translate(${tx}px,${ty}px) scale(${sx},${sy})`,filter:'blur(5px)'},{opacity:1,transform:'translate(0,0) scale(1)',filter:'blur(0)'}],{duration:600,easing:'cubic-bezier(.16,1,.3,1)'});
+ }else if(!reduced()&&win.animate){
+  win.animate([{opacity:0,transform:'translateY(12px) scale(.985)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:300,easing:'cubic-bezier(.16,1,.3,1)'});
  }
+ requestAnimationFrame(()=>layer.querySelector('.detail-close')?.focus({preventScroll:true}));
 }
 function setDetail(type,id,{expand=true}={}){
  current.selected[type]=id;detailState={type,id};
@@ -241,10 +267,10 @@ function render(){
  let s=slides[current.slide];$('#chapter').textContent=s.name;
  document.documentElement.style.setProperty('--slide-progress',current.slide+1);
  $('#count').textContent=`${String(current.slide+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
- $('#sidenav').innerHTML=slides.map((x,k)=>`<button class="navlink ${k===current.slide?'active':''}" data-goto="${x.id}" title="${esc(x.name)}"><span class="navno">${x.short}</span><span>${esc(x.name)}</span></button>`).join('');
+ $('#sidenav').innerHTML=slides.map((x,k)=>`<button class="navlink ${k===current.slide?'active':''}" data-goto="${x.id}" title="${esc(x.name)}" ${k===current.slide?'aria-current="page"':''}><span class="navno">${x.short}</span><span>${esc(x.name)}</span></button>`).join('');
  let body=({opening:cover,directions,organization:org,dealflow,cases,partners,changes,growth,decisions:decision})[s.id]();
  $('#page').innerHTML=`<div class="page-inner slide-enter">${body}</div>`;
- $('#page').scrollTop=0;$('#side').classList.remove('open');
+ $('#page').scrollTop=0;$('#side').classList.remove('open');$('#mobile-nav')?.setAttribute('aria-expanded','false');
 }
 async function navigate(id){
  let k=slides.findIndex(x=>x.id===id);if(k<0||k===current.slide)return;
@@ -275,7 +301,7 @@ async function switchFlow(id){
 
 function notify(message){let t=$('#toast');t.textContent=message;t.style.display='block';clearTimeout(notify.timer);notify.timer=setTimeout(()=>t.style.display='none',2300);}
 function exportDecisions(){let ts=new Date().toLocaleString('ru-RU');const st={pending:'К обсуждению',agreed:'Отмечено согласованным',review:'На доработку',hold:'Отложено'};let text=`# Sterling Group · Рабочий реестр решений\n\nДата экспорта: ${ts}\n\n> Не является утверждённым протоколом. Требует проверки участниками, подписи и назначения сроков.\n\n`+D.decisions.map((d,i)=>`## ${i+1}. ${d.title}\n\n**Статус:** ${st[current.decisions[d.id]||'pending']}\n\n**Предлагаемый ответственный:** ${d.owner}\n\n**Вопрос:** ${d.prompt}\n\n**Срок / подтверждение:** __________\n`).join('\n');let blob=new Blob([text],{type:'text/markdown;charset=utf-8'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='Sterling_Working_Decisions.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),2500);notify('Рабочий реестр скачан');}
-document.addEventListener('click',e=>{if(e.target.closest('[data-detail-close]')){hideZoom();return;}if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}let linked=e.target.closest('[data-open-case]');if(linked){current.selected.case=linked.dataset.openCase;const dest=linked.dataset.openCase;Promise.resolve(navigate('cases')).then(()=>setDetail('case',dest));return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let org=e.target.closest('[data-org]');if(org){orgClick(org.dataset.org);return;}if(e.target.closest('[data-orgback]')){let n=nodeById[current.orgParent];let parent=n?.super||'ceo';orgClick(parent);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let button=e.target.closest('[data-decision]');if(button){current.decisions[button.dataset.decision]=button.dataset.status;try{localStorage.setItem('navarro-session-decisions',JSON.stringify(current.decisions))}catch{}current.selected.decision=button.dataset.decision;document.querySelectorAll(`[data-decision="${button.dataset.decision}"]`).forEach(x=>x.classList.toggle('selected',x.dataset.status===button.dataset.status));let cnt=$('.status-chip');if(cnt)cnt.textContent=`${D.decisions.filter(d=>current.decisions[d.id]==='agreed').length} из ${D.decisions.length} отмечено как согласованные`;setDetail('decision',button.dataset.decision);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');return;}});
+document.addEventListener('click',e=>{if(e.target.closest('[data-detail-close]')){hideZoom();return;}if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}let linked=e.target.closest('[data-open-case]');if(linked){current.selected.case=linked.dataset.openCase;const dest=linked.dataset.openCase;Promise.resolve(navigate('cases')).then(()=>{const opener=[...document.querySelectorAll('[data-item]')].find(el=>el.dataset.item===`case:${dest}`);opener?.focus({preventScroll:true});setDetail('case',dest)});return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let org=e.target.closest('[data-org]');if(org){orgClick(org.dataset.org);return;}if(e.target.closest('[data-orgback]')){let n=nodeById[current.orgParent];let parent=n?.super||'ceo';orgClick(parent);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let button=e.target.closest('[data-decision]');if(button){current.decisions[button.dataset.decision]=button.dataset.status;try{localStorage.setItem('navarro-session-decisions',JSON.stringify(current.decisions))}catch{}current.selected.decision=button.dataset.decision;document.querySelectorAll(`[data-decision="${button.dataset.decision}"]`).forEach(x=>x.classList.toggle('selected',x.dataset.status===button.dataset.status));let cnt=$('.status-chip');if(cnt)cnt.textContent=`${D.decisions.filter(d=>current.decisions[d.id]==='agreed').length} из ${D.decisions.length} отмечено как согласованные`;setDetail('decision',button.dataset.decision);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){const open=$('#side').classList.toggle('open');$('#mobile-nav').setAttribute('aria-expanded',open?'true':'false');return;}});
 $('#prev').onclick=()=>navigate(slides[Math.max(0,current.slide-1)].id);$('#next').onclick=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const isEditable=(target)=>target?.closest?.('input,textarea,select,[contenteditable="true"]');
 const isInteractive=(target)=>target?.closest?.('button,a,[role="button"]');
@@ -292,9 +318,21 @@ window.addEventListener('resize',()=>requestAnimationFrame(adaptDetailColumns));
 const goNext=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const goPrev=()=>navigate(slides[Math.max(0,current.slide-1)].id);
 document.addEventListener('keydown',e=>{
+ const detailLayer=$('#detail-zoom');
+ if(detailLayer&&!detailLayer.hidden){
+  if(e.key==='Escape'){e.preventDefault();hideZoom();return;}
+  if(e.key==='Tab'){
+   const focusable=[...detailLayer.querySelectorAll('button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(el=>el.offsetParent!==null);
+   if(!focusable.length){e.preventDefault();detailLayer.querySelector('.detail-window')?.focus();return;}
+   const first=focusable[0],last=focusable[focusable.length-1];
+   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+   else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  }
+  return;
+ }
  if(isEditable(e.target)||e.ctrlKey||e.altKey||e.metaKey)return;
  if(e.key==='f'||e.key==='F'||e.key==='F11'){if(e.key==='F11'&&!document.fullscreenEnabled)return;e.preventDefault();toggleFullscreen();return;}
- if(e.key==='Escape'){if(!$('#detail-zoom').hidden){e.preventDefault();hideZoom();return;}if(!document.fullscreenElement)setPresentationMode(false);$('#side').classList.remove('open');return;}
+ if(e.key==='Escape'){if(!document.fullscreenElement)setPresentationMode(false);$('#side').classList.remove('open');$('#mobile-nav')?.setAttribute('aria-expanded','false');return;}
  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.code==='Space'||e.key==='Enter'&&!isInteractive(e.target)){
    if((e.key===' '||e.key==='Enter')&&isInteractive(e.target))return;
    e.preventDefault();goNext();return;
