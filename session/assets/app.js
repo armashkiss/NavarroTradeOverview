@@ -38,8 +38,8 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
   e=extra.cases?.[id];tag=i.group;title=i.title;sub=i.subtitle;
   inner=factsFlag('По материалам подразделений · проверить на сессии')+
     block('Описание процесса',plain(e?.process||i.subtitle))+
-    block('Практический кейс / факты',plain(e?.facts||i.issue))+
-    block('Что пошло не так',plain(i.issue))+
+    block('Что произошло',plain(e?.facts||i.issue))+
+    block('Основная проблема',plain(e?.cause||i.issue))+
     block('Последствия',plain(i.effect))+
     (e?.lesson?block('Урок для группы',plain(e.lesson)):'')+
     block('Предлагаемое решение',plain(i.resolution+(e?.next?` ${e.next}`:'')))+
@@ -115,15 +115,15 @@ function orgcard(n,cls=''){
 function orgAncestors(id){const out=[];let n=nodeById[id];while(n&&n.id!=='ceo'){out.unshift(n);n=nodeById[n.super]}return out;}
 function orgdetail(){
  const id=current.orgParent;
- if(!id)return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="orgsubtop"><b>Выберите руководителя для раскрытия структуры</b><span>CEO → EXECUTIVE → ДЕПАРТАМЕНТЫ</span></div><p class="org-empty">Нажмите на заместителя генерального директора, COO или CFO. Структура плавно приблизится к выбранному направлению.</p></div>`;
+ if(!id)return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="orgsubtop"><b>Выберите направление</b><span>ПРЯМОЕ ПОДЧИНЕНИЕ CEO</span></div><p class="org-empty">Нажмите на карточку руководителя. Ниже раскроются его подразделения, а справа — обязанности.</p></div>`;
  const n=nodeById[id];const child=n?.children||[];
  const chain=orgAncestors(id);
  return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="org-crumbs"><button data-org="ceo">CEO</button>${chain.map(c=>`<span>›</span><button data-org="${esc(c.id)}" class="${id===c.id?'current':''}">${esc(c.abbr)}</button>`).join('')}</div><div class="orgsubtop"><div><span class="org-focus-kicker">ФОКУС ПОДРАЗДЕЛЕНИЯ</span><b>${esc(n.name)}</b><span class="org-focus-sub">${esc(n.lead)}</span></div><button class="orgback" data-orgback="1">← Назад</button></div>${child.length?`<div class="orgchildren">${child.map((c,k)=>orgcard(nodeById[c],`orgstep-${k}`)).join('')}</div>`:`<div class="org-leaf-note"><span class="org-leaf-icon">✓</span><p>Это направление не имеет нижестоящих подразделений в проектной структуре. Подробные обязанности и взаимодействия отображаются справа.</p></div>`}</div>`;
 }
 function org(){
  let execs=nodeById.ceo.children.map(id=>nodeById[id]);
- let chart=`<div class="orgstage ${current.orgParent?'has-focus':''}" id="orgstage"><div class="orgintro"><span class="accent-label">ОРГАНИЗАЦИОННАЯ МОДЕЛЬ · TO-BE</span><span class="thin">Клик по руководителю → приближение направления</span></div><button class="org-ceo ${current.orgSelection==='ceo'?'active':''}" data-org="ceo"><span>CHIEF EXECUTIVE OFFICER</span><b>Генеральный директор</b></button><div class="orgbar"></div><div class="org-execs ${current.orgParent?'branch-selected':''}">${execs.map(e=>`<button class="orgexec ${current.orgParent===e.id?'active':''}" data-org="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(e.abbr)}</small></button>`).join('')}</div><div id="orgbranch">${orgdetail()}</div></div><div class="smallnote" style="margin-top:11px">Выбранное направление раскрывается без перезагрузки слайда. Организационная модель является проектной; новые ставки и полномочия требуют утверждения.</div>`;
- return head(2,'Executive-структура <span style="color:#389f91">по уровням.</span>','Выберите руководителя, приблизьте направление, затем откройте департамент и его отделы.')+shell(chart,'exec',current.orgSelection||'ceo');
+ let chart=`<div class="orgstage ${current.orgParent?'has-focus':''}" id="orgstage"><div class="orgintro"><span class="accent-label">ОРГАНИЗАЦИОННАЯ МОДЕЛЬ · TO-BE</span><span class="thin">Выберите карточку, чтобы раскрыть подразделения</span></div><button class="org-ceo ${current.orgSelection==='ceo'?'active':''}" data-org="ceo"><span>CHIEF EXECUTIVE OFFICER</span><b>Генеральный директор</b></button><div class="orgbar"></div><div class="org-overview-label">НЕПОСРЕДСТВЕННО ПОДЧИНЯЮТСЯ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</div><div class="org-execs ${current.orgParent?'branch-selected':''}">${execs.map(e=>`<button class="orgexec ${current.orgParent===e.id?'active':''}" data-org="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(e.abbr)}</small></button>`).join('')}</div><div id="orgbranch">${orgdetail()}</div></div><div class="smallnote" style="margin-top:11px">Выбранное направление раскрывается без перезагрузки слайда. Организационная модель является проектной; новые ставки и полномочия требуют утверждения.</div>`;
+ return head(2,'Executive-структура <span style="color:#389f91">по уровням.</span>','Нажмите на руководителя, затем на подразделение. Функции и задачи появятся справа.')+shell(chart,'exec',current.orgSelection||'ceo');
 }
 let branchSerial=0;
 async function orgClick(id){

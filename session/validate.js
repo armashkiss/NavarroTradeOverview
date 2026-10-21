@@ -20,4 +20,6 @@ assert(ui.includes('switchFlow'),'workflow changes without re-render');
 assert(ui.includes('inspectorSerial'),'animated inspector state');
 assert(ui.includes("type!=='flow'"),'flow inspector fix');
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen button');
-console.log(`PASS · NAVARRO Session v4: ${d.navigation.length} экранов, ${d.dealflows.reduce((n,f)=>n+f.steps.length,0)} этапа, ${d.cases.length} кейсов, полноэкранный режим и кликер`);
+assert(read('assets/style.css').includes('.org-overview-label'),'org hierarchy text layout');
+assert(read('assets/app.js').includes('ПРЯМОЕ ПОДЧИНЕНИЕ CEO'),'exec hierarchy legend');
+console.log(`PASS · NAVARRO Session v4.1: ${d.navigation.length} экранов, ${d.dealflows.reduce((n,f)=>n+f.steps.length,0)} этапа, ${d.cases.length} кейсов, полноэкранный режим и кликер`);
