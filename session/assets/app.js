@@ -85,27 +85,93 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
  }
  return `<div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div><h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p>${inner}`;
 }
-let inspectorSerial=0;
-async function setDetail(type,id){
- current.selected[type]=id;
+// v4.2: a compact on-slide preview, plus a cinematic no-scroll case focus.
+function preview(type,id){
+ const i=itemById(type,id);let title='',sub='',tag='INSIGHT PANEL';
+ if(type==='flow'){
+  const f=D.dealflows.find(x=>x.id===current.flow);const st=f?.steps[+id];
+  title=st?.[0]||'Этап сделки';sub=st?.[1]||'';tag='МАРШРУТ СДЕЛКИ';
+ } else if(i){title=i.name||i.title||'Подробности';sub=i.subtitle||i.intro||i.lead||i.scope||i.goal||i.why||i.prompt||'';tag=type==='case'?'КЕЙС / ВЫВОДЫ':'INSIGHT PANEL';}
+ return `<div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div>
+ <h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p>
+ <button class="detail-cta" type="button" data-expand-current>Развернуть разбор <span>↗</span></button>
+ <p class="detail-hint">Нажмите на карточку слева — описание, кейс, последствия и решение откроются крупно на экране без прокрутки.</p>`;
+}
+let detailState={type:null,id:null},detailSerial=0;
+const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function hideZoom({instant=false}={}){
+ const layer=$('#detail-zoom');if(!layer||layer.hidden)return;
+ const serial=++detailSerial;
+ if(instant||reduced()){layer.hidden=true;document.body.classList.remove('has-detail-zoom');return;}
+ const win=layer.querySelector('.detail-window');
+ const a=win.animate([{opacity:1,transform:'translateY(0) scale(1)',filter:'blur(0)'},{opacity:0,transform:'translateY(18px) scale(.97)',filter:'blur(3px)'}],{duration:240,easing:'ease-in',fill:'forwards'});
+ Promise.resolve(a.finished).catch(()=>{}).then(()=>{if(detailSerial!==serial)return;a.cancel();layer.hidden=true;document.body.classList.remove('has-detail-zoom')});
+}
+function adaptDetailColumns(){
+ const layer=$('#detail-zoom'),win=layer?.querySelector('.detail-window'),grid=layer?.querySelector('.detail-columns');
+ if(!win||!grid||layer.hidden)return;
+ const source=layer.querySelector('.detail-source');
+ const nodes=[...source.children].map(n=>n.cloneNode(true));
+ const width=win.clientWidth;
+ const columns=width>=1060?3:width>=930&&layer.dataset.focusType!=='direction'?3:width>=720?2:1;
+ // Preserve top-to-bottom reading order, balance content by approximate visual weight.
+ let lanes=Array.from({length:columns},()=>document.createElement('div'));
+ lanes.forEach(n=>n.className='detail-lane');
+ const weights=nodes.map(n=>{let t=n.textContent||'';return t.length+115+(n.querySelectorAll('li,.case-reference').length*60)});
+ const total=weights.reduce((x,y)=>x+y,0),target=total/columns;
+ let lane=0,load=0;
+ nodes.forEach((node,i)=>{
+  if(lane<columns-1&&load>target*.62&&(load+weights[i]*.55)>target){lane++;load=0;}
+  lanes[lane].appendChild(node);load+=weights[i];
+ });
+ grid.replaceChildren(...lanes);
+ layer.dataset.density='0';layer.classList.remove('detail-unavoidable-scroll');
+ const content=layer.querySelector('.detail-content');
+ const contentEnd=()=>content.getBoundingClientRect().bottom-parseFloat(getComputedStyle(content).paddingBottom);
+ const spilling=()=>lanes.some(l=>[...l.children].some(c=>c.getBoundingClientRect().bottom>contentEnd()+2));
+ for(let i=0;i<5;i++){
+  // Real bounding boxes catch overflow even when flex lanes are exactly 100% tall.
+  if(!spilling())break;
+  layer.dataset.density=String(i+1);
+ }
+ if(spilling()){
+  // Small mobile / accessibility font settings: never clip critical information.
+  layer.classList.add('detail-unavoidable-scroll');
+ }
+}
+function zoomToDetail(type,id){
+ const layer=$('#detail-zoom'),win=layer.querySelector('.detail-window');
+ const src=$('#inspector');
+ const start=src?.getBoundingClientRect();
+ const temp=document.createElement('div');temp.innerHTML=inspector(type,id);
+ const header=temp.querySelector('.inspector-header');
+ const title=temp.querySelector('h2'),sub=temp.querySelector('.sub');
+ const source=layer.querySelector('.detail-source');
+ source.replaceChildren(...[...temp.children].filter(x=>x!==header&&x!==title&&x!==sub));
+ layer.querySelector('#detail-topic').textContent=header?.querySelector('.inspector-tag')?.textContent||'ПОДРОБНОСТИ';
+ layer.querySelector('#detail-title').textContent=title?.textContent||'';
+ layer.querySelector('#detail-subtitle').textContent=sub?.textContent||'';
+ ++detailSerial;
+ layer.dataset.focusType=type;
+ layer.hidden=false;document.body.classList.add('has-detail-zoom');
+ win.getAnimations().forEach(a=>a.cancel());
+ // Wait for fixed positioning to be measured, then animate from the former right panel.
+ adaptDetailColumns();
+ if(start&&!reduced()&&win.animate){
+  const end=win.getBoundingClientRect(),sx=Math.min(1.0,Math.max(.22,start.width/end.width)),sy=Math.min(1.0,Math.max(.22,start.height/end.height));
+  const tx=(start.left+start.width/2)-(end.left+end.width/2),ty=(start.top+start.height/2)-(end.top+end.height/2);
+  win.animate([{opacity:.64,transform:`translate(${tx}px,${ty}px) scale(${sx},${sy})`,filter:'blur(5px)'},{opacity:1,transform:'translate(0,0) scale(1)',filter:'blur(0)'}],{duration:600,easing:'cubic-bezier(.16,1,.3,1)'});
+ }
+}
+function setDetail(type,id,{expand=true}={}){
+ current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
- const box=$('#inspector');if(!box)return;
- const serial=++inspectorSerial;
- box.setAttribute('aria-busy','true');
- if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches && box.animate){
-  try{await box.animate([{opacity:1,transform:'translateX(0)'},{opacity:.14,transform:'translateX(12px)'}],{duration:150,easing:'ease-in',fill:'forwards'}).finished}catch{}
- }
- if(serial!==inspectorSerial)return;
- box.getAnimations().forEach(a=>a.cancel());
- box.innerHTML=inspector(type,id);box.scrollTop=0;
- box.removeAttribute('aria-busy');
- if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches && box.animate){
-  box.animate([{opacity:.24,transform:'translateX(20px)',filter:'blur(3px)'},{opacity:1,transform:'translateX(0)',filter:'blur(0)'}],{duration:480,easing:'cubic-bezier(.16,1,.3,1)'});
- }
+ const box=$('#inspector');if(box){box.innerHTML=preview(type,id);box.setAttribute('aria-live','polite')}
+ if(expand)zoomToDetail(type,id);
 }
 
 function head(i,title,desc){return `<div class="slide-heading"><div><div class="eyebrow">NAVARRO TRADE · ${esc(slides[i].short)} / 08</div><h1 class="headline">${title}</h1><p class="head-desc">${desc}</p></div><div class="slide-no">${esc(slides[i].short)}</div></div>`;}
-function shell(content,type,id){return `<div class="slide-grid"><div class="left-area">${content}</div><aside class="inspector" id="inspector">${inspector(type,id)}</aside></div>`;}
+function shell(content,type,id){detailState={type,id};return `<div class="slide-grid"><div class="left-area">${content}</div><aside class="inspector inspector-preview" id="inspector">${preview(type,id)}</aside></div>`;}
 function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / STRATEGIC & OPERATIONAL SESSION 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Executive-структура →</button></div></div><div class="coverstamp">NAVARRO TRADE<br>WORKING EXECUTIVE MODEL<br>21 OCTOBER 2026</div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>08</strong><span>рабочих кейсов</span></div><div class="stat"><strong>06</strong><span>партнёрских контуров</span></div><div class="stat"><strong>06</strong><span>вопросов для решений</span></div></div><div class="business-note">Рабочая презентация по материалам подразделений. Факты и суммы требуют подтверждения; предложения не являются утверждёнными решениями Sterling.</div>`;}
 function directions(){let cards=`<div class="tile-grid">${D.directions.map(d=>`<button class="tile ${current.selected.direction===d.id?'active':''}" data-item="direction:${d.id}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="arrow">↗</span></button>`).join('')}</div><div class="business-note">Выберите направление — справа откроется модель работы, связанный кейс и необходимые изменения.</div>`;
  return head(1,'Три направления. <span style="color:#389f91">Одна коммерческая цепочка.</span>','Выберите направление: справа откроются процесс, документы, кейсы и решения из материалов.')+shell(cards,'direction',current.selected.direction||'wholesale');}
@@ -171,6 +237,7 @@ function decision(){let approved=D.decisions.filter(d=>current.decisions[d.id]==
  return head(8,'Решения, <span style="color:#389f91">которые останутся после сессии.</span>','Отмечайте статус вопросов прямо во время обсуждения и экспортируйте рабочий реестр.')+shell(items,'decision',current.selected.decision||'d1');}
 let slideSerial=0;
 function render(){
+ hideZoom({instant:true});
  let s=slides[current.slide];$('#chapter').textContent=s.name;
  document.documentElement.style.setProperty('--slide-progress',current.slide+1);
  $('#count').textContent=`${String(current.slide+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
@@ -181,6 +248,7 @@ function render(){
 }
 async function navigate(id){
  let k=slides.findIndex(x=>x.id===id);if(k<0||k===current.slide)return;
+ hideZoom({instant:true});
  const serial=++slideSerial;
  const page=$('#page'),old=page.querySelector('.page-inner');
  if(old?.animate&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
@@ -202,12 +270,12 @@ async function switchFlow(id){
  area.getAnimations().forEach(a=>a.cancel());
  area.innerHTML=next.steps.map((st,k)=>`<button class="clickcard flowcard ${k===0?'active':''}" data-no="${String(k+1).padStart(2,'0')}" data-item="flow:${k}"><div class="meta">ЭТАП ${String(k+1).padStart(2,'0')}</div><b>${esc(st[0])}</b><small>${esc(st[2])}</small></button>`).join('');
  if(area.animate&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)area.animate([{opacity:.25,transform:'scale(.97) translateY(15px)'},{opacity:1,transform:'scale(1) translateY(0)'}],{duration:490,easing:'cubic-bezier(.16,1,.3,1)'});
- await setDetail('flow','0');
+ setDetail('flow','0',{expand:false});
 }
 
 function notify(message){let t=$('#toast');t.textContent=message;t.style.display='block';clearTimeout(notify.timer);notify.timer=setTimeout(()=>t.style.display='none',2300);}
 function exportDecisions(){let ts=new Date().toLocaleString('ru-RU');const st={pending:'К обсуждению',agreed:'Отмечено согласованным',review:'На доработку',hold:'Отложено'};let text=`# Sterling Group · Рабочий реестр решений\n\nДата экспорта: ${ts}\n\n> Не является утверждённым протоколом. Требует проверки участниками, подписи и назначения сроков.\n\n`+D.decisions.map((d,i)=>`## ${i+1}. ${d.title}\n\n**Статус:** ${st[current.decisions[d.id]||'pending']}\n\n**Предлагаемый ответственный:** ${d.owner}\n\n**Вопрос:** ${d.prompt}\n\n**Срок / подтверждение:** __________\n`).join('\n');let blob=new Blob([text],{type:'text/markdown;charset=utf-8'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='Sterling_Working_Decisions.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),2500);notify('Рабочий реестр скачан');}
-document.addEventListener('click',e=>{let linked=e.target.closest('[data-open-case]');if(linked){current.selected.case=linked.dataset.openCase;navigate('cases');setDetail('case',linked.dataset.openCase);return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let org=e.target.closest('[data-org]');if(org){orgClick(org.dataset.org);return;}if(e.target.closest('[data-orgback]')){let n=nodeById[current.orgParent];let parent=n?.super||'ceo';orgClick(parent);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let button=e.target.closest('[data-decision]');if(button){current.decisions[button.dataset.decision]=button.dataset.status;try{localStorage.setItem('navarro-session-decisions',JSON.stringify(current.decisions))}catch{}current.selected.decision=button.dataset.decision;document.querySelectorAll(`[data-decision="${button.dataset.decision}"]`).forEach(x=>x.classList.toggle('selected',x.dataset.status===button.dataset.status));let cnt=$('.status-chip');if(cnt)cnt.textContent=`${D.decisions.filter(d=>current.decisions[d.id]==='agreed').length} из ${D.decisions.length} отмечено как согласованные`;setDetail('decision',button.dataset.decision);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');return;}});
+document.addEventListener('click',e=>{if(e.target.closest('[data-detail-close]')){hideZoom();return;}if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}let linked=e.target.closest('[data-open-case]');if(linked){current.selected.case=linked.dataset.openCase;const dest=linked.dataset.openCase;Promise.resolve(navigate('cases')).then(()=>setDetail('case',dest));return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let org=e.target.closest('[data-org]');if(org){orgClick(org.dataset.org);return;}if(e.target.closest('[data-orgback]')){let n=nodeById[current.orgParent];let parent=n?.super||'ceo';orgClick(parent);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let button=e.target.closest('[data-decision]');if(button){current.decisions[button.dataset.decision]=button.dataset.status;try{localStorage.setItem('navarro-session-decisions',JSON.stringify(current.decisions))}catch{}current.selected.decision=button.dataset.decision;document.querySelectorAll(`[data-decision="${button.dataset.decision}"]`).forEach(x=>x.classList.toggle('selected',x.dataset.status===button.dataset.status));let cnt=$('.status-chip');if(cnt)cnt.textContent=`${D.decisions.filter(d=>current.decisions[d.id]==='agreed').length} из ${D.decisions.length} отмечено как согласованные`;setDetail('decision',button.dataset.decision);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');return;}});
 $('#prev').onclick=()=>navigate(slides[Math.max(0,current.slide-1)].id);$('#next').onclick=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const isEditable=(target)=>target?.closest?.('input,textarea,select,[contenteditable="true"]');
 const isInteractive=(target)=>target?.closest?.('button,a,[role="button"]');
@@ -219,13 +287,14 @@ async function toggleFullscreen(){try{
  setPresentationMode(!document.body.classList.contains('presentation-mode'));
 }
 $('#fullscreen').addEventListener('click',toggleFullscreen);
-document.addEventListener('fullscreenchange',()=>setPresentationMode(!!document.fullscreenElement));
+document.addEventListener('fullscreenchange',()=>{setPresentationMode(!!document.fullscreenElement);requestAnimationFrame(adaptDetailColumns)});
+window.addEventListener('resize',()=>requestAnimationFrame(adaptDetailColumns));
 const goNext=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const goPrev=()=>navigate(slides[Math.max(0,current.slide-1)].id);
 document.addEventListener('keydown',e=>{
  if(isEditable(e.target)||e.ctrlKey||e.altKey||e.metaKey)return;
  if(e.key==='f'||e.key==='F'||e.key==='F11'){if(e.key==='F11'&&!document.fullscreenEnabled)return;e.preventDefault();toggleFullscreen();return;}
- if(e.key==='Escape'){if(!document.fullscreenElement)setPresentationMode(false);$('#side').classList.remove('open');return;}
+ if(e.key==='Escape'){if(!$('#detail-zoom').hidden){e.preventDefault();hideZoom();return;}if(!document.fullscreenElement)setPresentationMode(false);$('#side').classList.remove('open');return;}
  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.code==='Space'||e.key==='Enter'&&!isInteractive(e.target)){
    if((e.key===' '||e.key==='Enter')&&isInteractive(e.target))return;
    e.preventDefault();goNext();return;
