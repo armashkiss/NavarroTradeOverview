@@ -99,6 +99,7 @@ function preview(type,id){
 }
 let detailState={type:null,id:null},detailSerial=0,detailLastFocus=null;
 const modalDetailTypes=new Set(['direction','flow','case']);
+const expandableInlineTypes=new Set(['company','change','growth','decision']);
 const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function finishZoomClose(layer,{restoreFocus=true}={}){
  layer.hidden=true;layer.setAttribute('aria-hidden','true');document.body.classList.remove('has-detail-zoom');
@@ -199,11 +200,26 @@ function setDetail(type,id,{expand=false}={}){
 }
 function setInlineDetail(type,id){
  current.selected[type]=id;detailState={type,id};
- const box=$('#inspector');if(box){box.innerHTML=inspector(type,id);box.setAttribute('aria-live','polite')}
+ const box=$('#inspector');if(!box)return;
+ box.dataset.inlineType=type;box.innerHTML=inspector(type,id);box.setAttribute('aria-live','polite');
+ const grid=box.closest('.slide-grid'),expand=expandableInlineTypes.has(type);
+ grid?.classList.toggle('inline-focus',expand);
+ if(expand&&!reduced()&&box.animate)box.animate([{opacity:.35,transform:'translateX(28px) scale(.94)',filter:'blur(3px)'},{opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0)'}],{duration:560,easing:'cubic-bezier(.16,1,.3,1)'});
+ requestAnimationFrame(()=>adaptInlineInspector(box));
+ setTimeout(()=>adaptInlineInspector(box),580);
+}
+
+function adaptInlineInspector(box=$('#inspector')){
+ if(!box?.classList.contains('inspector-inline')||!expandableInlineTypes.has(box.dataset.inlineType)||window.innerWidth<=970)return;
+ box.dataset.inlineDensity='0';
+ const footerTop=$('.footbar')?.getBoundingClientRect().top||window.innerHeight;
+ const available=Math.max(360,Math.floor(footerTop-box.getBoundingClientRect().top-10));
+ box.style.setProperty('--inline-height',`${available}px`);
+ for(let density=1;density<=4&&box.scrollHeight>box.clientHeight+2;density++)box.dataset.inlineDensity=String(density);
 }
 
 function head(i,title,desc){return `<div class="slide-heading"><div><div class="eyebrow">NAVARRO TRADE · ${esc(slides[i].short)} / 08</div><h1 class="headline">${title}</h1><p class="head-desc">${desc}</p></div><div class="slide-no">${esc(slides[i].short)}</div></div>`;}
-function shell(content,type,id,{inline=!modalDetailTypes.has(type)}={}){detailState={type,id};return `<div class="slide-grid"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector">${inline?inspector(type,id):preview(type,id)}</aside></div>`;}
+function shell(content,type,id,{inline=!modalDetailTypes.has(type)}={}){detailState={type,id};return `<div class="slide-grid"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector" ${inline?`data-inline-type="${type}"`:''}>${inline?inspector(type,id):preview(type,id)}</aside></div>`;}
 function cover(){return `<div class="cover"><img class="cover-logo" src="assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="covercopy"><div class="eyebrow">STERLING GROUP / STRATEGIC & OPERATIONAL SESSION 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Executive-структура →</button></div></div><div class="coverstamp">NAVARRO TRADE<br>WORKING EXECUTIVE MODEL<br>21 OCTOBER 2026</div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>08</strong><span>рабочих кейсов</span></div><div class="stat"><strong>06</strong><span>партнёрских контуров</span></div><div class="stat"><strong>06</strong><span>вопросов для решений</span></div></div><div class="business-note">Рабочая презентация по материалам подразделений. Факты и суммы требуют подтверждения; предложения не являются утверждёнными решениями Sterling.</div>`;}
 function directions(){let cards=`<div class="tile-grid">${D.directions.map(d=>`<button class="tile ${current.selected.direction===d.id?'active':''}" data-item="direction:${d.id}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="arrow">↗</span></button>`).join('')}</div><div class="business-note">Выберите направление — справа откроется модель работы, связанный кейс и необходимые изменения.</div>`;
  return head(1,'Три направления. <span style="color:#389f91">Одна коммерческая цепочка.</span>','Выберите направление: справа откроются процесс, документы, кейсы и решения из материалов.')+shell(cards,'direction',current.selected.direction||'wholesale');}
@@ -277,6 +293,7 @@ function render(){
  let body=({opening:cover,directions,organization:org,dealflow,cases,partners,changes,growth,decisions:decision})[s.id]();
  $('#page').innerHTML=`<div class="page-inner slide-enter">${body}</div>`;
  $('#page').scrollTop=0;$('#side').classList.remove('open');$('#mobile-nav')?.setAttribute('aria-expanded','false');
+ requestAnimationFrame(()=>adaptInlineInspector());
 }
 async function navigate(id){
  let k=slides.findIndex(x=>x.id===id);if(k<0||k===current.slide)return;
@@ -320,7 +337,7 @@ async function toggleFullscreen(){try{
 }
 $('#fullscreen').addEventListener('click',toggleFullscreen);
 document.addEventListener('fullscreenchange',()=>{setPresentationMode(!!document.fullscreenElement);requestAnimationFrame(adaptDetailColumns)});
-window.addEventListener('resize',()=>requestAnimationFrame(adaptDetailColumns));
+window.addEventListener('resize',()=>requestAnimationFrame(()=>{adaptDetailColumns();adaptInlineInspector()}));
 const goNext=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const goPrev=()=>navigate(slides[Math.max(0,current.slide-1)].id);
 document.addEventListener('keydown',e=>{

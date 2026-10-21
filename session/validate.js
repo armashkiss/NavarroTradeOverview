@@ -30,12 +30,15 @@ assert(ui.includes('el.dataset.item===`case:${dest}`'),'linked-case focus restor
 assert(ui.includes("setInlineDetail('exec',id)"),'organization details remain inline');
 assert(ui.includes("new Set(['direction','flow','case'])"),'dialogs are limited to business processes and cases');
 assert(ui.includes('function setDetail(type,id,{expand=false}={})'),'cards update preview without opening a dialog');
+assert(ui.includes('adaptInlineInspector'),'inline details adapt to viewport height');
 assert(ui.includes("type!=='flow'"),'flow inspector fix');
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen button');
 assert(css.includes('.org-overview-label'),'org hierarchy text layout');
 assert(css.includes('@media(max-width:680px){.side{position:fixed}}'),'mobile menu remains an overlay');
 assert(css.includes('height:min(760px,100%)'),'short-viewport dialog bounds');
 assert(css.includes('.detail-lane .section{flex:1 1 auto'),'modal content fills available height');
+assert(css.includes('.slide-grid.inline-focus'),'inline detail column expands after selection');
+assert(css.includes('data-inline-density="4"'),'inline detail density has a no-scroll compact mode');
 assert(read('index.html').includes('assets/navarro-logo.png'),'company logo is wired into the presentation');
 assert(read('assets/app.js').includes('ПРЯМОЕ ПОДЧИНЕНИЕ CEO'),'exec hierarchy legend');
-console.log(`PASS · NAVARRO Session v4.4: ${d.navigation.length} экранов, ${d.dealflows.reduce((n,f)=>n+f.steps.length,0)} этапа, ${d.cases.length} кейсов, брендированный диалог и inline-оргструктура`);
+console.log(`PASS · NAVARRO Session v4.5: ${d.navigation.length} экранов, ${d.dealflows.reduce((n,f)=>n+f.steps.length,0)} этапа, ${d.cases.length} кейсов, адаптивная focus-колонка без внутренней прокрутки`);
