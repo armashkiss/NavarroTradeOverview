@@ -95,7 +95,7 @@ function preview(type,id){
  return `<div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div>
  <h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p>
  <button class="detail-cta" type="button" data-expand-current>Развернуть разбор <span>↗</span></button>
- <p class="detail-hint">Нажмите на карточку слева — описание, кейс, последствия и решение откроются крупно на экране без прокрутки.</p>`;
+ <p class="detail-hint">Выберите карточку слева, затем нажмите «Развернуть разбор», чтобы открыть материал крупно.</p>`;
 }
 let detailState={type:null,id:null},detailSerial=0,detailLastFocus=null;
 const modalDetailTypes=new Set(['direction','flow','case']);
@@ -190,7 +190,7 @@ function zoomToDetail(type,id){
  }
  requestAnimationFrame(()=>layer.querySelector('.detail-close')?.focus({preventScroll:true}));
 }
-function setDetail(type,id,{expand=true}={}){
+function setDetail(type,id,{expand=false}={}){
  current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
  if(!modalDetailTypes.has(type)){setInlineDetail(type,id);return;}
