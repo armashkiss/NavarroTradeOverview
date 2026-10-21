@@ -98,6 +98,7 @@ function preview(type,id){
  <p class="detail-hint">Нажмите на карточку слева — описание, кейс, последствия и решение откроются крупно на экране без прокрутки.</p>`;
 }
 let detailState={type:null,id:null},detailSerial=0,detailLastFocus=null;
+const modalDetailTypes=new Set(['direction','flow','case']);
 const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function finishZoomClose(layer,{restoreFocus=true}={}){
  layer.hidden=true;layer.setAttribute('aria-hidden','true');document.body.classList.remove('has-detail-zoom');
@@ -192,6 +193,7 @@ function zoomToDetail(type,id){
 function setDetail(type,id,{expand=true}={}){
  current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
+ if(!modalDetailTypes.has(type)){setInlineDetail(type,id);return;}
  const box=$('#inspector');if(box){box.innerHTML=preview(type,id);box.setAttribute('aria-live','polite')}
  if(expand)zoomToDetail(type,id);
 }
@@ -201,7 +203,7 @@ function setInlineDetail(type,id){
 }
 
 function head(i,title,desc){return `<div class="slide-heading"><div><div class="eyebrow">NAVARRO TRADE · ${esc(slides[i].short)} / 08</div><h1 class="headline">${title}</h1><p class="head-desc">${desc}</p></div><div class="slide-no">${esc(slides[i].short)}</div></div>`;}
-function shell(content,type,id,{inline=false}={}){detailState={type,id};return `<div class="slide-grid"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector">${inline?inspector(type,id):preview(type,id)}</aside></div>`;}
+function shell(content,type,id,{inline=!modalDetailTypes.has(type)}={}){detailState={type,id};return `<div class="slide-grid"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector">${inline?inspector(type,id):preview(type,id)}</aside></div>`;}
 function cover(){return `<div class="cover"><img class="cover-logo" src="assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="covercopy"><div class="eyebrow">STERLING GROUP / STRATEGIC & OPERATIONAL SESSION 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Executive-структура →</button></div></div><div class="coverstamp">NAVARRO TRADE<br>WORKING EXECUTIVE MODEL<br>21 OCTOBER 2026</div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>08</strong><span>рабочих кейсов</span></div><div class="stat"><strong>06</strong><span>партнёрских контуров</span></div><div class="stat"><strong>06</strong><span>вопросов для решений</span></div></div><div class="business-note">Рабочая презентация по материалам подразделений. Факты и суммы требуют подтверждения; предложения не являются утверждёнными решениями Sterling.</div>`;}
 function directions(){let cards=`<div class="tile-grid">${D.directions.map(d=>`<button class="tile ${current.selected.direction===d.id?'active':''}" data-item="direction:${d.id}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="arrow">↗</span></button>`).join('')}</div><div class="business-note">Выберите направление — справа откроется модель работы, связанный кейс и необходимые изменения.</div>`;
  return head(1,'Три направления. <span style="color:#389f91">Одна коммерческая цепочка.</span>','Выберите направление: справа откроются процесс, документы, кейсы и решения из материалов.')+shell(cards,'direction',current.selected.direction||'wholesale');}

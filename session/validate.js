@@ -28,6 +28,7 @@ assert(ui.includes('shell.inert=true'),'background isolation while dialog is ope
 assert(ui.includes('window.innerWidth>620'),'mobile-safe dialog animation');
 assert(ui.includes('el.dataset.item===`case:${dest}`'),'linked-case focus restoration');
 assert(ui.includes("setInlineDetail('exec',id)"),'organization details remain inline');
+assert(ui.includes("new Set(['direction','flow','case'])"),'dialogs are limited to business processes and cases');
 assert(ui.includes("type!=='flow'"),'flow inspector fix');
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen button');
 assert(css.includes('.org-overview-label'),'org hierarchy text layout');
