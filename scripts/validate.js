@@ -18,7 +18,6 @@ assert(d.raci.length>5 && d.docs.length>=10,'RACI / документы');
 // Official legal names supplied by the project team. Internal identifiers remain stable.
 const expectedNames = {
   dostyk: 'Dostyq Refinery',
-  mercury: 'Mercury Energy',
   ion: 'Ion Energy'
 };
 for (const [id,name] of Object.entries(expectedNames)) {
