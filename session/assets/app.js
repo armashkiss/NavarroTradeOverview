@@ -83,7 +83,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     caseReferences(x?.cases||[])+
     block('Предлагаемое решение / контроль',plain(x?.solution||'Согласовать контрольную точку и ответственного.'));
  }
- return `<div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div><h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p>${inner}`;
+ return `<div class="inspector-lead"><div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div><h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p></div><div class="inspector-body">${inner}</div>`;
 }
 // v4.3: a compact on-slide preview, plus an accessible executive insight dialog.
 function preview(type,id){
@@ -161,9 +161,9 @@ function zoomToDetail(type,id){
  const start=src?.getBoundingClientRect();
  const temp=document.createElement('div');temp.innerHTML=inspector(type,id);
  const header=temp.querySelector('.inspector-header');
- const title=temp.querySelector('h2'),sub=temp.querySelector('.sub');
+ const title=temp.querySelector('h2'),sub=temp.querySelector('.sub'),body=temp.querySelector('.inspector-body');
  const source=layer.querySelector('.detail-source');
- source.replaceChildren(...[...temp.children].filter(x=>x!==header&&x!==title&&x!==sub));
+ source.replaceChildren(...[...(body?.children||[])].map(x=>x.cloneNode(true)));
  delete layer.dataset.columns;
  layer.querySelector('#detail-topic').textContent=header?.querySelector('.inspector-tag')?.textContent||'ПОДРОБНОСТИ';
  layer.querySelector('#detail-title').textContent=title?.textContent||'';
@@ -201,12 +201,18 @@ function setDetail(type,id,{expand=false}={}){
 function setInlineDetail(type,id){
  current.selected[type]=id;detailState={type,id};
  const box=$('#inspector');if(!box)return;
- box.dataset.inlineType=type;box.innerHTML=inspector(type,id);box.setAttribute('aria-live','polite');
  const grid=box.closest('.slide-grid'),expand=expandableInlineTypes.has(type);
+ const wasFocused=grid?.classList.contains('inline-focus');
+ box.getAnimations().forEach(a=>a.cancel());
+ box.dataset.inlineType=type;box.innerHTML=inspector(type,id);box.setAttribute('aria-live','polite');
  grid?.classList.toggle('inline-focus',expand);
- if(expand&&!reduced()&&box.animate)box.animate([{opacity:.35,transform:'translateX(28px) scale(.94)',filter:'blur(3px)'},{opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0)'}],{duration:560,easing:'cubic-bezier(.16,1,.3,1)'});
- requestAnimationFrame(()=>adaptInlineInspector(box));
- setTimeout(()=>adaptInlineInspector(box),580);
+ requestAnimationFrame(()=>{
+  adaptInlineInspector(box);
+  if(!expand||reduced()||!box.animate)return;
+  box.animate([{opacity:.5,transform:`translateX(${wasFocused?28:76}px) scale(${wasFocused ? 0.97 : 0.9})`,filter:'blur(4px)'},{opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0)'}],{duration:wasFocused?720:1050,easing:'cubic-bezier(.16,1,.3,1)'});
+  [...box.querySelectorAll('.inspector-body>.section,.inspector-body>.pill,.inspector-body>.data-flag,.inspector-body>.source-caption')].forEach((block,index)=>block.animate([{opacity:0,transform:'translateY(24px) scale(.96)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:720,delay:(wasFocused?70:230)+index*75,easing:'cubic-bezier(.16,1,.3,1)',fill:'both'}));
+ });
+ setTimeout(()=>adaptInlineInspector(box),1100);
 }
 
 function adaptInlineInspector(box=$('#inspector')){
@@ -215,7 +221,7 @@ function adaptInlineInspector(box=$('#inspector')){
  const footerTop=$('.footbar')?.getBoundingClientRect().top||window.innerHeight;
  const available=Math.max(360,Math.floor(footerTop-box.getBoundingClientRect().top-10));
  box.style.setProperty('--inline-height',`${available}px`);
- for(let density=1;density<=4&&box.scrollHeight>box.clientHeight+2;density++)box.dataset.inlineDensity=String(density);
+ for(let density=1;density<=2&&box.scrollHeight>box.clientHeight+2;density++)box.dataset.inlineDensity=String(density);
 }
 
 function head(i,title,desc){return `<div class="slide-heading"><div><div class="eyebrow">NAVARRO TRADE · ${esc(slides[i].short)} / 08</div><h1 class="headline">${title}</h1><p class="head-desc">${desc}</p></div><div class="slide-no">${esc(slides[i].short)}</div></div>`;}
