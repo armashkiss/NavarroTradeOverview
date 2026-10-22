@@ -37,5 +37,10 @@ assert(read('index.html').includes('../session/assets/navarro-logo.png'),'offici
 assert(ui.includes('class="cover-logo"'),'official logo on opening slide');
 assert(ui.includes('box.clientWidth>=560'),'three-column inline layout breakpoint');
 assert(read('assets/style.css').includes('grid-template-columns:minmax(275px,.48fr)'),'wider inline focus column');
-assert(read('index.html').includes('style.css?v=6.5'),'v6.5 cache key');
-console.log(`PASS • NAVARRO v6.5: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
+const css=read('assets/style.css');
+assert(css.includes('v6.6 — projection typography'),'projection typography marker');
+assert(css.includes('font-size:14.5px'),'large inline body type');
+assert(ui.includes('class="changes-grid"'),'compact changes overview grid');
+assert(ui.includes('class="decisions-grid"'),'compact decisions overview grid');
+assert(read('index.html').includes('style.css?v=6.6'),'v6.6 cache key');
+console.log(`PASS • NAVARRO v6.6: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
