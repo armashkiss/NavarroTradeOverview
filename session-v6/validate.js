@@ -22,4 +22,6 @@ const ui=read('assets/app.js');
 for(const marker of ['data-open-direction','richBrief','openProcessExplorer','processSelectStage','orgmap','requestFullscreen','data-process-step','data-process-close','e.key===\'PageDown\'','branchSerial'])assert(ui.includes(marker),`UI marker ${marker}`);
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen control');
 assert(read('assets/style.css').includes('.process-modal-layout'),'process explorer layout');
-console.log(`PASS • NAVARRO v6: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; ${d.cases.length} кейсов; оргструктура + кликер`);
+assert(read('assets/style.css').includes('full-canvas modal composition'),'full-height modal sizing');
+assert(read('index.html').includes('style.css?v=6.1'),'v6.1 cache key');
+console.log(`PASS • NAVARRO v6.1: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; ${d.cases.length} кейсов; полноэкранные модалки`);
