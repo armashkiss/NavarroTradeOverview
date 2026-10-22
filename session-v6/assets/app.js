@@ -215,7 +215,7 @@ function prepareInlineLayout(box=$('#inspector')){
  const direct=[...body.children].filter(node=>node.classList.contains('section'));
  const nested=flow?[...flow.querySelectorAll(':scope>.section,:scope>.inline-section-stack>.section')]:[];
  const sections=direct.length?direct:nested;if(sections.length<2)return;
- const columns=box.clientWidth>=860&&sections.length>=6?3:2;
+ const columns=box.clientWidth>=560&&sections.length>=6?3:2;
  box.dataset.inlineColumns=String(columns);
  if(flow&&flow.querySelectorAll(':scope>.inline-section-stack').length===columns)return;
  const oldFlow=flow;flow=document.createElement('div');flow.className='inline-section-flow';
@@ -235,7 +235,7 @@ function adaptInlineInspector(box=$('#inspector')){
  const footerTop=$('.footbar')?.getBoundingClientRect().top||window.innerHeight;
  const currentLift=Number(box.dataset.inlineLift||0),naturalTop=box.getBoundingClientRect().top+currentLift;
  const safeTop=($('.top')?.getBoundingClientRect().bottom||0)+10;
- const lift=Math.min(112,Math.max(0,Math.floor(naturalTop-safeTop)));
+ const lift=Math.min(180,Math.max(0,Math.floor(naturalTop-safeTop)));
  box.dataset.inlineLift=String(lift);box.style.setProperty('--inline-lift',`${-lift}px`);
  const available=Math.max(390,Math.floor(footerTop-(naturalTop-lift)-8));
  box.style.setProperty('--inline-height',`${available}px`);
