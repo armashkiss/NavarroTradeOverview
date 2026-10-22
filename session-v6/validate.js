@@ -42,5 +42,8 @@ assert(css.includes('v6.6 — projection typography'),'projection typography mar
 assert(css.includes('font-size:14.5px'),'large inline body type');
 assert(ui.includes('class="changes-grid"'),'compact changes overview grid');
 assert(ui.includes('class="decisions-grid"'),'compact decisions overview grid');
-assert(read('index.html').includes('style.css?v=6.6'),'v6.6 cache key');
-console.log(`PASS • NAVARRO v6.6: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
+for(const phrase of ['теперь открывается','отдельного слайда','без перезагрузки слайда','Нажмите на карточку:','В модальном экране'])assert(!ui.includes(phrase),`no UI changelog copy: ${phrase}`);
+assert(ui.includes('цепочки исполнения, участники и контрольные точки'),'business-only directions description');
+assert(!JSON.stringify(d.navigation).includes('раскрытие'),'navigation uses business labels');
+assert(read('index.html').includes('style.css?v=6.7'),'v6.7 cache key');
+console.log(`PASS • NAVARRO v6.7: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);

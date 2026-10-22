@@ -23,7 +23,7 @@ window.SESSION_DATA = {
     },
     {
       "id": "organization",
-      "name": "Executive — раскрытие",
+      "name": "Executive-структура",
       "short": "03"
     },
     {
