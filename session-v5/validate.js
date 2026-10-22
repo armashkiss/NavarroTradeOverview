@@ -1,0 +1,24 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const read=p=>fs.readFileSync(path.join(__dirname,p),'utf8');
+for(const p of ['assets/data.js','assets/app.js'])new vm.Script(read(p),{filename:p});
+const context={window:{}};vm.createContext(context);vm.runInContext(read('assets/data.js'),context);
+const d=context.window.SESSION_DATA;
+assert.strictEqual(d.navigation.length,10,'10 navigation slides');
+assert.strictEqual(d.navigation[2].id,'orgmap','second content slide is full organizational map');
+assert.strictEqual(d.navigation[3].id,'organization','third content slide reveals hierarchy');
+assert.strictEqual(d.dealflows.length,2,'two confirmed trading process maps');
+assert.strictEqual(d.processScenes.transit.length,17,'17 real PetroChina transit stages');
+assert.strictEqual(d.processScenes.domestic.length,6,'6 domestic wholesale stages');
+assert.strictEqual(d.executives.filter(x=>x.super==='ceo').length,6,'6 direct reports');
+assert(d.growth.find(x=>x.id==='tolling'),'tolling / PetroChina');
+assert(d.growth.find(x=>x.id==='ion-franchise'),'ION franchising');
+assert(d.growth.find(x=>x.id==='mobile-fuel'),'mobile fuel terminal');
+assert(d.growth.find(x=>x.id==='foreign-airlines'),'foreign airlines');
+assert(!d.cases.find(x=>['base','jet-stock'].includes(x.id)),'excluded cases');
+for(const f of d.dealflows){for(const st of d.processScenes[f.id]){assert(st.title&&st.action&&st.owner);assert(Array.isArray(st.partners));}}
+for(const c of d.cases)assert(d.details.cases[c.id]?.process,`case content ${c.id}`);
+const ui=read('assets/app.js');
+for(const marker of ['openProcessExplorer','processSelectStage','orgmap','requestFullscreen','data-process-step','data-process-close','e.key===\'PageDown\'','branchSerial'])assert(ui.includes(marker),`UI marker ${marker}`);
+assert(read('index.html').includes('id="fullscreen"'),'fullscreen control');
+assert(read('assets/style.css').includes('.process-modal-layout'),'process explorer layout');
+console.log(`PASS • NAVARRO v5: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; ${d.cases.length} кейсов; оргструктура + кликер`);
