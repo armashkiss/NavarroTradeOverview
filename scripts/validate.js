@@ -17,7 +17,7 @@ assert(d.raci.length>5 && d.docs.length>=10,'RACI / документы');
 
 // Official legal names supplied by the project team. Internal identifiers remain stable.
 const expectedNames = {
-  dostyk: 'Dostyq Refinery',
+  dostyk: 'Dostyk Refinery',
   ion: 'Ion Energy'
 };
 for (const [id,name] of Object.entries(expectedNames)) {
@@ -26,6 +26,6 @@ for (const [id,name] of Object.entries(expectedNames)) {
 }
 for (const f of ['assets/data.js','assets/app.js','README.md','docs/CHANGELOG_FROM_V1.md']) {
   const content=fs.readFileSync(__dirname+'/../'+f,'utf8');
-  assert(!/(Достык|Меркури|\bION\b|Dostyk Refinery)/.test(content), 'Устаревшее название предприятия в '+f);
+  assert(!/(Достык|Меркури|\bION\b|Dosty[q] Refinery)/.test(content), 'Устаревшее название предприятия в '+f);
 }
 console.log('NAVARRO TRADE v2: проверка структуры, штатного состава и сценариев пройдена.');

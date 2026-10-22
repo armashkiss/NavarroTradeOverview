@@ -29,7 +29,7 @@ ${section('Общий принцип сделки','Порядок оплаты 
 ${section('Кто за что отвечает','Навигация по ключевым элементам операционной модели.')}
 <div class="card-grid cols-3">
  <a class="feature hoverable" href="#/structure"><div class="feature-top"><span class="feature-num">ORGANIZATION</span><span class="feature-ico">▤</span></div><h3>Руководство и отделы</h3><p>Административные линии, проектные отделы, прямое подчинение ИТ-PM генеральному директору.</p><div class="feature-footer">Открыть организационную схему →</div></a>
- <a class="feature hoverable" href="#/holding"><div class="feature-top"><span class="feature-num">HOLDING LINKS</span><span class="feature-ico">◎</span></div><h3>Предприятия Sterling</h3><p>JetWayLogistics, Dostyq Refinery, авиационный терминал, Sterling Energy и Ion Energy.</p><div class="feature-footer">Карта взаимодействий →</div></a>
+ <a class="feature hoverable" href="#/holding"><div class="feature-top"><span class="feature-num">HOLDING LINKS</span><span class="feature-ico">◎</span></div><h3>Предприятия Sterling</h3><p>JetWayLogistics, Dostyk Refinery, авиационный терминал, Sterling Energy и Ion Energy.</p><div class="feature-footer">Карта взаимодействий →</div></a>
  <a class="feature hoverable" href="#/decisions"><div class="feature-top"><span class="feature-num">RESPONSIBILITY</span><span class="feature-ico">◫</span></div><h3>Полномочия и контроль</h3><p>Кто исполняет, кто утверждает и где заканчивается ответственность Navarro.</p><div class="feature-footer">Матрица ответственности →</div></a>
 </div>
 ${notice('<strong>Статус материалов:</strong> проект TO-BE для обсуждения с руководством Sterling. Схемы не изменяют действующее штатное расписание, договорные полномочия и подчинённость сотрудников других ТОО.')}`;

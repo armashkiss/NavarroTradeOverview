@@ -101,7 +101,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     caseReferences(x?.cases||[])+
     block('Предлагаемое решение / контроль',plain(x?.solution||'Согласовать контрольную точку и ответственного.'));
  }
- return `<div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div><h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p>${inner}`;
+ return `<div class="inspector-lead"><div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div><h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p></div><div class="inspector-body">${inner}</div>`;
 }
 // v4.2: a compact on-slide preview, plus a cinematic no-scroll case focus.
 function preview(type,id){
@@ -163,9 +163,9 @@ function zoomToDetail(type,id){
  const start=src?.getBoundingClientRect();
  const temp=document.createElement('div');temp.innerHTML=inspector(type,id);
  const header=temp.querySelector('.inspector-header');
- const title=temp.querySelector('h2'),sub=temp.querySelector('.sub');
+ const title=temp.querySelector('h2'),sub=temp.querySelector('.sub'),body=temp.querySelector('.inspector-body');
  const source=layer.querySelector('.detail-source');
- source.replaceChildren(...[...temp.children].filter(x=>x!==header&&x!==title&&x!==sub));
+ source.replaceChildren(...[...(body?.children||[])].map(x=>x.cloneNode(true)));
  layer.querySelector('#detail-topic').textContent=header?.querySelector('.inspector-tag')?.textContent||'ПОДРОБНОСТИ';
  layer.querySelector('#detail-title').textContent=title?.textContent||'';
  layer.querySelector('#detail-subtitle').textContent=sub?.textContent||'';
@@ -181,16 +181,47 @@ function zoomToDetail(type,id){
   win.animate([{opacity:.64,transform:`translate(${tx}px,${ty}px) scale(${sx},${sy})`,filter:'blur(5px)'},{opacity:1,transform:'translate(0,0) scale(1)',filter:'blur(0)'}],{duration:600,easing:'cubic-bezier(.16,1,.3,1)'});
  }
 }
+const inlineDetailTypes=new Set(['company','change','growth','decision']);
 function setDetail(type,id,{expand=true}={}){
  current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
+ if(inlineDetailTypes.has(type)){setInlineDetail(type,id);return;}
  const box=$('#inspector');if(box){box.innerHTML=preview(type,id);box.setAttribute('aria-live','polite')}
  if(expand)zoomToDetail(type,id);
 }
 
+function setInlineDetail(type,id){
+ current.selected[type]=id;detailState={type,id};
+ const box=$('#inspector');if(!box)return;
+ const grid=box.closest('.slide-grid'),wasFocused=grid?.classList.contains('inline-focus');
+ box.getAnimations().forEach(animation=>animation.cancel());
+ box.dataset.inlineType=type;box.innerHTML=inspector(type,id);box.setAttribute('aria-live','polite');
+ grid?.classList.add('inline-focus');
+ requestAnimationFrame(()=>{
+  adaptInlineInspector(box);
+  if(reduced()||!box.animate)return;
+  box.animate([{opacity:.42,transform:`translateX(${wasFocused?30:82}px) scale(${wasFocused?0.97:0.88})`,filter:'blur(5px)'},{opacity:1,transform:'translateX(0) scale(1)',filter:'blur(0)'}],{duration:wasFocused?760:1150,easing:'cubic-bezier(.16,1,.3,1)'});
+  [...box.querySelectorAll('.inspector-body>.section,.inspector-body>.pill,.inspector-body>.data-flag,.inspector-body>.briefing-manifesto,.inspector-body>.source-caption')].forEach((block,index)=>block.animate([{opacity:0,transform:'translateY(28px) scale(.95)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:760,delay:(wasFocused?80:250)+index*70,easing:'cubic-bezier(.16,1,.3,1)',fill:'both'}));
+ });
+ setTimeout(()=>adaptInlineInspector(box),1180);
+}
+
+function adaptInlineInspector(box=$('#inspector')){
+ if(!box?.classList.contains('inspector-inline')||!inlineDetailTypes.has(box.dataset.inlineType)||window.innerWidth<=970)return;
+ box.dataset.inlineDensity='0';
+ const footerTop=$('.footbar')?.getBoundingClientRect().top||window.innerHeight;
+ const available=Math.max(390,Math.floor(footerTop-box.getBoundingClientRect().top-8));
+ box.style.setProperty('--inline-height',`${available}px`);
+ for(let density=1;density<=2&&box.scrollHeight>box.clientHeight+2;density++)box.dataset.inlineDensity=String(density);
+}
+
 function head(i,title,desc){i=current.slide;return `<div class="slide-heading"><div><div class="eyebrow">NAVARRO TRADE · ${esc(slides[i].short)} / ${slides.length}</div><h1 class="headline">${title}</h1><p class="head-desc">${desc}</p></div><div class="slide-no">${esc(slides[i].short)}</div></div>`;}
-function shell(content,type,id){detailState={type,id};return `<div class="slide-grid"><div class="left-area">${content}</div><aside class="inspector inspector-preview" id="inspector">${preview(type,id)}</aside></div>`;}
-function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / STRATEGIC & OPERATIONAL SESSION 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Executive-структура →</button></div></div><div class="coverstamp">NAVARRO TRADE<br>WORKING EXECUTIVE MODEL<br>22 OCTOBER 2026</div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>10</strong><span>рабочих кейсов</span></div><div class="stat"><strong>06</strong><span>партнёрских контуров</span></div><div class="stat"><strong>09</strong><span>вопросов для решений</span></div></div><div class="business-note">Рабочая презентация по материалам подразделений. Факты и суммы требуют подтверждения; предложения не являются утверждёнными решениями Sterling.</div>`;}
+function shell(content,type,id){
+ detailState={type,id};
+ const inline=inlineDetailTypes.has(type),focused=inline&&!!current.selected[type];
+ return `<div class="slide-grid ${focused?'inline-focus':''}"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector" ${inline?`data-inline-type="${type}"`:''}>${inline?inspector(type,id):preview(type,id)}</aside></div>`;
+}
+function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / STRATEGIC & OPERATIONAL SESSION 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Executive-структура →</button></div></div><div class="coverstamp">NAVARRO TRADE<br>WORKING EXECUTIVE MODEL<br>22 OCTOBER 2026</div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>10</strong><span>рабочих кейсов</span></div><div class="stat"><strong>05</strong><span>партнёрских контуров</span></div><div class="stat"><strong>09</strong><span>вопросов для решений</span></div></div><div class="business-note">Рабочая презентация по материалам подразделений. Факты и суммы требуют подтверждения; предложения не являются утверждёнными решениями Sterling.</div>`;}
 function directions(){
  const cards=`<div class="tile-grid direction-first">${D.directions.map(d=>`<button type="button" class="tile direction-launch" data-open-direction="${esc(d.id)}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="direction-foot">${d.id==='aviation'?'Модель, клиенты и инициативы':'Этапы · предприятия · риски · кейсы'} <b>Открыть ↗</b></span></button>`).join('')}</div>
  <div class="direction-overview"><div><span class="direction-overview-kicker">РЕАЛЬНАЯ ЦЕПОЧКА</span><b>Покупатель → подтверждённый объём → исполнение → документы</b><p>Международный транзит и оптовка отражены по фактическому описанию Navarro. Коммерческие и операционные предложения показаны отдельно.</p></div><div><span class="direction-overview-kicker">ГЛАВНЫЕ РИСКИ</span><b>Тарифы · курс · простои · товарный учёт</b><p>Выберите направление: откроется большая карта взаимодействия с этапами слева и решениями справа.</p></div></div>`;
@@ -250,7 +281,7 @@ async function orgClick(id){
   branch.animate([{height:`${oldHeight}px`},{height:`${newHeight}px`}],{duration:475,easing:'cubic-bezier(.2,.8,.18,1)'});
   branch.animate([{opacity:.18,transform:'translateY(17px) scale(.94)',filter:'blur(3px)'},{opacity:1,transform:'translateY(0) scale(1)',filter:'blur(0)'}],{duration:620,easing:'cubic-bezier(.16,1,.3,1)'});
  }
- await setDetail('exec',id);
+ await setDetail('exec',id,{expand:false});
 }
 
 function dealflow(){
@@ -259,10 +290,10 @@ function dealflow(){
  return head(4,'Бизнес-процессы <span style="color:#389f91">как они есть.</span>','Выберите маршрут. В модальном экране слева — этапы, справа — схема взаимодействий и связанные кейсы.')+
  `<div class="process-selector-grid">${cards}</div>${hints}<div class="business-note">Заправку в крыло не показываем как утверждённый пошаговый процесс до согласования фактической технологии и полномочий.</div>`;
 }
-function cases(){let sorted=D.cases;let cards=`<div class="case-grid">${sorted.map(c=>`<button class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${c.id}"><div class="meta">${esc(c.group)} <span class="corner">↗</span></div><span class="case-metric">${esc(c.metric)}</span><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></button>`).join('')}</div>`;
- return head(5,'Проблемы становятся <span style="color:#389f91">решениями.</span>','Реальные ситуации из материалов Navarro: процесс, подтверждаемые факты, последствия и решения.')+shell(cards,'case',current.selected.case||'measurement');}
+function cases(){let sorted=D.cases;let cards=`<div class="case-grid cases-full-grid">${sorted.map(c=>`<button class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${c.id}"><div class="meta">${esc(c.group)} <span class="corner">↗</span></div><span class="case-metric">${esc(c.metric)}</span><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></button>`).join('')}</div>`;
+ return head(5,'Проблемы становятся <span style="color:#389f91">решениями.</span>','Нажмите на карточку: кейс сразу откроется в полноэкранном разборе.')+cards;}
 function partners(){let cards=`<div class="partner-grid">${D.companies.map(c=>`<button class="clickcard partner ${current.selected.company===c.id?'active':''}" data-item="company:${c.id}"><span class="badge">${esc(c.short)}</span><span><div class="meta">STERLING GROUP ↗</div><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></span></button>`).join('')}</div><div class="nudge">Линия взаимодействия ≠ административная подчинённость. Ответственность другого ТОО определяется договором и регламентом.</div>`;
- return head(7,'Одна группа. <span style="color:#389f91">Шесть точек контакта.</span>','Навигация по предприятиям и по тому, что они должны получать и передавать друг другу.')+shell(cards,'company',current.selected.company||'dostyq');}
+ return head(7,'Одна группа. <span style="color:#389f91">Пять точек контакта.</span>','Навигация по предприятиям и по тому, что они должны получать и передавать друг другу.')+shell(cards,'company',current.selected.company||'dostyq');}
 function changes(){let cards=`<div class="cards-2">${D.improvements.map(c=>`<button class="clickcard ${current.selected.change===c.id?'active':''}" data-item="change:${c.id}" style="min-height:145px"><div class="meta">${esc(c.label)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.why)}</small></button>`).join('')}</div>`;
  return head(7,'От замечания <span style="color:#389f91">к управленческому действию.</span>','Шесть инициатив для обсуждения: проблема, предложение, владелец и необходимое решение.')+shell(cards,'change',current.selected.change||'clm');}
 function growth(){let cards=`<div class="growth-grid">${D.growth.map(c=>`<button class="clickcard growth ${current.selected.growth===c.id?'active':''}" data-item="growth:${c.id}"><div class="meta">${esc(c.tag)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.goal)}</small><div class="smallnote" style="margin-top:13px">${esc(c.state)}</div></button>`).join('')}</div><div class="business-note">Инициативы из презентационных материалов Navarro, не утверждённые бизнес-планы. CAPEX, разрешения, спрос и финансирование требуют проверки.</div>`;
@@ -278,6 +309,7 @@ function render(){
  $('#sidenav').innerHTML=slides.map((x,k)=>`<button class="navlink ${k===current.slide?'active':''}" data-goto="${x.id}" title="${esc(x.name)}"><span class="navno">${x.short}</span><span>${esc(x.name)}</span></button>`).join('');
  let body=({opening:cover,directions,orgmap,organization:org,cases,partners,changes,growth,decisions:decision})[s.id]();
  $('#page').innerHTML=`<div class="page-inner slide-enter">${body}</div>`;
+ requestAnimationFrame(()=>adaptInlineInspector());
  $('#page').scrollTop=0;$('#side').classList.remove('open');
 }
 async function navigate(id){

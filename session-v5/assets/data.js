@@ -536,7 +536,7 @@ window.SESSION_DATA = {
         [
           "Согласование основных Ж/Д планов",
           "Согласование базового железнодорожного плана между тремя участниками.",
-          "Navarro Trade · JetWayLogistics · Dostyq Refinery"
+          "Navarro Trade · JetWayLogistics · Dostyk Refinery"
         ],
         [
           "Получение плана выгрузок от PetroChina",
@@ -544,7 +544,7 @@ window.SESSION_DATA = {
           "JetWayLogistics · Navarro Trade"
         ],
         [
-          "Заявка вагонов на Dostyq Refinery",
+          "Заявка вагонов на Dostyk Refinery",
           "Заявить вагоны на базу. Для Jet A-1 ППС проверяет пропарку, JetWay отвечает за проверку качества и количества вагонов; Navarro заключает договор с SJS.",
           "Navarro Trade · JetWayLogistics · ППС"
         ],
@@ -554,13 +554,13 @@ window.SESSION_DATA = {
           "PetroChina · JetWayLogistics"
         ],
         [
-          "Заявка Navarro в Dostyq Refinery",
-          "Направление заявки в Dostyq Refinery на выполнение операции.",
+          "Заявка Navarro в Dostyk Refinery",
+          "Направление заявки в Dostyk Refinery на выполнение операции.",
           "Navarro Trade"
         ],
         [
           "Месячный объём и документы Navarro",
-          "Navarro заявляет на Dostyq Refinery весь согласованный месячный объём; начинает подготовку транзитных документов, в том числе документов Navarro взамен документов китайской стороны.",
+          "Navarro заявляет на Dostyk Refinery весь согласованный месячный объём; начинает подготовку транзитных документов, в том числе документов Navarro взамен документов китайской стороны.",
           "Navarro Trade"
         ],
         [
@@ -569,9 +569,9 @@ window.SESSION_DATA = {
           "Таможенный брокер"
         ],
         [
-          "Перелив на Dostyq Refinery",
+          "Перелив на Dostyk Refinery",
           "Физическая операция перелива нефтепродуктов.",
-          "Оператор Dostyq Refinery"
+          "Оператор Dostyk Refinery"
         ],
         [
           "Взлив, приёмка и техосмотр",
@@ -691,22 +691,12 @@ window.SESSION_DATA = {
     {
       "id": "dostyq",
       "short": "D",
-      "title": "Dostyq Refinery",
+      "title": "Dostyk Refinery",
       "subtitle": "Приграничная перевалочная база",
       "focus": "Измерения, физическая перевалка, подтверждения фактических операций.",
       "from": "Заявка / маршрут / партия / график",
       "to": "Измерения / данные вагонов / документы / статусы",
       "risk": "Рабочее соприкосновение по плану вагонов, приёму и переливу; риски отклонений маршрута и финансового эффекта необходимо разбирать по фактам."
-    },
-    {
-      "id": "mercury",
-      "short": "M",
-      "title": "Mercury Energy",
-      "subtitle": "Нефтебаза",
-      "focus": "Операции приёма, хранения и отпуска на своём объекте.",
-      "from": "Заявка / объём / срок",
-      "to": "Остатки / факт операции / документы",
-      "risk": "Необходима единая матрица границ операционной ответственности."
     },
     {
       "id": "terminal",
@@ -1044,11 +1034,6 @@ window.SESSION_DATA = {
         "cases": [],
         "solution": "По подтверждённому Ж/Д плану закрепить передачу статусов, контроль приёмки, документирование операций и границы ответственности сторон."
       },
-      "mercury": {
-        "process": "Нефтебаза подтверждает возможность приёма, хранит товар и оформляет операции отпуска на своём объекте.",
-        "cases": [],
-        "solution": "Согласовать единый формат заявки, подтверждения остатков и документа фактического отпуска."
-      },
       "terminal": {
         "process": "Терминал подтверждает хранение/отпуск авиа-ГСМ и взаимодействует с PCQA и AFO по подтверждениям качества и количества.",
         "cases": [],
@@ -1127,11 +1112,11 @@ window.SESSION_DATA = {
       },
       {
         "title": "Согласование основных Ж/Д планов",
-        "owner": "Navarro Trade · JetWayLogistics · Dostyq Refinery",
+        "owner": "Navarro Trade · JetWayLogistics · Dostyk Refinery",
         "action": "Согласование базового железнодорожного плана между тремя участниками.",
         "partners": [
           "JetWayLogistics",
-          "Dostyq Refinery"
+          "Dostyk Refinery"
         ],
         "doc": "Основной Ж/Д план",
         "risks": [
@@ -1162,11 +1147,11 @@ window.SESSION_DATA = {
         "mark": ""
       },
       {
-        "title": "Заявка вагонов на Dostyq Refinery",
+        "title": "Заявка вагонов на Dostyk Refinery",
         "owner": "Navarro Trade · JetWayLogistics · ППС",
         "action": "Заявить вагоны на базу. Для Jet A-1 ППС проверяет пропарку, JetWay отвечает за проверку качества и количества вагонов; Navarro заключает договор с SJS.",
         "partners": [
-          "Dostyq Refinery",
+          "Dostyk Refinery",
           "JetWayLogistics",
           "ППС",
           "SJS (Jet A-1)"
@@ -1200,11 +1185,11 @@ window.SESSION_DATA = {
         "mark": "ВАГОНЫ"
       },
       {
-        "title": "Заявка Navarro в Dostyq Refinery",
+        "title": "Заявка Navarro в Dostyk Refinery",
         "owner": "Navarro Trade",
-        "action": "Направление заявки в Dostyq Refinery на выполнение операции.",
+        "action": "Направление заявки в Dostyk Refinery на выполнение операции.",
         "partners": [
-          "Dostyq Refinery"
+          "Dostyk Refinery"
         ],
         "doc": "Заявка на базу",
         "risks": [
@@ -1218,9 +1203,9 @@ window.SESSION_DATA = {
       {
         "title": "Месячный объём и документы Navarro",
         "owner": "Navarro Trade",
-        "action": "Navarro заявляет на Dostyq Refinery весь согласованный месячный объём; начинает подготовку транзитных документов, в том числе документов Navarro взамен документов китайской стороны.",
+        "action": "Navarro заявляет на Dostyk Refinery весь согласованный месячный объём; начинает подготовку транзитных документов, в том числе документов Navarro взамен документов китайской стороны.",
         "partners": [
-          "Dostyq Refinery"
+          "Dostyk Refinery"
         ],
         "doc": "Заявка на месячный объём; транзитные документы",
         "risks": [
@@ -1248,11 +1233,11 @@ window.SESSION_DATA = {
         "mark": ""
       },
       {
-        "title": "Перелив на Dostyq Refinery",
-        "owner": "Оператор Dostyq Refinery",
+        "title": "Перелив на Dostyk Refinery",
+        "owner": "Оператор Dostyk Refinery",
         "action": "Физическая операция перелива нефтепродуктов.",
         "partners": [
-          "Dostyq Refinery"
+          "Dostyk Refinery"
         ],
         "doc": "Производственные сопроводительные документы",
         "risks": [
@@ -1357,7 +1342,7 @@ window.SESSION_DATA = {
         "action": "Сбор дополнительных планов для будущих поставок.",
         "partners": [
           "JetWayLogistics",
-          "Dostyq Refinery",
+          "Dostyk Refinery",
           "PetroChina"
         ],
         "doc": "Дополнительные планы",

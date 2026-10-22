@@ -16,6 +16,9 @@ assert(d.growth.find(x=>x.id==='ion-franchise'),'ION franchising');
 assert(d.growth.find(x=>x.id==='mobile-fuel'),'mobile fuel terminal');
 assert(d.growth.find(x=>x.id==='foreign-airlines'),'foreign airlines');
 assert(!d.cases.find(x=>['base','jet-stock'].includes(x.id)),'excluded cases');
+assert.strictEqual(d.companies.length,5,'five partner contours');
+assert(!JSON.stringify(d).includes(['Merc','ury'].join('')),'excluded partner removed');
+assert(!JSON.stringify(d).includes(['Dosty','q Refinery'].join('')),'legacy spelling removed');
 for(const f of d.dealflows){for(const st of d.processScenes[f.id]){assert(st.title&&st.action&&st.owner);assert(Array.isArray(st.partners));}}
 for(const c of d.cases)assert(d.details.cases[c.id]?.process,`case content ${c.id}`);
 const ui=read('assets/app.js');
@@ -23,5 +26,8 @@ for(const marker of ['data-open-direction','richBrief','openProcessExplorer','pr
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen control');
 assert(read('assets/style.css').includes('.process-modal-layout'),'process explorer layout');
 assert(read('assets/style.css').includes('full-canvas modal composition'),'full-height modal sizing');
-assert(read('index.html').includes('style.css?v=6.1'),'v6.1 cache key');
-console.log(`PASS • NAVARRO v6.1: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; ${d.cases.length} кейсов; полноэкранные модалки`);
+assert(ui.includes("const inlineDetailTypes=new Set(['company','change','growth','decision'])"),'slides 05-08 use inline focus');
+assert(ui.includes("setDetail('exec',id,{expand:false})"),'organization cards do not auto-open dialog');
+assert(ui.includes('case-grid cases-full-grid')&&!ui.includes("shell(cards,'case'"),'cases open directly without preview panel');
+assert(read('index.html').includes('style.css?v=6.2'),'v6.2 cache key');
+console.log(`PASS • NAVARRO v6.2: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; ${d.cases.length} кейсов; inline-focus 05–08`);
