@@ -29,5 +29,7 @@ assert(read('assets/style.css').includes('full-canvas modal composition'),'full-
 assert(ui.includes("const inlineDetailTypes=new Set(['company','change','growth','decision'])"),'slides 05-08 use inline focus');
 assert(ui.includes("setDetail('exec',id,{expand:false})"),'organization cards do not auto-open dialog');
 assert(ui.includes('case-grid cases-full-grid')&&!ui.includes("shell(cards,'case'"),'cases open directly without preview panel');
-assert(read('index.html').includes('style.css?v=6.2'),'v6.2 cache key');
-console.log(`PASS • NAVARRO v6.2: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; ${d.cases.length} кейсов; inline-focus 05–08`);
+assert(ui.includes('function prepareInlineLayout'),'balanced inline text columns');
+assert(read('assets/style.css').includes('.inline-section-flow'),'inline column-flow styles');
+assert(read('index.html').includes('style.css?v=6.3'),'v6.3 cache key');
+console.log(`PASS • NAVARRO v6.3: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; ${d.cases.length} кейсов; balanced inline columns`);
