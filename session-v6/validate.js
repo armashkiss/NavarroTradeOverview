@@ -47,5 +47,12 @@ assert(ui.includes('цепочки исполнения, участники и �
 assert(!JSON.stringify(d.navigation).includes('раскрытие'),'navigation uses business labels');
 const duplicateFacts=d.details.cases.duplicate.facts;
 assert(!/Navarro|Ion Energy/i.test(duplicateFacts),'duplicate-functions case uses no company names');
-assert(read('index.html').includes('style.css?v=6.8'),'v6.8 cache key');
-console.log(`PASS • NAVARRO v6.8: ${d.navigation.length} экранов; 17 этапов PetroChina; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
+const transitText=JSON.stringify({direction:d.directions.find(x=>x.id==='transit'),flow:d.dealflows.find(x=>x.id==='transit'),scenes:d.processScenes.transit,details:d.details.directions.transit});
+const domesticText=JSON.stringify({direction:d.directions.find(x=>x.id==='domestic'),flow:d.dealflows.find(x=>x.id==='domestic'),scenes:d.processScenes.domestic,details:d.details.directions.domestic});
+assert(transitText.includes('Поставки с КНР'),'transit uses China supply wording');
+assert(!transitText.includes('SJS')&&transitText.includes('SGS'),'SGS spelling in transit');
+assert(transitText.includes('произведение пропарки вагонов'),'wagon steaming wording');
+assert(d.processScenes.transit.find(x=>x.title==='Взлив, приёмка и техосмотр').owner.includes('Almaty Sterling Terminal'),'terminal participates in acceptance stage');
+assert(!domesticText.includes('НПЗ')&&domesticText.includes('поставщик'),'wholesale uses supplier wording');
+assert(read('index.html').includes('style.css?v=6.9'),'v6.9 cache key');
+console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; 17 этапов транзита; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
