@@ -46,7 +46,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     (i.super?block('Административное подчинение',plain(nodeById[i.super].name)):'')+
     block('Функции и зона ответственности',bullet(i.duties))+
     (i.children.length?block('Подразделения',bullet(i.children.map(cid=>nodeById[cid].name))):'')+
-    ((id==='coo'||id==='pcqa')?caseReferences(['measurement','ops']):'')+
+    ((id==='commercial'||id==='pcqa')?caseReferences(['measurement','ops']):'')+
     ((id==='legal')?caseReferences(['legal']):'')+
     ((id==='cfo'||id==='fpa')?caseReferences(['receivable']):'');
  }else if(type==='case'){
@@ -260,7 +260,7 @@ function orgmap(){
  const box=id=>`<div class="map-leaf">${esc(N(id).name)}</div>`;
  const pillar=(label,manager,sections)=>`<div class="orgmap-pillar"><div class="orgmap-exec"><small>${esc(label)}</small><b>${esc(N(manager).name)}</b></div><div class="orgmap-stem"></div><div class="orgmap-sections">${sections.map(s=>{let n=N(s);return `<div class="orgmap-section"><strong>${esc(n.name)}</strong>${n.children.length?`<div class="orgmap-lowers">${n.children.map(cid=>box(cid)).join('')}</div>`:''}</div>`}).join('')}</div></div>`;
  return head(2,'Структура <span style="color:#389f91">одним взглядом.</span>','Проектная модель TO-BE · схема подчинённости без функциональных описаний')+
- `<div class="orgmap"><div class="orgmap-root">NAVARRO TRADE <strong>Генеральный директор</strong></div><div class="orgmap-main">${pillar('DCEO','deputy',['commercial','international'])}${pillar('COO','coo',['logistics','transitops','pcqa','afo'])}${pillar('CFO','cfo',['accounting','fpa'])}</div><div class="orgmap-support">${['legal','advisor','digital'].map(id=>`<div class="orgmap-direct">${esc(N(id).name)}<span>Прямое подчинение CEO</span></div>`).join('')}</div><div class="orgmap-note">Оргструктура TO-BE · новые подразделения и должности требуют официального утверждения</div></div>`;
+ `<div class="orgmap"><div class="orgmap-root">NAVARRO TRADE <strong>Генеральный директор</strong></div><div class="orgmap-main">${pillar('DCEO','deputy',['commercial','international'])}${pillar('CFO','cfo',['accounting','fpa'])}</div><div class="orgmap-support">${['legal','advisor','digital'].map(id=>`<div class="orgmap-direct">${esc(N(id).name)}<span>Прямое подчинение CEO</span></div>`).join('')}</div><div class="orgmap-note">Оргструктура TO-BE · подразделения операционного контура включены в коммерческий департамент</div></div>`;
 }
 
 function orgcard(n,cls=''){
