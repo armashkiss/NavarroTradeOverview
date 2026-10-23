@@ -31,7 +31,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     (i.super?block('Административное подчинение',plain(nodeById[i.super].name)):'')+
     block('Функции и зона ответственности',bullet(i.duties))+
     (i.children.length?block('Подразделения',bullet(i.children.map(cid=>nodeById[cid].name))):'')+
-    ((id==='commercial'||id==='pcqa')?caseReferences(['measure','base']):'')+
+    ((id==='coo'||id==='pcqa')?caseReferences(['measure','base']):'')+
     ((id==='legal')?caseReferences(['legal']):'')+
     ((id==='cfo'||id==='fpa')?caseReferences(['receivable']):'');
  }else if(type==='case'){
