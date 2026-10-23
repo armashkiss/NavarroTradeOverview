@@ -7,7 +7,11 @@ assert.strictEqual(d.navigation.length,9,'9 navigation screens');
 assert.strictEqual(d.dealflows.length,3,'3 business scenarios');
 assert.strictEqual(d.cases.length,8,'8 source-based cases');
 assert.strictEqual(d.companies.length,5,'5 holding entities');
-assert.strictEqual(d.executives.filter(x=>x.super==='ceo').length,6,'6 CEO direct reports');
+assert.strictEqual(d.executives.filter(x=>x.super==='ceo').length,5,'5 CEO direct reports after COO removal');
+assert(!d.executives.some(x=>x.id==='coo'||x.abbr==='COO'),'COO removed from organization');
+assert.strictEqual(Array.from(d.executives.find(x=>x.id==='commercial').children).join(','),'procurement,sales,aviasales,logistics,transitops,pcqa,afo','operations teams moved under commercial department');
+for(const id of ['logistics','transitops','pcqa','afo'])assert.strictEqual(d.executives.find(x=>x.id===id).super,'commercial',`${id} reports to commercial`);
+assert(!JSON.stringify(d).includes('COO'),'no COO references remain in presentation data');
 for(const f of d.dealflows){const notes=d.details.flows[f.id];assert.strictEqual(notes.length,f.steps.length,`details ${f.id}`);for(const stage of notes){assert(stage.process.length>70,'stage process');assert(stage.solution.length>25,'stage solution');}}
 for(const dir of d.directions){assert(d.details.directions[dir.id].cases,'direction case references');}
 for(const c of d.cases){assert(d.details.cases[c.id].process,'case process');}
@@ -42,4 +46,5 @@ assert(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'),'focused de
 assert(ui.includes('duration:wasFocused?720:1050'),'focus-column animation uses a smooth extended duration');
 assert(read('index.html').includes('assets/navarro-logo.png'),'company logo is wired into the presentation');
 assert(read('assets/app.js').includes('ПРЯМОЕ ПОДЧИНЕНИЕ CEO'),'exec hierarchy legend');
+assert(read('index.html').includes('style.css?v=4.7-org'),'v4.7 organization cache revision');
 console.log(`PASS · NAVARRO Session v4.7: ${d.navigation.length} экранов, ${d.dealflows.reduce((n,f)=>n+f.steps.length,0)} этапа, ${d.cases.length} кейсов, увеличенная адаптивная типографика`);
