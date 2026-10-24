@@ -16,9 +16,15 @@ assert(!d.executives.some(x=>x.id==='coo'||x.abbr==='COO'),'COO removed from org
 assert.strictEqual(Array.from(d.executives.find(x=>x.id==='commercial').children).join(','),'procurement,sales,aviasales,logistics,transitops,pcqa,afo','operations teams moved under commercial department');
 for(const id of ['logistics','transitops','pcqa','afo'])assert.strictEqual(d.executives.find(x=>x.id===id).super,'commercial',`${id} reports to commercial`);
 assert(!JSON.stringify(d).includes('COO'),'no COO references remain in presentation data');
-assert(d.growth.find(x=>x.id==='tolling'),'tolling / PetroChina');
+assert(d.growth.find(x=>x.id==='tolling').name==='Переработка / PetroChina','processing / PetroChina');
 assert(!d.growth.find(x=>x.id==='ion-franchise'),'ION block removed from growth slide');
 assert(!d.growth.find(x=>x.id==='mobile-fuel'),'mobile fuel block removed from growth slide');
+assert(!d.briefings.growth['ion-franchise'],'ION franchise briefing removed');
+assert(!d.briefings.growth['mobile-fuel'],'standalone mobile fuel briefing removed');
+assert.strictEqual(d.decisions.length,8,'ION franchise decision removed');
+assert(!JSON.stringify(d.decisions).includes('ION ENERGY'),'no ION franchise decision');
+assert(d.growth.find(x=>x.id==='airports').goal.includes('ТЗК из Европы'),'Astana fuel truck in aviation infrastructure');
+assert(d.briefings.growth.airports.why.includes('РГС'),'RGS included in aviation infrastructure briefing');
 assert(d.growth.find(x=>x.id==='foreign-airlines'),'foreign airlines');
 assert(d.cases.find(x=>x.id==='aviation-rfq'),'after-hours aviation request case');
 assert.strictEqual(d.cases.length,12,'12 working cases');
@@ -61,5 +67,8 @@ assert(!transitText.includes('SJS')&&transitText.includes('SGS'),'SGS spelling i
 assert(transitText.includes('произведение пропарки вагонов'),'wagon steaming wording');
 assert(d.processScenes.transit.find(x=>x.title==='Взлив, приёмка и техосмотр').owner.includes('Almaty Sterling Terminal'),'terminal participates in acceptance stage');
 assert(!domesticText.includes('НПЗ')&&domesticText.includes('поставщик'),'wholesale uses supplier wording');
-assert(read('index.html').includes('style.css?v=6.9-case12'),'v6.9 case cache revision');
+assert(d.cases.find(x=>x.id==='receivable').title==='Внутриструктурная задолженность','structural debt wording');
+assert(d.details.cases.tajik.lesson.includes('альтернативных покупателей'),'Tajikistan lesson expands client base');
+assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
+assert(read('index.html').includes('style.css?v=6.9-growth'),'v6.9 growth cache revision');
 console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; 17 этапов транзита; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
