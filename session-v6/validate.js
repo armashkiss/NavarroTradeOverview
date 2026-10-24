@@ -21,6 +21,9 @@ assert(!d.growth.find(x=>x.id==='ion-franchise'),'ION block removed from growth 
 assert(!d.growth.find(x=>x.id==='mobile-fuel'),'mobile fuel block removed from growth slide');
 assert(d.growth.find(x=>x.id==='foreign-airlines'),'foreign airlines');
 assert(d.cases.find(x=>x.id==='aviation-rfq'),'after-hours aviation request case');
+assert.strictEqual(d.cases.length,12,'12 working cases');
+assert(d.cases.find(x=>x.id==='intercompany-edo'),'intercompany EDO case');
+assert(d.cases.find(x=>x.id==='intercompany-edo').resolution.includes('ЭДО'),'intercompany EDO solution');
 assert(!d.cases.find(x=>['base','jet-stock'].includes(x.id)),'excluded cases');
 assert.strictEqual(d.companies.length,5,'five partner contours');
 assert(!JSON.stringify(d).includes(['Merc','ury'].join('')),'excluded partner removed');
@@ -58,5 +61,5 @@ assert(!transitText.includes('SJS')&&transitText.includes('SGS'),'SGS spelling i
 assert(transitText.includes('произведение пропарки вагонов'),'wagon steaming wording');
 assert(d.processScenes.transit.find(x=>x.title==='Взлив, приёмка и техосмотр').owner.includes('Almaty Sterling Terminal'),'terminal participates in acceptance stage');
 assert(!domesticText.includes('НПЗ')&&domesticText.includes('поставщик'),'wholesale uses supplier wording');
-assert(read('index.html').includes('style.css?v=6.9-org3'),'v6.9 organization cache revision');
+assert(read('index.html').includes('style.css?v=6.9-case12'),'v6.9 case cache revision');
 console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; 17 этапов транзита; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
