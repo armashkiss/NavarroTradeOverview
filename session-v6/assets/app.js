@@ -251,7 +251,7 @@ function prepareInlineLayout(box=$('#inspector')){
  const nested=flow?[...flow.querySelectorAll(':scope>.section,:scope>.inline-section-stack>.section')]:[];
  const sections=direct.length?direct:nested;if(sections.length<2)return;
  const width=box.getBoundingClientRect().width||box.clientWidth;
- const columns=box.dataset.inlineType==='company'?(width>=1050?3:width>=520?2:1):(sections.length>=6&&width>=720?3:width>=510?2:1);
+ const columns=sections.length>=6&&width>=720?3:width>=510?2:1;
  box.dataset.inlineColumns=String(columns);
  if(flow&&flow.querySelectorAll(':scope>.inline-section-stack').length===columns)return;
  const oldFlow=flow;flow=document.createElement('div');flow.className='inline-section-flow';
