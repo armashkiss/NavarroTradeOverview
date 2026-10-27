@@ -631,7 +631,8 @@ body.process-open{overflow:hidden}
   overflow:hidden;
   pointer-events:auto;
   transform:translateX(-12px) scale(.94);
-  opacity:.58;
+  opacity:.82;
+  filter:saturate(.92);
  }
  body.presentation-mode .slide-grid.inline-focus .inspector-inline{margin-top:0!important;border-radius:15px;box-shadow:0 22px 58px rgba(7,59,72,.13)}
  body.presentation-mode:has(.slide-grid.inline-focus) .page-inner{padding-top:12px;padding-bottom:10px}
