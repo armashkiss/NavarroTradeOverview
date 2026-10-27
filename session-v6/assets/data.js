@@ -1,7 +1,7 @@
 /* NAVARRO TRADE · strategy session v6: source-grounded executive briefs. */
 window.SESSION_DATA = {
   "meta": {
-    "revision": "22.10.2026 · редакция 6",
+    "revision": "30.10.2026 · редакция 6",
     "status": "ПРОЕКТ СЕССИИ · ФАКТЫ И ПРЕДЛОЖЕНИЯ",
     "group": "STERLING GROUP"
   },
