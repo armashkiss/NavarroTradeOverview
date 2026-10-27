@@ -121,83 +121,45 @@ function hideZoom({instant=false}={}){
  const a=win.animate([{opacity:1,transform:'translateY(0) scale(1)',filter:'blur(0)'},{opacity:0,transform:'translateY(18px) scale(.97)',filter:'blur(3px)'}],{duration:240,easing:'ease-in',fill:'forwards'});
  Promise.resolve(a.finished).catch(()=>{}).then(()=>{if(detailSerial!==serial)return;a.cancel();layer.hidden=true;document.body.classList.remove('has-detail-zoom')});
 }
-/* v6.10: measured widescreen modal / split overlong material into pages */
 function adaptDetailColumns(){
- const layer=$('#detail-zoom'),grid=layer?.querySelector('.detail-columns'),content=layer?.querySelector('.detail-content');
- if(!layer||layer.hidden||!grid||!content)return;
- layer.classList.remove('fit-balanced');
- const nodes=[...layer.querySelector('.detail-source').children].map(n=>n.cloneNode(true));
- const width=grid.clientWidth||window.innerWidth;
- const chars=nodes.reduce((s,n)=>s+n.textContent.length,0);
- const cols=width>1420&&chars>1500?4:width>960?3:width>660?2:1;
- const modes=[[16.2,1.32,10,'11px 13px'],[15.5,1.29,8,'10px 12px'],[14.8,1.27,7,'9px 11px'],[14,1.24,6,'8px 10px'],[13.4,1.22,5,'7px 9px']];
- const size=n=>{
-  const [font,line,gap,pad]=modes[n];layer.dataset.density=String(n);
-  layer.style.setProperty('--fit-font',font+'px');layer.style.setProperty('--fit-line',line);
-  layer.style.setProperty('--fit-gap',gap+'px');layer.style.setProperty('--fit-pad',pad);
-  layer.style.setProperty('--fit-label',(11.5-n*.23)+'px');
- };
- const build=()=>{
-  grid.style.setProperty('--fit-columns',cols);
-  const lanes=Array.from({length:cols},()=>{const x=document.createElement('div');x.className='detail-lane';return x});
-  grid.replaceChildren(...lanes);return lanes;
- };
- const height=lane=>{const kids=[...lane.children];if(!kids.length)return 0;return Math.ceil(kids[kids.length-1].getBoundingClientRect().bottom-lane.getBoundingClientRect().top)};
- const max=()=>content.clientHeight-parseFloat(getComputedStyle(content).paddingTop)-parseFloat(getComputedStyle(content).paddingBottom)-3;
- let fitted=false;
- for(let d=0;d<modes.length;d++){
-  size(d);const lanes=build();
-  nodes.forEach(n=>lanes.reduce((a,b)=>height(a)<=height(b)?a:b).appendChild(n.cloneNode(true)));
-  if(lanes.every(l=>height(l)<=max())){fitted=true;break;}
+ const layer=$('#detail-zoom'),win=layer?.querySelector('.detail-window'),grid=layer?.querySelector('.detail-columns');
+ if(!win||!grid||layer.hidden)return;
+ const source=layer.querySelector('.detail-source');
+ const nodes=[...source.children].map(n=>n.cloneNode(true));
+ const width=win.clientWidth;
+ const columns=width>=1060?3:width>=930&&layer.dataset.focusType!=='direction'?3:width>=720?2:1;
+ // Preserve top-to-bottom reading order, balance content by approximate visual weight.
+ let lanes=Array.from({length:columns},()=>document.createElement('div'));
+ lanes.forEach(n=>n.className='detail-lane');
+ const weights=nodes.map(n=>{let t=n.textContent||'';return t.length+115+(n.querySelectorAll('li,.case-reference').length*60)});
+ const total=weights.reduce((x,y)=>x+y,0),target=total/columns;
+ let lane=0,load=0;
+ nodes.forEach((node,i)=>{
+  if(lane<columns-1&&load>target*.62&&(load+weights[i]*.55)>target){lane++;load=0;}
+  lanes[lane].appendChild(node);load+=weights[i];
+ });
+ grid.replaceChildren(...lanes);
+ layer.dataset.density='0';layer.classList.remove('detail-unavoidable-scroll');
+ const content=layer.querySelector('.detail-content');
+ const contentEnd=()=>content.getBoundingClientRect().bottom-parseFloat(getComputedStyle(content).paddingBottom);
+ const spilling=()=>lanes.some(l=>[...l.children].some(c=>c.getBoundingClientRect().bottom>contentEnd()+2));
+ for(let i=0;i<5;i++){
+  // Real bounding boxes catch overflow even when flex lanes are exactly 100% tall.
+  if(!spilling())break;
+  layer.dataset.density=String(i+1);
  }
- let pager=layer.querySelector('.detail-pager');
- if(!pager){pager=document.createElement('div');pager.className='detail-pager';pager.innerHTML='<button type="button" data-fit-prev aria-label="Назад">←</button><span aria-live="polite"></span><button type="button" data-fit-next aria-label="Вперёд">→</button>';layer.querySelector('.detail-tools').insertBefore(pager,layer.querySelector('.detail-close'));}
- if(fitted){pager.hidden=true;layer._fitPages=null;layer.classList.add('fit-balanced');return;}
- size(3);const pages=[];let index=0;
- while(index<nodes.length){
-  const lanes=build();let consumed=0;
-  while(index+consumed<nodes.length){
-   const n=nodes[index+consumed].cloneNode(true);
-   let fits=false;
-   for(const lane of [...lanes].sort((a,b)=>height(a)-height(b))){
-    lane.appendChild(n);
-    if(height(lane)<=max()+1){fits=true;break;}
-    n.remove();
-   }
-   if(!fits){if(consumed===0){lanes[0].appendChild(n);consumed=1;}break;}
-   consumed++;
-  }
-  pages.push(lanes.map(l=>[...l.children].map(n=>n.cloneNode(true))));index+=consumed;
- }
- layer._fitPages=pages;layer._fitPageIndex=Math.min(layer._fitPageIndex||0,pages.length-1);
- pager.hidden=pages.length<=1;
- const draw=()=>{
-  const lanes=build(),page=pages[layer._fitPageIndex];
-  lanes.forEach((l,i)=>l.replaceChildren(...page[i].map(n=>n.cloneNode(true))));
-  pager.querySelector('span').textContent=(layer._fitPageIndex+1)+' / '+pages.length;
-  pager.querySelector('[data-fit-prev]').disabled=layer._fitPageIndex===0;
-  pager.querySelector('[data-fit-next]').disabled=layer._fitPageIndex===pages.length-1;
- };
- layer._fitRender=draw;draw();
- if(!layer._fitBound){
-  layer._fitBound=true;
-  layer.addEventListener('click',e=>{const b=e.target.closest('[data-fit-prev],[data-fit-next]');if(!b||!layer._fitPages)return;const delta=b.hasAttribute('data-fit-next')?1:-1;layer._fitPageIndex=Math.max(0,Math.min(layer._fitPageIndex+delta,layer._fitPages.length-1));layer._fitRender();});
-  document.addEventListener('keydown',e=>{
-   if(layer.hidden||!layer._fitPages||layer._fitPages.length<2||e.ctrlKey||e.altKey||e.metaKey)return;
-   let delta=0;if(['ArrowRight','PageDown',' '].includes(e.key))delta=1;
-   if(['ArrowLeft','PageUp'].includes(e.key))delta=-1;if(!delta)return;
-   e.preventDefault();e.stopImmediatePropagation();layer._fitPageIndex=Math.max(0,Math.min(layer._fitPageIndex+delta,layer._fitPages.length-1));layer._fitRender();
-  },true);
+ if(spilling()){
+  // Small mobile / accessibility font settings: never clip critical information.
+  layer.classList.add('detail-unavoidable-scroll');
  }
 }
 function zoomToDetail(type,id){
  const layer=$('#detail-zoom'),win=layer.querySelector('.detail-window');
- const src=document.querySelector(`[data-item="${type}:${id}"]`)||document.querySelector(`[data-open-direction="${id}"]`)||$('#inspector');
+ const src=$('#inspector');
  const start=src?.getBoundingClientRect();
  const temp=document.createElement('div');temp.innerHTML=inspector(type,id);
  const header=temp.querySelector('.inspector-header');
  const title=temp.querySelector('h2'),sub=temp.querySelector('.sub'),body=temp.querySelector('.inspector-body');
- layer._fitPageIndex=0;
  const source=layer.querySelector('.detail-source');
  source.replaceChildren(...[...(body?.children||[])].map(x=>x.cloneNode(true)));
  layer.querySelector('#detail-topic').textContent=header?.querySelector('.inspector-tag')?.textContent||'ПОДРОБНОСТИ';
@@ -219,7 +181,7 @@ const inlineDetailTypes=new Set(['company','change','growth','decision']);
 function setDetail(type,id,{expand=true}={}){
  current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
- if(inlineDetailTypes.has(type)){zoomToDetail(type,id);return;}
+ if(inlineDetailTypes.has(type)){setInlineDetail(type,id);return;}
  const box=$('#inspector');if(box){box.innerHTML=preview(type,id);box.setAttribute('aria-live','polite')}
  if(expand)zoomToDetail(type,id);
 }
@@ -281,7 +243,7 @@ function adaptInlineInspector(box=$('#inspector')){
 function head(i,title,desc){i=current.slide;return `<div class="slide-heading"><div><div class="eyebrow">NAVARRO TRADE · ${esc(slides[i].short)} / ${slides.length}</div><h1 class="headline">${title}</h1><p class="head-desc">${desc}</p></div><div class="slide-no">${esc(slides[i].short)}</div></div>`;}
 function shell(content,type,id){
  detailState={type,id};
- const inline=inlineDetailTypes.has(type),focused=false;
+ const inline=inlineDetailTypes.has(type),focused=inline&&!!current.selected[type];
  if(inline&&!focused)return `<div class="slide-grid overview-only"><div class="left-area">${content}</div></div>`;
  const panel=inline&&focused?inspector(type,id):preview(type,id);
  return `<div class="slide-grid ${focused?'inline-focus':''}"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector" ${inline?`data-inline-type="${type}"`:''}>${panel}</aside></div>`;
