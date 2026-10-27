@@ -417,7 +417,11 @@ async function toggleFullscreen(){try{
  setPresentationMode(!document.body.classList.contains('presentation-mode'));
 }
 $('#fullscreen').addEventListener('click',toggleFullscreen);
-document.addEventListener('fullscreenchange',()=>{setPresentationMode(!!document.fullscreenElement);requestAnimationFrame(()=>{adaptDetailColumns();adaptInlineInspector()})});
+document.addEventListener('fullscreenchange',()=>{
+ setPresentationMode(!!document.fullscreenElement);
+ const adapt=()=>{adaptDetailColumns();adaptInlineInspector()};
+ requestAnimationFrame(adapt);setTimeout(adapt,220);setTimeout(adapt,620);
+});
 window.addEventListener('resize',()=>requestAnimationFrame(()=>{adaptDetailColumns();adaptInlineInspector()}));
 const goNext=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const goPrev=()=>navigate(slides[Math.max(0,current.slide-1)].id);
