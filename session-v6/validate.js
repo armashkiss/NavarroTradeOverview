@@ -83,6 +83,7 @@ assert(/акт выполненных работ/i.test(d.details.cases.duplicat
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-readable17'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-readable18'),'v6.9 readable cache revision');
 assert(css.includes('body.presentation-mode .slide-grid.inline-focus'),'fullscreen inline analysis overrides the narrow preview column');
+assert(css.includes('height:var(--inline-height,calc(100dvh - 132px))!important'),'inline panel obeys the measured slide height');
 console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; 17 этапов транзита; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
