@@ -231,9 +231,10 @@ function adaptInlineInspector(box=$('#inspector')){
  prepareInlineLayout(box);
  box.dataset.inlineDensity='0';
  const footerTop=$('.footbar')?.getBoundingClientRect().top||window.innerHeight;
- const currentLift=Number(box.dataset.inlineLift||0),naturalTop=box.getBoundingClientRect().top+currentLift;
+ const presentation=document.body.classList.contains('presentation-mode');
+ const currentLift=presentation?0:Number(box.dataset.inlineLift||0),naturalTop=box.getBoundingClientRect().top+currentLift;
  const safeTop=($('.top')?.getBoundingClientRect().bottom||0)+10;
- const lift=Math.max(0,Math.floor(naturalTop-safeTop));
+ const lift=presentation?0:Math.max(0,Math.floor(naturalTop-safeTop));
  box.dataset.inlineLift=String(lift);box.style.setProperty('--inline-lift',`${-lift}px`);
  const available=Math.max(390,Math.floor(footerTop-(naturalTop-lift)-8));
  box.style.setProperty('--inline-height',`${available}px`);

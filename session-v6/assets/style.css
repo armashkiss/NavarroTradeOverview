@@ -622,25 +622,25 @@ body.process-open{overflow:hidden}
   max-height:var(--inline-height,calc(100dvh - 132px))!important;
  }
  body.presentation-mode .slide-grid.inline-focus{
-  grid-template-columns:0 minmax(0,1fr);
-  gap:0;
+  grid-template-columns:minmax(500px,.72fr) minmax(0,1.28fr);
+  gap:18px;
  }
  body.presentation-mode .slide-grid.inline-focus .left-area{
-  height:0;
-  max-height:0;
+  height:auto;
+  max-height:calc(100dvh - 285px);
   overflow:hidden;
-  pointer-events:none;
-  transform:translateX(-54px) scale(.86);
-  opacity:0;
+  pointer-events:auto;
+  transform:translateX(-12px) scale(.94);
+  opacity:.58;
  }
- body.presentation-mode:has(.slide-grid.inline-focus) .slide-heading{opacity:0;pointer-events:none;transform:translateX(-44px)}
+ body.presentation-mode .slide-grid.inline-focus .inspector-inline{margin-top:0!important;border-radius:15px;box-shadow:0 22px 58px rgba(7,59,72,.13)}
  body.presentation-mode:has(.slide-grid.inline-focus) .page-inner{padding-top:12px;padding-bottom:10px}
  body.presentation-mode .slide-grid.inline-focus .inline-section-flow>.section h4,
  body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section h4{font-size:13.5px}
  body.presentation-mode .slide-grid.inline-focus .inline-section-flow>.section p,
  body.presentation-mode .slide-grid.inline-focus .inline-section-flow>.section ul,
  body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section p,
- body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section ul{font-size:19px;line-height:1.4}
+ body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section ul{font-size:17.5px;line-height:1.36}
 }
 @media(min-width:971px) and (max-width:1320px){
  .slide-grid.inline-focus .left-area{
