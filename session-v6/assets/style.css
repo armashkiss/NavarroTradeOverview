@@ -613,3 +613,28 @@ body.process-open{overflow:hidden}
  .slide-grid.inline-focus .inspector-inline[data-inline-density="0"] .section h4,
  .slide-grid.inline-focus .inspector-inline[data-inline-density="1"] .section h4{margin-bottom:3px}
 }
+
+/* readable-17 — the fullscreen deck must keep the inline analysis on one canvas. */
+@media(min-width:971px){
+ body.presentation-mode .slide-grid.inline-focus{
+  grid-template-columns:minmax(180px,.3fr) minmax(0,1.9fr);
+  gap:16px;
+ }
+ body.presentation-mode .slide-grid.inline-focus .left-area{
+  transform:translateX(-18px) scale(.93);
+  opacity:.52;
+ }
+ body.presentation-mode:has(.slide-grid.inline-focus) .page{overflow:hidden}
+ body.presentation-mode:has(.slide-grid.inline-focus) .page-inner{padding-top:12px;padding-bottom:10px}
+}
+@media(min-width:971px) and (max-width:1320px){
+ body.presentation-mode .slide-grid.inline-focus{
+  grid-template-columns:0 minmax(0,1fr);
+  gap:0;
+ }
+ body.presentation-mode .slide-grid.inline-focus .left-area{
+  opacity:0;
+  pointer-events:none;
+  transform:translateX(-46px) scale(.88);
+ }
+}
