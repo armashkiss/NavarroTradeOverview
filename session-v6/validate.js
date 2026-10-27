@@ -68,6 +68,8 @@ assert(transitText.includes('произведение пропарки ваго�
 assert(d.processScenes.transit.find(x=>x.title==='Взлив, приёмка и техосмотр').owner.includes('Almaty Sterling Terminal'),'terminal participates in acceptance stage');
 assert(!domesticText.includes('НПЗ')&&domesticText.includes('поставщик'),'wholesale uses supplier wording');
 assert(d.cases.find(x=>x.id==='receivable').title==='Внутриструктурная задолженность','structural debt wording');
+assert(d.cases.find(x=>x.id==='legal').title==='Трудности с согласованием договоров','contract approval wording');
+assert(d.cases.find(x=>x.id==='intercompany-edo').title==='Налаживание документооборота внутри группы','intercompany document flow wording');
 assert(d.details.cases.tajik.lesson.includes('альтернативных покупателей'),'Tajikistan lesson expands client base');
 assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
 const presentationText=JSON.stringify(d);
@@ -76,5 +78,5 @@ assert(/акт выполненных работ/i.test(d.details.cases.duplicat
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-readable13'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-readable14'),'v6.9 readable cache revision');
 console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; 17 этапов транзита; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
