@@ -634,7 +634,12 @@ body.process-open{overflow:hidden}
   opacity:.82;
   filter:saturate(.92);
  }
- body.presentation-mode .slide-grid.inline-focus .inspector-inline{margin-top:0!important;border-radius:15px;box-shadow:0 22px 58px rgba(7,59,72,.13)}
+ body.presentation-mode .slide-grid.inline-focus .inspector-inline{height:auto!important;min-height:0;margin-top:0!important;border-radius:15px;box-shadow:0 22px 58px rgba(7,59,72,.13)}
+ body.presentation-mode .slide-grid.inline-focus .inspector-body{flex:0 1 auto}
+ body.presentation-mode .slide-grid.inline-focus .inline-section-flow{flex:0 1 auto;align-items:start}
+ body.presentation-mode .slide-grid.inline-focus .inline-section-stack{height:auto;gap:9px}
+ body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section{flex:0 0 auto;justify-content:flex-start}
+ body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section+.section{margin-top:0}
  body.presentation-mode:has(.slide-grid.inline-focus) .page-inner{padding-top:12px;padding-bottom:10px}
  body.presentation-mode .slide-grid.inline-focus .inline-section-flow>.section h4,
  body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section h4{font-size:13.5px}
