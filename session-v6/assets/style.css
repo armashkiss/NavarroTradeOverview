@@ -450,6 +450,7 @@ body.process-open{overflow:hidden}
 .slide-grid.inline-focus .inspector-inline[data-inline-columns="1"] .inline-section-flow{grid-template-columns:1fr}
 .slide-grid.inline-focus .inspector-inline[data-inline-columns="2"] .inline-section-flow{grid-template-columns:repeat(2,minmax(0,1fr))}
 .slide-grid.inline-focus .inspector-inline[data-inline-columns="3"] .inline-section-flow{grid-template-columns:repeat(3,minmax(0,1fr))}
+.slide-grid.inline-focus .inspector-inline[data-inline-columns="4"] .inline-section-flow{grid-template-columns:repeat(4,minmax(0,1fr))}
 .slide-grid.inline-focus .inline-section-flow{gap:14px}
 .slide-grid.inline-focus .inline-section-stack{gap:12px}
 .slide-grid.inline-focus .inline-section-flow>.section,
@@ -622,13 +623,18 @@ body.process-open{overflow:hidden}
   max-height:var(--inline-height,calc(100dvh - 132px))!important;
  }
  body.presentation-mode .slide-grid.inline-focus{
-  grid-template-columns:minmax(180px,.3fr) minmax(0,1.9fr);
-  gap:16px;
+  grid-template-columns:0 minmax(0,1fr);
+  gap:0;
  }
  body.presentation-mode .slide-grid.inline-focus .left-area{
-  transform:translateX(-18px) scale(.93);
-  opacity:.52;
+  height:0;
+  max-height:0;
+  overflow:hidden;
+  pointer-events:none;
+  transform:translateX(-54px) scale(.86);
+  opacity:0;
  }
+ body.presentation-mode:has(.slide-grid.inline-focus) .slide-heading{opacity:0;pointer-events:none;transform:translateX(-44px)}
  body.presentation-mode:has(.slide-grid.inline-focus) .page-inner{padding-top:12px;padding-bottom:10px}
 }
 @media(min-width:971px) and (max-width:1320px){
@@ -666,6 +672,10 @@ body.process-open{overflow:hidden}
  box-shadow:0 10px 28px rgba(20,76,76,.055);
 }
 .slide-grid.inline-focus .inline-section-stack>.section{
+ flex:1 1 0;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
  padding:8px 3px;
  border:0;
  border-radius:0;
@@ -682,4 +692,9 @@ body.process-open{overflow:hidden}
 }
 .slide-grid.inline-focus .inspector-inline[data-inline-density="2"] .inline-section-stack>.section{
  padding:6px 2px;
+}
+.slide-grid.inline-focus .inspector-inline h2{
+ overflow-wrap:normal;
+ word-break:normal;
+ hyphens:none;
 }

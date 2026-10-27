@@ -50,7 +50,7 @@ assert(ui.includes('function prepareInlineLayout'),'balanced inline text columns
 assert(read('assets/style.css').includes('.inline-section-flow'),'inline column-flow styles');
 assert(read('index.html').includes('../session/assets/navarro-logo.png'),'official logo in persistent navigation');
 assert(ui.includes('class="cover-logo"'),'official logo on opening slide');
-assert(ui.includes('width>=720?3:width>=510?2:1'),'width-aware inline layout breakpoints');
+assert(ui.includes('width>=1280?4:sections.length>=6&&width>=720?3:width>=510?2:1'),'width-aware inline layout breakpoints');
 assert(read('assets/style.css').includes('grid-template-columns:minmax(275px,.48fr)'),'wider inline focus column');
 const css=read('assets/style.css');
 assert(css.includes('v6.6 — projection typography'),'projection typography marker');
@@ -83,7 +83,7 @@ assert(/акт выполненных работ/i.test(d.details.cases.duplicat
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-readable18'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-readable19'),'v6.9 readable cache revision');
 assert(css.includes('body.presentation-mode .slide-grid.inline-focus'),'fullscreen inline analysis overrides the narrow preview column');
 assert(css.includes('height:var(--inline-height,calc(100dvh - 132px))!important'),'inline panel obeys the measured slide height');
 console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; 17 этапов транзита; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
