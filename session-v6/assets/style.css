@@ -450,7 +450,6 @@ body.process-open{overflow:hidden}
 .slide-grid.inline-focus .inspector-inline[data-inline-columns="1"] .inline-section-flow{grid-template-columns:1fr}
 .slide-grid.inline-focus .inspector-inline[data-inline-columns="2"] .inline-section-flow{grid-template-columns:repeat(2,minmax(0,1fr))}
 .slide-grid.inline-focus .inspector-inline[data-inline-columns="3"] .inline-section-flow{grid-template-columns:repeat(3,minmax(0,1fr))}
-.slide-grid.inline-focus .inspector-inline[data-inline-columns="4"] .inline-section-flow{grid-template-columns:repeat(4,minmax(0,1fr))}
 .slide-grid.inline-focus .inline-section-flow{gap:14px}
 .slide-grid.inline-focus .inline-section-stack{gap:12px}
 .slide-grid.inline-focus .inline-section-flow>.section,
@@ -636,6 +635,12 @@ body.process-open{overflow:hidden}
  }
  body.presentation-mode:has(.slide-grid.inline-focus) .slide-heading{opacity:0;pointer-events:none;transform:translateX(-44px)}
  body.presentation-mode:has(.slide-grid.inline-focus) .page-inner{padding-top:12px;padding-bottom:10px}
+ body.presentation-mode .slide-grid.inline-focus .inline-section-flow>.section h4,
+ body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section h4{font-size:13.5px}
+ body.presentation-mode .slide-grid.inline-focus .inline-section-flow>.section p,
+ body.presentation-mode .slide-grid.inline-focus .inline-section-flow>.section ul,
+ body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section p,
+ body.presentation-mode .slide-grid.inline-focus .inline-section-stack>.section ul{font-size:19px;line-height:1.4}
 }
 @media(min-width:971px) and (max-width:1320px){
  .slide-grid.inline-focus .left-area{
