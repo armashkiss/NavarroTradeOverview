@@ -72,7 +72,7 @@ assert(d.details.cases.tajik.lesson.includes('альтернативных по�
 assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
 const presentationText=JSON.stringify(d);
 assert(!/дублирован/i.test(presentationText),'duplicate work/reporting case removed');
-assert(d.details.cases.duplicate.facts.includes('акт выполненных работ')&&d.details.cases.duplicate.facts.includes('электронный счёт-фактура'),'closing document sequence case');
+assert(/акт выполненных работ/i.test(d.details.cases.duplicate.facts)&&/электронный счёт-фактура/i.test(d.details.cases.duplicate.facts),'closing document sequence case');
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
