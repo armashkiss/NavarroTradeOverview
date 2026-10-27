@@ -28,10 +28,10 @@ function richBrief(type,id){
    block('Механика внедрения',bullet(steps))+
    block('Маршрут / цепочка',`<div class="briefing-route">${esc(b.workflow)}</div>`)+
    block('Роли и контроль',p(rolesControl))+
-   block('Результат и KPI',p(resultKpi))+
+   block('Результат и ключевые показатели',p(resultKpi))+
    `<p class="source-caption">${esc(b.source)}</p>`;
 }
-function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return `<div class="inspector-header"><span class="inspector-tag">EXECUTIVE CONTEXT</span><span class="inspector-index">N.</span></div><h2>Контекст раздела</h2><p class="sub">Процессы, ответственность, риски и предлагаемые решения.</p>`;
+function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return `<div class="inspector-header"><span class="inspector-tag">УПРАВЛЕНЧЕСКИЙ КОНТЕКСТ</span><span class="inspector-index">N.</span></div><h2>Контекст раздела</h2><p class="sub">Процессы, ответственность, риски и предлагаемые решения.</p>`;
  let tag='',title='',sub='',inner='',e;
  if(type==='direction'){
   e=extra.directions?.[id];tag=i.tag;title=i.name;sub=i.intro;
@@ -62,7 +62,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     block('Контрольная точка для руководства',plain('Проверить фактические документы, позиции участников и критерий закрытия корректирующего действия; установить владельца и срок.'))+
     `<p class="source-caption">ИСТОЧНИК: ${esc(i.source)}. Факты и выводы требуют проверки обеими сторонами.</p>`;
  }else if(type==='company'){
-  e=extra.partners?.[id];tag='STERLING / OPERATING LINKS';title=i.title;sub=i.subtitle;
+  e=extra.partners?.[id];tag='STERLING / РАБОЧИЕ СВЯЗИ';title=i.title;sub=i.subtitle;
   inner=block('Описание процесса',plain(e?.process||i.focus))+
     block('Получает от Navarro',plain(i.from))+
     block('Передаёт Navarro',plain(i.to))+
@@ -80,7 +80,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     richBrief('growth',id)+
     block('Что подготовить к решению',plain(i.next));
  }else if(type==='decision'){
-  tag='EXECUTIVE DECISION';title=i.title;sub=i.prompt;
+  tag='УПРАВЛЕНЧЕСКОЕ РЕШЕНИЕ';title=i.title;sub=i.prompt;
   const status=current.decisions[i.id]||'pending';const names={pending:'К обсуждению',agreed:'Отмечено как согласованное',review:'На доработку',hold:'Отложено'};
   const link={d1:['change','coo-owner'],d2:['change','tariff-fx'],d3:['change','tariff-fx'],d4:['change','inventory-audit'],d5:['change','clm'],d7:['growth','tolling'],d8:['growth','airports']}[id];
   const linked=link?rich[link[0]]?.[link[1]]:null;
@@ -105,15 +105,15 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
 }
 // v4.2: a compact on-slide preview, plus a cinematic no-scroll case focus.
 function preview(type,id){
- const i=itemById(type,id);let title='',sub='',tag='INSIGHT PANEL';
+ const i=itemById(type,id);let title='',sub='',tag='АНАЛИТИЧЕСКАЯ ПАНЕЛЬ';
  if(type==='flow'){
   const f=D.dealflows.find(x=>x.id===current.flow);const st=f?.steps[+id];
   title=st?.[0]||'Этап сделки';sub=st?.[1]||'';tag='МАРШРУТ СДЕЛКИ';
- } else if(i){title=i.name||i.title||'Подробности';sub=i.subtitle||i.intro||i.lead||i.scope||i.goal||i.why||i.prompt||'';tag=type==='case'?'КЕЙС / ВЫВОДЫ':'INSIGHT PANEL';}
+ } else if(i){title=i.name||i.title||'Подробности';sub=i.subtitle||i.intro||i.lead||i.scope||i.goal||i.why||i.prompt||'';tag=type==='case'?'КЕЙС / ВЫВОДЫ':'АНАЛИТИЧЕСКАЯ ПАНЕЛЬ';}
+ const inline=inlineDetailTypes.has(type);
  return `<div class="inspector-header"><span class="inspector-tag">${esc(tag)}</span><span class="inspector-index">N.</span></div>
  <h2>${esc(title)}</h2><p class="sub">${esc(sub)}</p>
- <button class="detail-cta" type="button" data-expand-current>Развернуть разбор <span>↗</span></button>
- <p class="detail-hint">Полный разбор объединяет функции, ответственность, связанные кейсы и решения.</p>`;
+ ${inline?`<div class="preview-guide"><strong>Выберите карточку</strong><p>Колонка плавно раскроет полный разбор без перехода на другой экран.</p><div><span>Контекст</span><span>Роли</span><span>Риски</span><span>Решение</span></div></div>`:`<button class="detail-cta" type="button" data-expand-current>Развернуть разбор <span>↗</span></button><p class="detail-hint">Полный разбор объединяет функции, ответственность, связанные кейсы и решения.</p>`}`;
 }
 let detailState={type:null,id:null},detailSerial=0;
 const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -196,7 +196,7 @@ function setInlineDetail(type,id){
  const grid=box.closest('.slide-grid'),wasFocused=grid?.classList.contains('inline-focus');
  box.getAnimations().forEach(animation=>animation.cancel());
  box.dataset.inlineType=type;box.innerHTML=inspector(type,id);box.setAttribute('aria-live','polite');
- prepareInlineLayout(box);
+ prepareInlineLayout(box,true);
  grid?.classList.add('inline-focus');
  requestAnimationFrame(()=>{
   adaptInlineInspector(box);
@@ -208,7 +208,7 @@ function setInlineDetail(type,id){
  setTimeout(()=>adaptInlineInspector(box),1700);
 }
 
-function prepareInlineLayout(box=$('#inspector')){
+function prepareInlineLayout(box=$('#inspector'),forceExpanded=false){
  const body=box?.querySelector('.inspector-body');if(!body)return;
  const pill=body.querySelector(':scope>.pill'),header=box.querySelector('.inspector-header'),index=header?.querySelector('.inspector-index');
  if(pill&&header)header.insertBefore(pill,index||null);
@@ -216,7 +216,7 @@ function prepareInlineLayout(box=$('#inspector')){
  const direct=[...body.children].filter(node=>node.classList.contains('section'));
  const nested=flow?[...flow.querySelectorAll(':scope>.section,:scope>.inline-section-stack>.section')]:[];
  const sections=direct.length?direct:nested;if(sections.length<2)return;
- const columns=box.clientWidth>=560&&sections.length>=6?3:2;
+ const columns=(forceExpanded||box.clientWidth>=560)&&sections.length>=6?3:2;
  box.dataset.inlineColumns=String(columns);
  if(flow&&flow.querySelectorAll(':scope>.inline-section-stack').length===columns)return;
  const oldFlow=flow;flow=document.createElement('div');flow.className='inline-section-flow';
@@ -231,7 +231,7 @@ function prepareInlineLayout(box=$('#inspector')){
 
 function adaptInlineInspector(box=$('#inspector')){
  if(!box?.classList.contains('inspector-inline')||!inlineDetailTypes.has(box.dataset.inlineType)||window.innerWidth<=970)return;
- prepareInlineLayout(box);
+ prepareInlineLayout(box,box.closest('.slide-grid')?.classList.contains('inline-focus'));
  box.dataset.inlineDensity='0';
  const footerTop=$('.footbar')?.getBoundingClientRect().top||window.innerHeight;
  const currentLift=Number(box.dataset.inlineLift||0),naturalTop=box.getBoundingClientRect().top+currentLift;
@@ -247,9 +247,10 @@ function head(i,title,desc){i=current.slide;return `<div class="slide-heading"><
 function shell(content,type,id){
  detailState={type,id};
  const inline=inlineDetailTypes.has(type),focused=inline&&!!current.selected[type];
- return `<div class="slide-grid ${focused?'inline-focus':''}"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector" ${inline?`data-inline-type="${type}"`:''}>${inline?inspector(type,id):preview(type,id)}</aside></div>`;
+ const panel=inline&&focused?inspector(type,id):preview(type,id);
+ return `<div class="slide-grid ${focused?'inline-focus':''}"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector" ${inline?`data-inline-type="${type}"`:''}>${panel}</aside></div>`;
 }
-function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / STRATEGIC & OPERATIONAL SESSION 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Executive-структура →</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">WORKING EXECUTIVE MODEL<br>22 OCTOBER 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>12</strong><span>рабочих кейсов</span></div><div class="stat"><strong>05</strong><span>партнёрских контуров</span></div><div class="stat"><strong>08</strong><span>вопросов для решений</span></div></div><div class="business-note">Рабочая презентация по материалам подразделений. Факты и суммы требуют подтверждения; предложения не являются утверждёнными решениями Sterling.</div>`;}
+function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Структура руководства →</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">РАБОЧАЯ УПРАВЛЕНЧЕСКАЯ МОДЕЛЬ<br>22 ОКТЯБРЯ 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>12</strong><span>рабочих кейсов</span></div><div class="stat"><strong>05</strong><span>партнёрских контуров</span></div><div class="stat"><strong>08</strong><span>вопросов для решений</span></div></div><div class="business-note">Рабочая презентация по материалам подразделений. Факты и суммы требуют подтверждения; предложения не являются утверждёнными решениями Sterling.</div>`;}
 function directions(){
  const cards=`<div class="tile-grid direction-first">${D.directions.map(d=>`<button type="button" class="tile direction-launch" data-open-direction="${esc(d.id)}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="direction-foot">Этапы · предприятия · риски · кейсы <b>Открыть ↗</b></span></button>`).join('')}</div>
  <div class="direction-overview"><div><span class="direction-overview-kicker">РЕАЛЬНАЯ ЦЕПОЧКА</span><b>Покупатель → подтверждённый объём → исполнение → документы</b><p>Международный транзит и оптовка отражены по фактическому описанию Navarro. Коммерческие и операционные предложения показаны отдельно.</p></div><div><span class="direction-overview-kicker">ГЛАВНЫЕ РИСКИ</span><b>Тарифы · курс · простои · товарный учёт</b><p>Для каждого направления сопоставлены этапы, участники, риски и контрольные решения.</p></div></div>`;
@@ -260,8 +261,8 @@ function orgmap(){
  const N=id=>nodeById[id];
  const box=id=>`<div class="map-leaf">${esc(N(id).name)}</div>`;
  const pillar=(label,manager,sections)=>`<div class="orgmap-pillar"><div class="orgmap-exec"><small>${esc(label)}</small><b>${esc(N(manager).name)}</b></div><div class="orgmap-stem"></div><div class="orgmap-sections">${sections.map(s=>{let n=N(s);return `<div class="orgmap-section"><strong>${esc(n.name)}</strong>${n.children.length?`<div class="orgmap-lowers">${n.children.map(cid=>box(cid)).join('')}</div>`:''}</div>`}).join('')}</div></div>`;
- return head(2,'Структура <span style="color:#389f91">одним взглядом.</span>','Проектная модель TO-BE · схема подчинённости без функциональных описаний')+
- `<div class="orgmap"><div class="orgmap-root">NAVARRO TRADE <strong>Генеральный директор</strong></div><div class="orgmap-main">${pillar('DCEO','deputy',['commercial','international'])}${pillar('CFO','cfo',['accounting','fpa'])}</div><div class="orgmap-support">${['legal','advisor','digital'].map(id=>`<div class="orgmap-direct">${esc(N(id).name)}<span>Прямое подчинение CEO</span></div>`).join('')}</div><div class="orgmap-note">Оргструктура TO-BE · подразделения операционного контура включены в коммерческий департамент</div></div>`;
+ return head(2,'Структура <span style="color:#389f91">одним взглядом.</span>','Целевая проектная модель · схема подчинённости без функциональных описаний')+
+ `<div class="orgmap"><div class="orgmap-root">NAVARRO TRADE <strong>Генеральный директор</strong></div><div class="orgmap-main">${pillar('Заместитель генерального директора','deputy',['commercial','international'])}${pillar('Финансовый директор','cfo',['accounting','fpa'])}</div><div class="orgmap-support">${['legal','advisor','digital'].map(id=>`<div class="orgmap-direct">${esc(N(id).name)}<span>Прямое подчинение генеральному директору</span></div>`).join('')}</div><div class="orgmap-note">Целевая оргструктура · подразделения операционного контура включены в коммерческий департамент</div></div>`;
 }
 
 function orgcard(n,cls=''){
@@ -270,15 +271,15 @@ function orgcard(n,cls=''){
 function orgAncestors(id){const out=[];let n=nodeById[id];while(n&&n.id!=='ceo'){out.unshift(n);n=nodeById[n.super]}return out;}
 function orgdetail(){
  const id=current.orgParent;
- if(!id)return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="orgsubtop"><b>Руководители прямого подчинения</b><span>ПРЯМОЕ ПОДЧИНЕНИЕ CEO</span></div><p class="org-empty">Для каждого руководителя показаны подчинённые подразделения, функции и зоны ответственности.</p></div>`;
+ if(!id)return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="orgsubtop"><b>Руководители прямого подчинения</b><span>ПРЯМОЕ ПОДЧИНЕНИЕ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</span></div><p class="org-empty">Для каждого руководителя показаны подчинённые подразделения, функции и зоны ответственности.</p></div>`;
  const n=nodeById[id];const child=n?.children||[];
  const chain=orgAncestors(id);
- return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="org-crumbs"><button data-org="ceo">CEO</button>${chain.map(c=>`<span>›</span><button data-org="${esc(c.id)}" class="${id===c.id?'current':''}">${esc(c.abbr)}</button>`).join('')}</div><div class="orgsubtop"><div><span class="org-focus-kicker">ФОКУС ПОДРАЗДЕЛЕНИЯ</span><b>${esc(n.name)}</b><span class="org-focus-sub">${esc(n.lead)}</span></div><button class="orgback" data-orgback="1">← Назад</button></div>${child.length?`<div class="orgchildren">${child.map((c,k)=>orgcard(nodeById[c],`orgstep-${k}`)).join('')}</div>`:`<div class="org-leaf-note"><span class="org-leaf-icon">✓</span><p>Направление не имеет нижестоящих подразделений в проектной структуре; ответственность ограничена заявленными функциями.</p></div>`}</div>`;
+ return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="org-crumbs"><button data-org="ceo">Генеральный директор</button>${chain.map(c=>`<span>›</span><button data-org="${esc(c.id)}" class="${id===c.id?'current':''}">${esc(c.abbr)}</button>`).join('')}</div><div class="orgsubtop"><div><span class="org-focus-kicker">ФОКУС ПОДРАЗДЕЛЕНИЯ</span><b>${esc(n.name)}</b><span class="org-focus-sub">${esc(n.lead)}</span></div><button class="orgback" data-orgback="1">← Назад</button></div>${child.length?`<div class="orgchildren">${child.map((c,k)=>orgcard(nodeById[c],`orgstep-${k}`)).join('')}</div>`:`<div class="org-leaf-note"><span class="org-leaf-icon">✓</span><p>Направление не имеет нижестоящих подразделений в проектной структуре; ответственность ограничена заявленными функциями.</p></div>`}</div>`;
 }
 function org(){
  let execs=nodeById.ceo.children.map(id=>nodeById[id]);
- let chart=`<div class="orgstage ${current.orgParent?'has-focus':''}" id="orgstage"><div class="orgintro"><span class="accent-label">ОРГАНИЗАЦИОННАЯ МОДЕЛЬ · TO-BE</span><span class="thin">Руководители и подчинённые подразделения</span></div><button class="org-ceo ${current.orgSelection==='ceo'?'active':''}" data-org="ceo"><span>CHIEF EXECUTIVE OFFICER</span><b>Генеральный директор</b></button><div class="orgbar"></div><div class="org-overview-label">НЕПОСРЕДСТВЕННО ПОДЧИНЯЮТСЯ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</div><div class="org-execs ${current.orgParent?'branch-selected':''}">${execs.map(e=>`<button class="orgexec ${current.orgParent===e.id?'active':''}" data-org="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(e.abbr)}</small></button>`).join('')}</div><div id="orgbranch">${orgdetail()}</div></div><div class="smallnote" style="margin-top:11px">Организационная модель является проектной; новые ставки и полномочия требуют утверждения.</div>`;
- return head(3,'Executive-структура <span style="color:#389f91">по уровням.</span>','Проектная модель подчинённости, функций и ответственности руководителей.')+shell(chart,'exec',current.orgSelection||'ceo');
+ let chart=`<div class="orgstage ${current.orgParent?'has-focus':''}" id="orgstage"><div class="orgintro"><span class="accent-label">ЦЕЛЕВАЯ ОРГАНИЗАЦИОННАЯ МОДЕЛЬ</span><span class="thin">Руководители и подчинённые подразделения</span></div><button class="org-ceo ${current.orgSelection==='ceo'?'active':''}" data-org="ceo"><span>ГЕНЕРАЛЬНЫЙ ДИРЕКТОР</span><b>Стратегия и общий результат</b></button><div class="orgbar"></div><div class="org-overview-label">НЕПОСРЕДСТВЕННО ПОДЧИНЯЮТСЯ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</div><div class="org-execs ${current.orgParent?'branch-selected':''}">${execs.map(e=>`<button class="orgexec ${current.orgParent===e.id?'active':''}" data-org="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(e.abbr)}</small></button>`).join('')}</div><div id="orgbranch">${orgdetail()}</div></div><div class="smallnote" style="margin-top:11px">Организационная модель является проектной; новые ставки и полномочия требуют утверждения.</div>`;
+ return head(3,'Структура руководства <span style="color:#389f91">по уровням.</span>','Проектная модель подчинённости, функций и ответственности руководителей.')+shell(chart,'exec',current.orgSelection||'ceo');
 }
 let branchSerial=0;
 async function orgClick(id){
@@ -313,8 +314,8 @@ async function orgClick(id){
 }
 
 function dealflow(){
- const cards=D.dealflows.map((f,j)=>`<button class="process-selector" data-explore-flow="${esc(f.id)}"><div class="process-cover-num">0${j+1}</div><div class="process-tag">${j===0?'КНР · ПОСТАВКИ · Ж/Д':'KAZAKHSTAN · ОПТОВАЯ ТОРГОВЛЯ'}</div><h2>${esc(f.name)}</h2><p>${esc(f.lead)}</p><div class="process-selector-foot"><span>${f.steps.length} этапов</span><strong>Карта процесса ↗</strong></div></button>`).join('');
- const hints=`<div class="process-feature-grid"><div><span>01 / ЛОГИКА</span><strong>Фактическая последовательность</strong><small>Без придуманной универсальной схемы</small></div><div><span>02 / СВЯЗИ</span><strong>Точки контакта с предприятиями</strong><small>JetWay, поставщики, базы и логистические операторы</small></div><div><span>03 / РИСКИ</span><strong>Простой · тарифы · FX · маржа</strong><small>Кейсы на соответствующих этапах</small></div></div>`;
+ const cards=D.dealflows.map((f,j)=>`<button class="process-selector" data-explore-flow="${esc(f.id)}"><div class="process-cover-num">0${j+1}</div><div class="process-tag">${j===0?'КНР · ПОСТАВКИ · ЖЕЛЕЗНАЯ ДОРОГА':'КАЗАХСТАН · ОПТОВАЯ ТОРГОВЛЯ'}</div><h2>${esc(f.name)}</h2><p>${esc(f.lead)}</p><div class="process-selector-foot"><span>${f.steps.length} этапов</span><strong>Карта процесса ↗</strong></div></button>`).join('');
+ const hints=`<div class="process-feature-grid"><div><span>01 / ЛОГИКА</span><strong>Фактическая последовательность</strong><small>Без придуманной универсальной схемы</small></div><div><span>02 / СВЯЗИ</span><strong>Точки контакта с предприятиями</strong><small>JetWay, поставщики, базы и логистические операторы</small></div><div><span>03 / РИСКИ</span><strong>Простой · тарифы · валютный курс · маржа</strong><small>Кейсы на соответствующих этапах</small></div></div>`;
  return head(4,'Бизнес-процессы <span style="color:#389f91">как они есть.</span>','Фактические маршруты исполнения: этапы, участники, документы, риски и связанные кейсы.')+
  `<div class="process-selector-grid">${cards}</div>${hints}<div class="business-note">Три рабочих маршрута: этапы, участники, документы, риски и предлагаемые цифровые решения.</div>`;
 }
@@ -324,8 +325,8 @@ function partners(){let cards=`<div class="partner-grid">${D.companies.map(c=>`<
  return head(7,'Одна группа. <span style="color:#389f91">Пять точек контакта.</span>','Входящие и исходящие данные, договорные связи и зоны ответственности предприятий.')+shell(cards,'company',current.selected.company||'dostyq');}
 function changes(){let cards=`<div class="changes-grid">${D.improvements.map(c=>`<button class="clickcard ${current.selected.change===c.id?'active':''}" data-item="change:${c.id}"><div class="meta">${esc(c.label)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.why)}</small></button>`).join('')}</div>`;
  return head(7,'От замечания <span style="color:#389f91">к управленческому действию.</span>','Восемь инициатив для обсуждения: проблема, предложение, владелец и необходимое решение.')+shell(cards,'change',current.selected.change||'clm');}
-function growth(){let cards=`<div class="growth-grid">${D.growth.map(c=>`<button class="clickcard growth ${current.selected.growth===c.id?'active':''}" data-item="growth:${c.id}"><div class="meta">${esc(c.tag)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.goal)}</small><div class="smallnote" style="margin-top:13px">${esc(c.state)}</div></button>`).join('')}</div><div class="business-note">Инициативы из презентационных материалов Navarro, не утверждённые бизнес-планы. CAPEX, разрешения, спрос и финансирование требуют проверки.</div>`;
- return head(7,'Новые рынки. <span style="color:#389f91">Новая инфраструктура.</span>','Инициативы развития авиационного топливообеспечения и международной торговой модели.')+shell(cards,'growth',current.selected.growth||'almaty');}
+function growth(){let cards=`<div class="growth-grid">${D.growth.map(c=>`<button class="clickcard growth ${current.selected.growth===c.id?'active':''}" data-item="growth:${c.id}"><div class="meta">${esc(c.tag)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.goal)}</small><div class="smallnote" style="margin-top:13px">${esc(c.state)}</div></button>`).join('')}</div><div class="business-note">Инициативы из презентационных материалов Navarro, не утверждённые бизнес-планы. Капитальные затраты, разрешения, спрос и финансирование требуют проверки.</div>`;
+ return head(7,'Новые рынки. <span style="color:#389f91">Новая инфраструктура.</span>','Инициативы развития авиационного топливообеспечения и международной торговой модели.')+shell(cards,'growth',current.selected.growth||D.growth[0]?.id);}
 function decision(){let approved=D.decisions.filter(d=>current.decisions[d.id]==='agreed').length;let items=`<div class="exportbar"><span class="status-chip">${approved} из ${D.decisions.length} отмечено как согласованные</span><button class="primary" id="export-decisions">Экспортировать рабочий протокол ↓</button></div><div class="decisions-grid">${D.decisions.map(d=>`<div class="clickcard ${current.selected.decision===d.id?'active':''}" data-item="decision:${d.id}"><div class="meta">РЕШЕНИЕ / ${esc(d.id.toUpperCase())}</div><div class="decision-row"><strong>${esc(d.title)}</strong><span class="corner">↗</span></div><small>${esc(d.owner)}</small><div class="decision-controls">${[['pending','К обсуждению'],['agreed','Согласовано'],['review','Доработать'],['hold','Отложить']].map(([v,l])=>`<button data-decision="${d.id}" data-status="${v}" class="${(current.decisions[d.id]||'pending')===v?'selected':''}">${l}</button>`).join('')}</div></div>`).join('')}</div><div class="nudge">Рабочие статусы не являются официальным протоколом и требуют утверждения руководства.</div>`;
  return head(9,'Решения, <span style="color:#389f91">которые останутся после сессии.</span>','Статусы вопросов, ответственные и рабочий реестр решений стратегической сессии.')+shell(items,'decision',current.selected.decision||'d1');}
 let slideSerial=0;
@@ -372,7 +373,7 @@ async function switchFlow(id){
 let processState={flow:null,index:0},processFocus=null;
 function ensureProcessExplorer(){
  let node=$('#process-explorer');if(node)return node;
- document.body.insertAdjacentHTML('beforeend',`<div id="process-explorer" class="process-explorer" role="dialog" aria-modal="true" aria-label="Карта бизнес-процесса" hidden><div class="process-backdrop" data-process-close></div><div class="process-window"><div class="process-modal-top"><div><span>НАПРАВЛЕНИЕ / БИЗНЕС-ПРОЦЕСС · NAVARRO TRADE</span><h2 id="process-modal-title"></h2></div><button type="button" class="process-close" data-process-close>✕ Закрыть</button></div><div class="process-modal-tabs" id="process-modal-tabs"></div><div class="process-modal-layout"><nav class="process-step-list" id="process-steps" aria-label="Этапы процесса"></nav><div class="process-stage-view" id="process-view" aria-live="polite"></div></div><div class="process-modal-footer"><span>AS-IS по материалам Navarro · риски и TO-BE обозначены отдельно</span><span>Последовательность · участники · документы · риски · решения</span></div></div></div>`);
+ document.body.insertAdjacentHTML('beforeend',`<div id="process-explorer" class="process-explorer" role="dialog" aria-modal="true" aria-label="Карта бизнес-процесса" hidden><div class="process-backdrop" data-process-close></div><div class="process-window"><div class="process-modal-top"><div><span>НАПРАВЛЕНИЕ / БИЗНЕС-ПРОЦЕСС · NAVARRO TRADE</span><h2 id="process-modal-title"></h2></div><button type="button" class="process-close" data-process-close>✕ Закрыть</button></div><div class="process-modal-tabs" id="process-modal-tabs"></div><div class="process-modal-layout"><nav class="process-step-list" id="process-steps" aria-label="Этапы процесса"></nav><div class="process-stage-view" id="process-view" aria-live="polite"></div></div><div class="process-modal-footer"><span>Текущее состояние по материалам Navarro · целевые решения обозначены отдельно</span><span>Последовательность · участники · документы · риски · решения</span></div></div></div>`);
  return $('#process-explorer');
 }
 function openProcessExplorer(flow,index=0){
