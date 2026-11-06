@@ -709,3 +709,10 @@ body.process-open{overflow:hidden}
  word-break:normal;
  hyphens:none;
 }
+
+/* Restored operating directorate and finance block reporting to the CEO. */
+@media(min-width:821px){
+ .orgmap-main{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+ .orgmap-main:before{left:16.6667%;right:16.6667%}
+ .orgmap-lowers{grid-template-columns:1fr}
+}

@@ -46,7 +46,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     (i.children.length?block('Подразделения',bullet(i.children.map(cid=>nodeById[cid].name))):'')+
     ((id==='commercial'||id==='pcqa')?caseReferences(['measurement','ops']):'')+
     ((id==='legal')?caseReferences(['legal']):'')+
-    ((id==='cfo'||id==='fpa')?caseReferences(['receivable']):'');
+    ((id==='finance'||id==='fpa')?caseReferences(['receivable']):'');
  }else if(type==='case'){
   e=extra.cases?.[id];tag=i.group;title=i.title;sub=i.subtitle;
   inner=block('Описание процесса',plain(e?.process||i.subtitle))+
@@ -261,7 +261,7 @@ function orgmap(){
  const box=id=>`<div class="map-leaf">${esc(N(id).name)}</div>`;
  const pillar=(label,manager,sections)=>`<div class="orgmap-pillar"><div class="orgmap-exec"><small>${esc(label)}</small><b>${esc(N(manager).name)}</b></div><div class="orgmap-stem"></div><div class="orgmap-sections">${sections.map(s=>{let n=N(s);return `<div class="orgmap-section"><strong>${esc(n.name)}</strong>${n.children.length?`<div class="orgmap-lowers">${n.children.map(cid=>box(cid)).join('')}</div>`:''}</div>`}).join('')}</div></div>`;
  return head(2,'Структура <span style="color:#389f91">одним взглядом.</span>','Целевая проектная модель · схема подчинённости без функциональных описаний')+
- `<div class="orgmap"><div class="orgmap-root">NAVARRO TRADE <strong>Генеральный директор</strong></div><div class="orgmap-main">${pillar('Заместитель генерального директора','deputy',['commercial','international'])}${pillar('Финансовый директор','cfo',['accounting','fpa'])}</div><div class="orgmap-support">${['legal','advisor','digital'].map(id=>`<div class="orgmap-direct">${esc(N(id).name)}<span>Прямое подчинение генеральному директору</span></div>`).join('')}</div></div>`;
+ `<div class="orgmap"><div class="orgmap-root">NAVARRO TRADE <strong>Генеральный директор</strong></div><div class="orgmap-main">${pillar('Заместитель генерального директора','deputy',['commercial','international'])}${pillar('Операционная дирекция','coo',['logistics','transitops','pcqa','afo'])}${pillar('Прямое подчинение генеральному директору','finance',['accounting','fpa'])}</div><div class="orgmap-support">${['legal','advisor','digital'].map(id=>`<div class="orgmap-direct">${esc(N(id).name)}<span>Прямое подчинение генеральному директору</span></div>`).join('')}</div></div>`;
 }
 
 function orgcard(n,cls=''){
@@ -270,14 +270,14 @@ function orgcard(n,cls=''){
 function orgAncestors(id){const out=[];let n=nodeById[id];while(n&&n.id!=='ceo'){out.unshift(n);n=nodeById[n.super]}return out;}
 function orgdetail(){
  const id=current.orgParent;
- if(!id)return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="orgsubtop"><b>Руководители прямого подчинения</b><span>ПРЯМОЕ ПОДЧИНЕНИЕ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</span></div><p class="org-empty">Для каждого руководителя показаны подчинённые подразделения, функции и зоны ответственности.</p></div>`;
+ if(!id)return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="orgsubtop"><b>Блоки и руководители прямого подчинения</b><span>ПРЯМОЕ ПОДЧИНЕНИЕ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</span></div><p class="org-empty">Для каждого блока и руководителя показаны подчинённые подразделения, функции и зоны ответственности.</p></div>`;
  const n=nodeById[id];const child=n?.children||[];
  const chain=orgAncestors(id);
  return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="org-crumbs"><button data-org="ceo">Генеральный директор</button>${chain.map(c=>`<span>›</span><button data-org="${esc(c.id)}" class="${id===c.id?'current':''}">${esc(c.abbr)}</button>`).join('')}</div><div class="orgsubtop"><div><span class="org-focus-kicker">ФОКУС ПОДРАЗДЕЛЕНИЯ</span><b>${esc(n.name)}</b><span class="org-focus-sub">${esc(n.lead)}</span></div><button class="orgback" data-orgback="1">← Назад</button></div>${child.length?`<div class="orgchildren">${child.map((c,k)=>orgcard(nodeById[c],`orgstep-${k}`)).join('')}</div>`:`<div class="org-leaf-note"><span class="org-leaf-icon">✓</span><p>Направление не имеет нижестоящих подразделений в проектной структуре; ответственность ограничена заявленными функциями.</p></div>`}</div>`;
 }
 function org(){
  let execs=nodeById.ceo.children.map(id=>nodeById[id]);
- let chart=`<div class="orgstage ${current.orgParent?'has-focus':''}" id="orgstage"><div class="orgintro"><span class="accent-label">ЦЕЛЕВАЯ ОРГАНИЗАЦИОННАЯ МОДЕЛЬ</span><span class="thin">Руководители и подчинённые подразделения</span></div><button class="org-ceo ${current.orgSelection==='ceo'?'active':''}" data-org="ceo"><span>ГЕНЕРАЛЬНЫЙ ДИРЕКТОР</span><b>Стратегия и общий результат</b></button><div class="orgbar"></div><div class="org-overview-label">НЕПОСРЕДСТВЕННО ПОДЧИНЯЮТСЯ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</div><div class="org-execs ${current.orgParent?'branch-selected':''}">${execs.map(e=>`<button class="orgexec ${current.orgParent===e.id?'active':''}" data-org="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(e.abbr)}</small></button>`).join('')}</div><div id="orgbranch">${orgdetail()}</div></div>`;
+ let chart=`<div class="orgstage ${current.orgParent?'has-focus':''}" id="orgstage"><div class="orgintro"><span class="accent-label">ЦЕЛЕВАЯ ОРГАНИЗАЦИОННАЯ МОДЕЛЬ</span><span class="thin">Блоки, руководители и подчинённые подразделения</span></div><button class="org-ceo ${current.orgSelection==='ceo'?'active':''}" data-org="ceo"><span>ГЕНЕРАЛЬНЫЙ ДИРЕКТОР</span><b>Стратегия и общий результат</b></button><div class="orgbar"></div><div class="org-overview-label">НЕПОСРЕДСТВЕННО ПОДЧИНЯЮТСЯ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</div><div class="org-execs ${current.orgParent?'branch-selected':''}">${execs.map(e=>`<button class="orgexec ${current.orgParent===e.id?'active':''}" data-org="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(e.abbr)}</small></button>`).join('')}</div><div id="orgbranch">${orgdetail()}</div></div>`;
  return head(3,'Структура руководства <span style="color:#389f91">по уровням.</span>','Проектная модель подчинённости, функций и ответственности руководителей.')+shell(chart,'exec',current.orgSelection||'ceo');
 }
 let branchSerial=0;
