@@ -13,7 +13,7 @@ const pill=s=>`<span class="pill">${esc(s)}</span>`;
 const extra=D.details||{};
 const plain=(s)=>`<p>${esc(s)}</p>`;
 function caseReferences(ids){if(!ids||!ids.length)return '';
- let cases=ids.map(id=>D.cases.find(c=>c.id===id)).filter(Boolean);
+ let cases=ids.map(id=>D.cases.find(c=>c.id===id)).filter(c=>c&&c.expandable!==false);
  return cases.length?block('Связанные кейсы и проблемы',`<div class="case-references">${cases.map(c=>`<button class="case-reference" data-open-case="${esc(c.id)}"><span class="ref-number">${esc(c.metric)}</span><span><b>${esc(c.title)}</b><small>${esc(c.issue)}</small></span><span aria-hidden="true">↗</span></button>`).join('')}</div>`):'';
 }
 const rich=D.briefings||{};
@@ -40,23 +40,18 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     block('Предлагаемые решения',plain(e?.solution||i.actions.join('; ')))+
     (id==='transit'?block('Критичные точки',bullet(['Пересогласование тарифов КТЖ и ставок оперирования вагонами.','Валютная разница при изменении курса между расчётом и оплатой.','Согласование графиков и риск простоя, влияющий на маржу.'])):'');
  }else if(type==='exec'){
-  tag=i.en;title=i.name;sub=i.lead;inner=pill(i.abbr)+
-    (i.super?block('Административное подчинение',plain(nodeById[i.super].name)):'')+
-    block('Функции и зона ответственности',bullet(i.duties))+
-    (i.children.length?block('Подразделения',bullet(i.children.map(cid=>nodeById[cid].name))):'')+
-    ((id==='commercial'||id==='pcqa')?caseReferences(['measurement','ops']):'')+
-    ((id==='legal')?caseReferences(['legal']):'')+
-    ((id==='finance'||id==='fpa')?caseReferences(['receivable']):'');
+  tag=i.super ? `Подчинение · ${nodeById[i.super].name}` : 'Руководство компании';
+  title=i.name;sub=i.lead;
+  inner=block('Функциональные обязанности',bullet(i.duties))+
+    block('Результат работы',bullet(i.outputs||[]))+
+    block('Рабочие взаимодействия',bullet(i.interfaces||[]));
  }else if(type==='case'){
   e=extra.cases?.[id];tag=i.group;title=i.title;sub=i.subtitle;
-  inner=block('Описание процесса',plain(e?.process||i.subtitle))+
-    block('Что произошло',plain(e?.facts||i.issue))+
-    block('Основная проблема',plain(e?.cause||i.issue))+
+  inner=block('Ситуация',plain(e?.facts||i.issue))+
     block('Последствия',plain(i.effect))+
+    block('Предлагаемое решение',plain(i.resolution))+
     (e?.lesson?block('Практический вывод',plain(e.lesson)):'')+
-    block('Предлагаемое решение',plain(i.resolution+(e?.next?` ${e.next}`:'')))+
-    block('Предлагаемый ответственный',plain(i.owner))+
-    block('Контрольная точка для руководства',plain('Согласовать критерий результата, назначить владельца и определить срок исполнения.'));
+    block('Ответственный',plain(i.owner));
  }else if(type==='company'){
   e=extra.partners?.[id];tag='STERLING GROUP / ВЗАИМОДЕЙСТВИЕ';title=i.title;sub=i.subtitle;
   inner=block('Описание процесса',plain(e?.process||i.focus))+
@@ -126,6 +121,14 @@ function adaptDetailColumns(){
  if(!win||!grid||layer.hidden)return;
  const source=layer.querySelector('.detail-source');
  const nodes=[...source.children].map(n=>n.cloneNode(true));
+ if(layer.dataset.focusType==='exec'){
+  const duties=document.createElement('div'),context=document.createElement('div');
+  duties.className='detail-lane exec-duties';context.className='detail-lane exec-context';
+  nodes.forEach((node,index)=>(index===0?duties:context).appendChild(node));
+  grid.replaceChildren(duties,context);
+  layer.dataset.density='0';layer.classList.remove('detail-unavoidable-scroll');
+  return;
+ }
  const width=win.clientWidth;
  const columns=width>=1060?3:width>=930&&layer.dataset.focusType!=='direction'?3:width>=720?2:1;
  // Preserve top-to-bottom reading order, balance content by approximate visual weight.
@@ -179,6 +182,7 @@ function zoomToDetail(type,id){
 }
 const inlineDetailTypes=new Set(['company','change','growth','decision']);
 function setDetail(type,id,{expand=true}={}){
+ if(type==='case'&&itemById(type,id)?.expandable===false)return;
  current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
  if(inlineDetailTypes.has(type)){setInlineDetail(type,id);return;}
@@ -257,11 +261,14 @@ function directions(){
 }
 
 function orgmap(){
- const N=id=>nodeById[id];
- const box=id=>`<div class="map-leaf">${esc(N(id).name)}</div>`;
- const pillar=(label,manager,sections)=>`<div class="orgmap-pillar"><div class="orgmap-exec"><small>${esc(label)}</small><b>${esc(N(manager).name)}</b></div><div class="orgmap-stem"></div><div class="orgmap-sections">${sections.map(s=>{let n=N(s);return `<div class="orgmap-section"><strong>${esc(n.name)}</strong>${n.children.length?`<div class="orgmap-lowers">${n.children.map(cid=>box(cid)).join('')}</div>`:''}</div>`}).join('')}</div></div>`;
- return head(2,'Структура <span style="color:#389f91">одним взглядом.</span>','Целевая проектная модель · схема подчинённости без функциональных описаний')+
- `<div class="orgmap"><div class="orgmap-root">NAVARRO TRADE <strong>Генеральный директор</strong></div><div class="orgmap-main">${pillar('Заместитель генерального директора','deputy',['commercial','international'])}${pillar('Операционная дирекция','coo',['logistics','transitops','pcqa','afo'])}${pillar('Прямое подчинение генеральному директору','finance',['accounting','fpa'])}</div><div class="orgmap-support">${['legal','advisor','digital'].map(id=>`<div class="orgmap-direct">${esc(N(id).name)}<span>Прямое подчинение генеральному директору</span></div>`).join('')}</div></div>`;
+ const name = id => esc(nodeById[id].name);
+ const branch = directorId => {
+  const director = nodeById[directorId];
+  const department = nodeById[director.children[0]];
+  return `<div class="structure-branch"><div class="structure-director">${esc(director.name)}</div><div class="structure-link"></div><div class="structure-department"><strong>${esc(department.name)}</strong><div class="structure-units">${department.children.map(id=>`<div class="structure-unit">${name(id)}</div>`).join('')}</div></div></div>`;
+ };
+ return head(2,'Структура <span style="color:#389f91">одним взглядом.</span>','Руководители, департаменты и подразделения · целевая модель подчинённости')+
+ `<div class="structure-map"><div class="structure-ceo"><small>NAVARRO TRADE</small><strong>${name('ceo')}</strong></div><div class="structure-trunk"></div><div class="structure-grid"><div class="structure-executive"><div class="structure-deputy">${name('deputy')}</div><div class="structure-branches">${branch('commercial-director')}${branch('operations-director')}</div><div class="structure-shared"><div><small>Первому заместителю</small>${name('international')}</div><div><small>Первому заместителю</small>${name('digital')}</div><div><small>Первому заместителю</small>${name('legal')}</div></div></div><aside class="structure-support"><div class="structure-finance"><strong>${name('finance')}</strong><div class="structure-units">${nodeById.finance.children.map(id=>`<div class="structure-unit">${name(id)}</div>`).join('')}</div></div><div class="structure-advisory">${name('advisor')}</div></aside></div></div>`;
 }
 
 function orgcard(n,cls=''){
@@ -309,7 +316,7 @@ async function orgClick(id){
   branch.animate([{height:`${oldHeight}px`},{height:`${newHeight}px`}],{duration:475,easing:'cubic-bezier(.2,.8,.18,1)'});
   branch.animate([{opacity:.18,transform:'translateY(17px) scale(.94)',filter:'blur(3px)'},{opacity:1,transform:'translateY(0) scale(1)',filter:'blur(0)'}],{duration:620,easing:'cubic-bezier(.16,1,.3,1)'});
  }
- await setDetail('exec',id,{expand:false});
+ await setDetail('exec',id,{expand:!n.children.length});
 }
 
 function dealflow(){
@@ -318,12 +325,18 @@ function dealflow(){
  return head(4,'Бизнес-процессы <span style="color:#389f91">как они есть.</span>','Фактические маршруты исполнения: этапы, участники, документы, риски и связанные кейсы.')+
  `<div class="process-selector-grid">${cards}</div>${hints}`;
 }
-function cases(){let sorted=D.cases;let cards=`<div class="case-grid cases-full-grid">${sorted.map(c=>`<button class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${c.id}"><div class="meta">${esc(c.group)} <span class="corner">↗</span></div><span class="case-metric">${esc(c.metric)}</span><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></button>`).join('')}</div>`;
- return `<div class="cases-slide">${head(5,'Проблемы становятся <span style="color:#389f91">решениями.</span>','Операционные, коммерческие и правовые кейсы: последствия, решения и ответственные.')}${cards}</div>`;}
+function cases(){
+ const cards=D.cases.map(c=>{
+  const content=`<div class="meta">${esc(c.group)}${c.expandable===false?'':'<span class="corner">↗</span>'}</div><span class="case-metric">${esc(c.metric)}</span><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small>`;
+  return c.expandable===false ? `<article class="clickcard casecard casecard-static">${content}</article>` : `<button class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${c.id}">${content}</button>`;
+ });
+ return `<div class="cases-slide">${head(5,'Проблемы становятся <span style="color:#389f91">решениями.</span>','Ситуация, последствия и понятные действия для каждого кейса.')}<div class="case-grid cases-full-grid">${cards.join('')}</div></div>`;
+}
+
 function partners(){let cards=`<div class="partner-grid">${D.companies.map(c=>`<button class="clickcard partner ${current.selected.company===c.id?'active':''}" data-item="company:${c.id}"><span class="badge">${esc(c.short)}</span><span><div class="meta">STERLING GROUP ↗</div><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></span></button>`).join('')}</div>`;
  return head(7,'Одна группа. <span style="color:#389f91">Пять точек контакта.</span>','Входящие и исходящие данные, договорные связи и зоны ответственности предприятий.')+shell(cards,'company',current.selected.company||'dostyq');}
 function changes(){let cards=`<div class="changes-grid">${D.improvements.map(c=>`<button class="clickcard ${current.selected.change===c.id?'active':''}" data-item="change:${c.id}"><div class="meta">${esc(c.label)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.why)}</small></button>`).join('')}</div>`;
- return head(7,'От замечания <span style="color:#389f91">к управленческому действию.</span>','Восемь инициатив для обсуждения: проблема, предложение, владелец и необходимое решение.')+shell(cards,'change',current.selected.change||'clm');}
+ return head(7,'Предложения <span style="color:#389f91">для развития группы.</span>','Десять инициатив: процессы, учёт, команда и цифровые сервисы группы.')+shell(cards,'change',current.selected.change||'clm');}
 function growth(){let cards=`<div class="growth-grid">${D.growth.map(c=>`<button class="clickcard growth ${current.selected.growth===c.id?'active':''}" data-item="growth:${c.id}"><div class="meta">${esc(c.tag)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.goal)}</small><div class="smallnote" style="margin-top:13px">${esc(c.state)}</div></button>`).join('')}</div>`;
  return head(7,'Новые рынки. <span style="color:#389f91">Новая инфраструктура.</span>','Инициативы развития авиационного топливообеспечения и международной торговой модели.')+shell(cards,'growth',current.selected.growth||D.growth[0]?.id);}
 function decision(){let items=`<div class="exportbar"><button class="primary" id="export-decisions">Экспортировать протокол ↓</button></div><div class="decisions-grid">${D.decisions.map(d=>`<div class="clickcard ${current.selected.decision===d.id?'active':''}" data-item="decision:${d.id}"><div class="meta">РЕШЕНИЕ / ${esc(d.id.toUpperCase())}</div><div class="decision-row"><strong>${esc(d.title)}</strong><span class="corner">↗</span></div><small>${esc(d.owner)}</small></div>`).join('')}</div>`;
@@ -392,7 +405,7 @@ function processSelectStage(index,instant=false){
  let s=steps[index],prev=steps[index-1],next=steps[index+1],view=$('#process-view');if(!view)return;
  document.querySelectorAll('.process-step').forEach((el,i)=>el.classList.toggle('active',i===index));
  const active=$(`.process-step[data-process-step="${index}"]`);active?.scrollIntoView({block:'nearest',behavior:'smooth'});
- const toc=(s.partners||[]).slice(0,4).map((name,k)=>`<div class="process-partner" style="--n:${k}"><span>↔</span><b>${esc(name)}</b></div>`).join('')||'<div class="process-partner"><span>↔</span><b>Внутри Navarro Trade</b></div>';
+ const toc=(s.partners||[]).map((name,k)=>`<div class="process-partner" style="--n:${k}"><span>↔</span><b>${esc(name)}</b></div>`).join('')||'<div class="process-partner"><span>↔</span><b>Внутри Navarro Trade</b></div>';
  const rec=(s.cases||[]).map(id=>D.cases.find(c=>c.id===id)).filter(Boolean).map(c=>`<div class="process-related-case"><span>${esc(c.group)}</span><strong>${esc(c.title)}</strong><p>${esc(c.issue)}</p><div><b>Предложение:</b> ${esc(c.resolution)}</div></div>`).join('');
  view.innerHTML=`<div class="process-view-kicker">ЭТАП ${String(index+1).padStart(2,'0')} / ${String(steps.length).padStart(2,'0')} ${s.mark?`<span>${esc(s.mark)}</span>`:''}</div><h2>${esc(s.title)}</h2>
  <div class="process-scheme"><div class="process-neighbor ${prev?'':'muted'}"><small>ПРЕДЫДУЩИЙ</small><b>${esc(prev?.title||'Начало процесса')}</b></div><div class="process-arrow">→</div><div class="process-core"><small>ТЕКУЩАЯ ОПЕРАЦИЯ</small><strong>${esc(s.title)}</strong><p>${esc(s.owner)}</p></div><div class="process-arrow">→</div><div class="process-neighbor ${next?'':'muted'}"><small>СЛЕДУЮЩИЙ</small><b>${esc(next?.title||'Завершение процесса')}</b></div></div>
