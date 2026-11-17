@@ -140,13 +140,14 @@ for(const phrase of ['По материалам подразделений','Ф�
 assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
 assert(d.growth.find(x=>x.id==='tolling').goal.includes('РФ/РК'),'tolling card covers Russian and Kazakh oil');
 assert(JSON.stringify(d.briefings.growth.tolling).includes('РФ/РК')&&!JSON.stringify(d.briefings.growth.tolling).includes('нефть РК'),'tolling modal covers Russian and Kazakh oil throughout');
+assert(d.briefings.growth.tolling.mechanism.some(x=>x.includes('Smart-АЗС Ion Energy')&&x.includes('мобильного ТЗК')&&x.includes('Центральной Азии')),'tolling modal includes Smart stations and mobile airport fuel complex development');
 const presentationText=JSON.stringify(d);
 assert(!/дублирован/i.test(presentationText),'duplicate work/reporting case removed');
 assert(paymentCase.resolution.includes('ЭСФ не может отправляться до утверждения АВР'),'closing document sequence case');
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-digital57'),'v6.9 digital cache revision');
+assert(read('index.html').includes('style.css?v=6.9-growth58'),'v6.9 growth cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
