@@ -937,7 +937,7 @@ window.SESSION_DATA = {
   "growth": [
     {
       "id": "tolling",
-      "name": "Переработка / PetroChina",
+      "name": "Толлинг / PetroChina",
       "tag": "CRUDE · CHINA",
       "goal": "Нефть РФ/РК → переработка PetroChina → реализация нефтепродуктов в Центральной Азии.",
       "state": "Инициатива / проверка модели",

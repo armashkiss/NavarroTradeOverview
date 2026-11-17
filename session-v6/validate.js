@@ -42,7 +42,7 @@ assert.strictEqual(Array.from(finance.children).join(','),'accounting,fpa','two 
 for(const id of finance.children)assert.strictEqual(d.executives.find(x=>x.id===id).super,'finance');
 for(const n of d.executives)for(const id of n.children)assert.strictEqual(d.executives.find(x=>x.id===id).super,n.id,'consistent reporting hierarchy');
 assert(!/финансовый директор/i.test(JSON.stringify(d)),'no abolished finance director in presentation');
-assert(d.growth.find(x=>x.id==='tolling').name==='Переработка / PetroChina','processing / PetroChina');
+assert(d.growth.find(x=>x.id==='tolling').name==='Толлинг / PetroChina','tolling / PetroChina title');
 assert(!d.growth.find(x=>x.id==='ion-franchise'),'ION block removed from growth slide');
 assert(!d.growth.find(x=>x.id==='mobile-fuel'),'mobile fuel block removed from growth slide');
 assert(!d.briefings.growth['ion-franchise'],'ION franchise briefing removed');
@@ -137,7 +137,7 @@ assert(d.details.cases.tajik.lesson.includes('альтернативных по�
 assert(ui.includes("block('Практический вывод'")&&!ui.includes('Урок для группы'),'constructive case conclusion label');
 assert(ui.includes('class="cases-slide"'),'case overview presentation');
 for(const phrase of ['По материалам подразделений','Факты и выводы требуют проверки','Рабочие материалы','Не является протоколом решений','Инициатива — не утверждена'])assert(!ui.includes(phrase)&&!read('index.html').includes(phrase),`no presentation disclaimer: ${phrase}`);
-assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
+assert(d.growth.find(x=>x.id==='tolling').name.startsWith('Толлинг'),'tolling wording restored by user request');
 assert(d.growth.find(x=>x.id==='tolling').goal.includes('РФ/РК'),'tolling card covers Russian and Kazakh oil');
 assert(JSON.stringify(d.briefings.growth.tolling).includes('РФ/РК')&&!JSON.stringify(d.briefings.growth.tolling).includes('нефть РК'),'tolling modal covers Russian and Kazakh oil throughout');
 assert(d.briefings.growth.tolling.mechanism.some(x=>x.includes('Smart-АЗС Ion Energy')&&x.includes('мобильного ТЗК')&&x.includes('Центральной Азии')),'tolling modal includes Smart stations and mobile airport fuel complex development');
@@ -147,7 +147,7 @@ assert(paymentCase.resolution.includes('ЭСФ не может отправля�
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-growth58'),'v6.9 growth cache revision');
+assert(read('index.html').includes('style.css?v=6.9-growth59'),'v6.9 growth cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
