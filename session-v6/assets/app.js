@@ -401,44 +401,42 @@ async function switchFlow(id){
 }
 
 
-// Interactive process explorer: stage rail at left, true operational relationships at right.
-let processState={flow:null,index:0},processFocus=null;
+// Static transit overview: full stage rail at left, supplied relationship scheme at right.
 function ensureProcessExplorer(){
  let node=$('#process-explorer');if(node)return node;
- document.body.insertAdjacentHTML('beforeend',`<div id="process-explorer" class="process-explorer" role="dialog" aria-modal="true" aria-label="Карта бизнес-процесса" hidden><div class="process-backdrop" data-process-close></div><div class="process-window"><div class="process-modal-top"><div><span>НАПРАВЛЕНИЕ / БИЗНЕС-ПРОЦЕСС · NAVARRO TRADE</span><h2 id="process-modal-title"></h2></div><button type="button" class="process-close" data-process-close>✕ Закрыть</button></div><div class="process-modal-tabs" id="process-modal-tabs"></div><div class="process-modal-layout"><nav class="process-step-list" id="process-steps" aria-label="Этапы процесса"></nav><div class="process-stage-view" id="process-view" aria-live="polite"></div></div><div class="process-modal-footer"><span>NAVARRO TRADE</span><span>Последовательность · участники · документы · риски · решения</span></div></div></div>`);
+ document.body.insertAdjacentHTML('beforeend',`<div id="process-explorer" class="process-explorer process-static-explorer" role="dialog" aria-modal="true" aria-label="Международный транзит" hidden><div class="process-backdrop" data-process-close></div><div class="process-window"><div class="process-modal-top"><div><span>НАПРАВЛЕНИЕ / БИЗНЕС-ПРОЦЕСС · NAVARRO TRADE</span><h2 id="process-modal-title"></h2></div><button type="button" class="process-close" data-process-close>✕ Закрыть</button></div><div class="process-modal-layout"><aside class="process-step-list" id="process-steps" aria-label="Этапы процесса"></aside><div class="process-stage-view process-static-view" id="process-view"></div></div><div class="process-modal-footer"><span>NAVARRO TRADE</span><span>Этапы · схема взаимодействия</span></div></div></div>`);
  return $('#process-explorer');
 }
-function openProcessExplorer(flow,index=0){
+function openProcessExplorer(flow){
  const modal=ensureProcessExplorer();const f=D.dealflows.find(x=>x.id===flow);if(!f)return;
- processState={flow,index:Math.max(0,Math.min(index,f.steps.length-1))};
  modal.hidden=false;document.body.classList.add('process-open');
  modal.querySelector('#process-modal-title').textContent=f.name;
- modal.querySelector('#process-modal-tabs').innerHTML=D.dealflows.filter(x=>x.id!=='aviation').map(x=>`<button data-process-flow="${esc(x.id)}" class="${x.id===flow?'active':''}">${esc(x.name)}</button>`).join('');
  const list=modal.querySelector('#process-steps');
- list.innerHTML=f.steps.map((st,i)=>`<button type="button" class="process-step ${i===processState.index?'active':''}" data-process-step="${i}"><span>${String(i+1).padStart(2,'0')}</span><b>${esc(st[0])}</b><small>${esc(st[2])}</small></button>`).join('');
- processSelectStage(processState.index,true);
+ list.innerHTML=f.steps.map((st,i)=>`<div class="process-step process-step-static"><span>${String(i+1).padStart(2,'0')}</span><b>${esc(st[0])}</b><small>${esc(st[2])}</small></div>`).join('');
+ modal.querySelector('#process-view').innerHTML=`<figure class="process-static-scheme"><img src="assets/transit-process-scheme.png" alt="Схема взаимодействия PetroChina, Navarro Trade, Dostyk Refinery, JetWay Logistics и станции Достык"></figure>`;
 }
 function closeProcessExplorer(){const modal=$('#process-explorer');if(modal&&!modal.hidden){modal.classList.add('closing');setTimeout(()=>{modal.hidden=true;modal.classList.remove('closing')},260)}document.body.classList.remove('process-open')}
-function processSelectStage(index,instant=false){
- const f=D.dealflows.find(x=>x.id===processState.flow),steps=D.processScenes[processState.flow];if(!f||!steps[index])return;
- processState.index=index;
- let s=steps[index],prev=steps[index-1],next=steps[index+1],view=$('#process-view');if(!view)return;
- document.querySelectorAll('.process-step').forEach((el,i)=>el.classList.toggle('active',i===index));
- const active=$(`.process-step[data-process-step="${index}"]`);active?.scrollIntoView({block:'nearest',behavior:'smooth'});
- const toc=(s.partners||[]).map((name,k)=>`<div class="process-partner" style="--n:${k}"><span>↔</span><b>${esc(name)}</b></div>`).join('')||'<div class="process-partner"><span>↔</span><b>Внутри Navarro Trade</b></div>';
- const rec=(s.cases||[]).map(id=>D.cases.find(c=>c.id===id)).filter(Boolean).map(c=>`<div class="process-related-case"><span>${esc(c.group)}</span><strong>${esc(c.title)}</strong><p>${esc(c.issue)}</p><div><b>Предложение:</b> ${esc(c.resolution)}</div></div>`).join('');
- view.innerHTML=`<div class="process-view-kicker">ЭТАП ${String(index+1).padStart(2,'0')} / ${String(steps.length).padStart(2,'0')} ${s.mark?`<span>${esc(s.mark)}</span>`:''}</div><h2>${esc(s.title)}</h2>
- <div class="process-scheme"><div class="process-neighbor ${prev?'':'muted'}"><small>ПРЕДЫДУЩИЙ</small><b>${esc(prev?.title||'Начало процесса')}</b></div><div class="process-arrow">→</div><div class="process-core"><small>ТЕКУЩАЯ ОПЕРАЦИЯ</small><strong>${esc(s.title)}</strong><p>${esc(s.owner)}</p></div><div class="process-arrow">→</div><div class="process-neighbor ${next?'':'muted'}"><small>СЛЕДУЮЩИЙ</small><b>${esc(next?.title||'Завершение процесса')}</b></div></div>
- <div class="process-touch-title">ТОЧКИ СОПРИКОСНОВЕНИЯ <span>ЛИНИИ ВЗАИМОДЕЙСТВИЯ · НЕ ПОДЧИНЕНИЕ</span></div><div class="process-touchpoints"><div class="process-source">NAVARRO<br>TRADE</div><div class="process-touch-line"></div><div class="process-partners">${toc}</div></div>
- <div class="process-explain"><div class="process-fact"><small>ЧТО ПРОИСХОДИТ</small><p>${esc(s.action)}</p>${s.doc?`<small>ДОКУМЕНТ / ПОДТВЕРЖДЕНИЕ</small><p>${esc(s.doc)}</p>`:''}</div><div class="process-risk"><small>РИСКИ И ВЛИЯНИЕ НА МАРЖУ</small>${s.risks.length?`<ul>${s.risks.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:'<p>Дополнительный специфический риск не обозначен.</p>'}${s.solution?`<small>ПРЕДЛАГАЕМОЕ РЕШЕНИЕ</small><p>${esc(s.solution)}</p>`:''}</div></div>
- ${rec?`<div class="process-related"><div class="process-related-heading">СВЯЗАННЫЕ ПРАКТИЧЕСКИЕ КЕЙСЫ</div>${rec}</div>`:''}
- <div class="process-view-controls"><button data-process-move="-1" ${index===0?'disabled':''}>← Предыдущий этап</button><span>${index+1} из ${steps.length}</span><button data-process-move="1" ${index===steps.length-1?'disabled':''}>Следующий этап →</button></div>`;
- view.classList.remove('process-animate');void view.offsetWidth;view.classList.add('process-animate');view.scrollTop=0;
-}
 
 function notify(message){let t=$('#toast');t.textContent=message;t.style.display='block';clearTimeout(notify.timer);notify.timer=setTimeout(()=>t.style.display='none',2300);}
 function exportDecisions(){let ts=new Date().toLocaleString('ru-RU');const st={pending:'К обсуждению',agreed:'Отмечено согласованным',review:'На доработку',hold:'Отложено'};let text=`# Sterling Group · Реестр решений\n\nДата экспорта: ${ts}\n\n`+D.decisions.map((d,i)=>`## ${i+1}. ${d.title}\n\n**Статус:** ${st[current.decisions[d.id]||'pending']}\n\n**Предлагаемый ответственный:** ${d.owner}\n\n**Вопрос:** ${d.prompt}\n\n**Срок / подтверждение:** __________\n`).join('\n');let blob=new Blob([text],{type:'text/markdown;charset=utf-8'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='Sterling_Decisions.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),2500);notify('Реестр решений скачан');}
-document.addEventListener('click',e=>{const projectImage=e.target.closest('[data-project-image]');if(projectImage){openProjectImage(+projectImage.dataset.projectImage);return;}if(e.target.closest('[data-project-image-close]')){$('#project-image-dialog')?.close();return;}const aviation=e.target.closest('[data-aviation-view]');if(aviation){if(!['clients','markets'].includes(aviation.dataset.aviationView))return;current.aviationView=aviation.dataset.aviationView;zoomToDetail('direction','aviation');document.querySelector(`.detail-columns [data-aviation-view="${current.aviationView}"]`)?.focus({preventScroll:true});return;}const category=e.target.closest('[data-case-category]');if(category){selectCaseCategory(category.dataset.caseCategory==='all'?null:category.dataset.caseCategory);return;}const direction=e.target.closest('[data-open-direction]');if(direction){const id=direction.dataset.openDirection;if(id==='aviation')current.aviationView='clients';if(D.processScenes[id]&&id!=='aviation')openProcessExplorer(id,0);else{current.selected.direction=id;detailState={type:'direction',id};zoomToDetail('direction',id)}return;}if(e.target.closest('[data-process-close]')){closeProcessExplorer();return;}let ex=e.target.closest('[data-explore-flow]');if(ex){openProcessExplorer(ex.dataset.exploreFlow,+ex.dataset.processIndex||0);return;}let ps=e.target.closest('[data-process-step]');if(ps){processSelectStage(+ps.dataset.processStep);return;}let pf=e.target.closest('[data-process-flow]');if(pf){openProcessExplorer(pf.dataset.processFlow);return;}let pm=e.target.closest('[data-process-move]');if(pm){processSelectStage(processState.index + +pm.dataset.processMove);return;}if(e.target.closest('[data-detail-close]')){hideZoom();return;}if(e.target.closest('[data-inline-close]')){if(detailState.type)current.selected[detailState.type]=null;render();return;}if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}let linked=e.target.closest('[data-open-case]');if(linked){const id=linked.dataset.openCase;if(!D.cases.some(c=>c.id===id&&c.expandable!==false))return;Promise.resolve(navigate('cases')).then(()=>setDetail('case',id));return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');return;}});
+document.addEventListener('click',e=>{
+ const projectImage=e.target.closest('[data-project-image]');if(projectImage){openProjectImage(+projectImage.dataset.projectImage);return;}
+ if(e.target.closest('[data-project-image-close]')){$('#project-image-dialog')?.close();return;}
+ const aviation=e.target.closest('[data-aviation-view]');if(aviation){if(!['clients','markets'].includes(aviation.dataset.aviationView))return;current.aviationView=aviation.dataset.aviationView;zoomToDetail('direction','aviation');document.querySelector(`.detail-columns [data-aviation-view="${current.aviationView}"]`)?.focus({preventScroll:true});return;}
+ const category=e.target.closest('[data-case-category]');if(category){selectCaseCategory(category.dataset.caseCategory==='all'?null:category.dataset.caseCategory);return;}
+ const direction=e.target.closest('[data-open-direction]');if(direction){const id=direction.dataset.openDirection;if(id==='aviation')current.aviationView='clients';if(D.processScenes[id]&&id!=='aviation')openProcessExplorer(id);else{current.selected.direction=id;detailState={type:'direction',id};zoomToDetail('direction',id)}return;}
+ if(e.target.closest('[data-process-close]')){closeProcessExplorer();return;}
+ const explorer=e.target.closest('[data-explore-flow]');if(explorer){openProcessExplorer(explorer.dataset.exploreFlow);return;}
+ if(e.target.closest('[data-detail-close]')){hideZoom();return;}
+ if(e.target.closest('[data-inline-close]')){if(detailState.type)current.selected[detailState.type]=null;render();return;}
+ if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}
+ const linked=e.target.closest('[data-open-case]');if(linked){const id=linked.dataset.openCase;if(!D.cases.some(c=>c.id===id&&c.expandable!==false))return;Promise.resolve(navigate('cases')).then(()=>setDetail('case',id));return;}
+ const go=e.target.closest('[data-goto]');if(go){navigate(go.dataset.goto);return;}
+ const flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}
+ const item=e.target.closest('[data-item]');if(item){const [type,id]=item.dataset.item.split(':');setDetail(type,id);return;}
+ if(e.target.closest('#export-decisions')){exportDecisions();return;}
+ if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');}
+});
 $('#prev').onclick=()=>navigate(slides[Math.max(0,current.slide-1)].id);$('#next').onclick=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const isEditable=(target)=>target?.closest?.('input,textarea,select,[contenteditable="true"]');
 const isInteractive=(target)=>target?.closest?.('button,a,[role="button"]');
@@ -463,7 +461,7 @@ document.addEventListener('keydown',e=>{
  const imageDialog=$('#project-image-dialog');if(imageDialog?.open){if(e.key==='Escape'){e.preventDefault();imageDialog.close();}return;}
  if(e.key==='f'||e.key==='F'||e.key==='F11'){if(e.key==='F11'&&!document.fullscreenEnabled)return;e.preventDefault();toggleFullscreen();return;}
  if(e.key==='Escape'){if($('#process-explorer')&&!$('#process-explorer').hidden){e.preventDefault();closeProcessExplorer();return;}if(!$('#detail-zoom').hidden){e.preventDefault();hideZoom();return;}if(slides[current.slide].id==='cases'&&current.caseCategory){e.preventDefault();selectCaseCategory(null);return;}if(!document.fullscreenElement)setPresentationMode(false);$('#side').classList.remove('open');return;}
- if($('#process-explorer')&&!$('#process-explorer').hidden){if(e.key==='ArrowDown'||e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.code==='Space'){e.preventDefault();processSelectStage(Math.min(processState.index+1,D.processScenes[processState.flow].length-1));return;}if(e.key==='ArrowUp'||e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();processSelectStage(Math.max(processState.index-1,0));return;}return;}
+ if($('#process-explorer')&&!$('#process-explorer').hidden)return;
  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.code==='Space'||e.key==='Enter'&&!isInteractive(e.target)){
    if((e.key===' '||e.key==='Enter')&&isInteractive(e.target))return;
    e.preventDefault();goNext();return;

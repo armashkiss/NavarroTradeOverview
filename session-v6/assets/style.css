@@ -992,6 +992,20 @@ body.process-open{overflow:hidden}
 @media(max-width:970px){.strategy-growth-grid{grid-template-columns:1fr;min-height:0}.strategy-growth-block{min-height:360px}}
 @media(max-width:580px){.strategy-growth-block{padding:22px 20px;min-height:0}.strategy-growth-block h2{font-size:27px}.strategy-growth-block section p{font-size:16px}.strategy-growth-result p{font-size:17px!important}.strategy-growth-top>span{font-size:40px}}
 
+/* Static international transit modal: stage rail and supplied relationship scheme. */
+.process-static-explorer .process-modal-layout{grid-template-columns:minmax(300px,360px) minmax(0,1fr)}
+.process-static-explorer .process-step-list{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:12px 10px;overflow-y:auto}
+.process-static-explorer .process-step-static{flex:0 0 auto;margin:0;padding:10px 11px;border:1px solid transparent;background:transparent;transition:none;cursor:default}
+.process-static-explorer .process-step-static:hover{background:transparent;border-color:transparent;transform:none;box-shadow:none}
+.process-static-explorer .process-step-static span{color:#2f9689}
+.process-static-explorer .process-step-static b{font-size:13.5px;line-height:1.28}
+.process-static-explorer .process-step-static small{font-size:10.5px;line-height:1.25}
+.process-static-explorer .process-static-view{display:flex;align-items:center;justify-content:center;min-height:0;padding:12px 18px;background:#fff;overflow:hidden}
+.process-static-scheme{display:flex;align-items:center;justify-content:center;width:100%;height:100%;margin:0;min-width:0;min-height:0}
+.process-static-scheme img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center}
+@media(max-width:1200px){.process-static-explorer .process-modal-layout{grid-template-columns:270px minmax(0,1fr)}.process-static-explorer .process-step-static{padding:8px 9px}.process-static-explorer .process-step-static b{font-size:12.5px}.process-static-explorer .process-step-static small{font-size:9.5px}}
+@media(max-width:580px){.process-static-explorer .process-step-list{display:flex;flex-direction:row;justify-content:flex-start;height:102px}.process-static-explorer .process-step-static{flex:0 0 190px}.process-static-explorer .process-static-view{flex:1;padding:8px}}
+
 /* Aviation market brief, summarized from the supplied slide. */
 .detail-zoom[data-focus-type="aviation-markets"] .detail-window{bottom:auto;height:auto;max-height:calc(100dvh - 16px)}
 .detail-zoom[data-focus-type="aviation-markets"] .detail-columns{display:block;height:auto}

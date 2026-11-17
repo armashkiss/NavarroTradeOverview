@@ -1,4 +1,4 @@
-const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path'),crypto=require('crypto');
 const read=p=>fs.readFileSync(path.join(__dirname,p),'utf8');
 for(const p of ['assets/data.js','assets/app.js'])new vm.Script(read(p),{filename:p});
 const context={window:{}};vm.createContext(context);vm.runInContext(read('assets/data.js'),context);
@@ -85,9 +85,14 @@ assert(!/МЕ|ДР|казначейство/.test(JSON.stringify({case:paymentCa
 assert(paymentCase.owner.includes('финансовый блок'),'financial block owns payment controls');
 assert(!d.cases.some(c=>c.id==='issue-escalation')&&!d.details.cases['issue-escalation'],'escalation case removed');
 const ui=read('assets/app.js');
-for(const marker of ['data-open-direction','richBrief','openProcessExplorer','processSelectStage','requestFullscreen','data-process-step','data-process-close','e.key===\'PageDown\''])assert(ui.includes(marker),`UI marker ${marker}`);
+for(const marker of ['data-open-direction','richBrief','openProcessExplorer','requestFullscreen','data-process-close','e.key===\'PageDown\''])assert(ui.includes(marker),`UI marker ${marker}`);
+for(const marker of ['function processSelectStage','data-process-step=','data-process-flow=','data-process-move=','processState','process-modal-tabs'])assert(!ui.includes(marker),`static transit UI excludes ${marker}`);
+for(const marker of ['process-static-explorer','process-step-static','class="process-static-scheme"','assets/transit-process-scheme.png'])assert(ui.includes(marker),`static transit marker ${marker}`);
+const transitScheme=fs.readFileSync(path.join(__dirname,'assets/transit-process-scheme.png'));
+assert.strictEqual(crypto.createHash('sha256').update(transitScheme).digest('hex'),'20b353e680f680278d38cf3765d091fdf7ae524c28af3c30bc637133173e2fdf','approved transit scheme asset');
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen control');
 assert(read('assets/style.css').includes('.process-modal-layout'),'process explorer layout');
+assert(read('assets/style.css').includes('.process-static-scheme img')&&read('assets/style.css').includes('object-fit:contain'),'static scheme fits modal canvas');
 assert(read('assets/style.css').includes('full-canvas modal composition'),'full-height modal sizing');
 assert(ui.includes("const inlineDetailTypes=new Set(['company','change','growth','decision'])"),'slides 05-08 use inline focus');
 assert(ui.includes('slide-grid overview-only'),'inline slides have no detail column before card selection');
@@ -148,7 +153,7 @@ assert(paymentCase.resolution.includes('ЭСФ не может отправля�
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-growth61'),'v6.9 growth cache revision');
+assert(read('index.html').includes('style.css?v=6.9-transit62'),'v6.9 transit cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
