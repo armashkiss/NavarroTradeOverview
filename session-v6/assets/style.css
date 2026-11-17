@@ -843,3 +843,12 @@ body.process-open{overflow:hidden}
  .process-step span{grid-row:auto}
  .process-step-list{padding:10px 8px}
 }
+
+@media(min-width:971px){
+ .cases-full-grid{grid-template-rows:repeat(var(--case-rows,3),minmax(0,1fr))}
+}
+@media(min-width:971px) and (max-height:780px){
+ .cases-full-grid .casecard{padding:8px 11px}
+ .cases-full-grid .casecard b{font-size:15px;line-height:1.25}
+ .cases-full-grid .casecard .meta{font-size:10.5px;line-height:1.25}
+}

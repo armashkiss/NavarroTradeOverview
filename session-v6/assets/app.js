@@ -51,7 +51,9 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     block('Последствия',plain(i.effect))+
     block('Предлагаемое решение',plain(i.resolution))+
     (e?.lesson?block('Практический вывод',plain(e.lesson)):'')+
-    block('Ответственный',plain(i.owner));
+    block('Ответственный',plain(i.owner))+
+    (e?.documents?.length?block('Подтверждающие документы',bullet(e.documents)):'')+
+    (e?.reference?`<p class="source-caption"><a href="${esc(e.reference.url)}" target="_blank" rel="noopener noreferrer">${esc(e.reference.label)}</a></p>`:'');
  }else if(type==='company'){
   e=extra.partners?.[id];tag='STERLING GROUP / ВЗАИМОДЕЙСТВИЕ';title=i.title;sub=i.subtitle;
   inner=block('Описание процесса',plain(e?.process||i.focus))+
@@ -253,7 +255,7 @@ function shell(content,type,id){
  const panel=inline&&focused?inspector(type,id):preview(type,id);
  return `<div class="slide-grid ${focused?'inline-focus':''}"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector" ${inline?`data-inline-type="${type}"`:''}>${panel}</aside></div>`;
 }
-function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Структура руководства →</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">СТРАТЕГИЧЕСКАЯ СЕССИЯ<br>30 ОКТЯБРЯ 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>12</strong><span>кейсов</span></div><div class="stat"><strong>05</strong><span>партнёрских контуров</span></div><div class="stat"><strong>08</strong><span>вопросов для решений</span></div></div>`;}
+function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Структура руководства →</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">СТРАТЕГИЧЕСКАЯ СЕССИЯ<br>30 ОКТЯБРЯ 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>${String(D.cases.length).padStart(2,'0')}</strong><span>кейсов</span></div><div class="stat"><strong>05</strong><span>партнёрских контуров</span></div><div class="stat"><strong>08</strong><span>вопросов для решений</span></div></div>`;}
 function directions(){
  const cards=`<div class="tile-grid direction-first">${D.directions.map(d=>`<button type="button" class="tile direction-launch" data-open-direction="${esc(d.id)}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="direction-foot">Этапы · предприятия · риски · кейсы <b>Открыть ↗</b></span></button>`).join('')}</div>
  <div class="direction-overview"><div><span class="direction-overview-kicker">РЕАЛЬНАЯ ЦЕПОЧКА</span><b>Покупатель → подтверждённый объём → исполнение → документы</b><p>Международный транзит и оптовка отражены по фактическому описанию Navarro. Коммерческие и операционные предложения показаны отдельно.</p></div><div><span class="direction-overview-kicker">ГЛАВНЫЕ РИСКИ</span><b>Тарифы · курс · простои · товарный учёт</b><p>Для каждого направления сопоставлены этапы, участники, риски и контрольные решения.</p></div></div>`;
@@ -330,7 +332,7 @@ function cases(){
   const content=`<div class="meta">${esc(c.group)}${c.expandable===false?'':'<span class="corner">↗</span>'}</div><span class="case-metric">${esc(c.metric)}</span><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small>`;
   return c.expandable===false ? `<article class="clickcard casecard casecard-static">${content}</article>` : `<button class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${c.id}">${content}</button>`;
  });
- return `<div class="cases-slide">${head(5,'Проблемы становятся <span style="color:#389f91">решениями.</span>','Ситуация, последствия и понятные действия для каждого кейса.')}<div class="case-grid cases-full-grid">${cards.join('')}</div></div>`;
+ return `<div class="cases-slide">${head(5,'Проблемы становятся <span style="color:#389f91">решениями.</span>','Ситуация, последствия и понятные действия для каждого кейса.')}<div class="case-grid cases-full-grid" style="--case-rows:${Math.ceil(D.cases.length/4)}">${cards.join('')}</div></div>`;
 }
 
 function partners(){let cards=`<div class="partner-grid">${D.companies.map(c=>`<button class="clickcard partner ${current.selected.company===c.id?'active':''}" data-item="company:${c.id}"><span class="badge">${esc(c.short)}</span><span><div class="meta">STERLING GROUP ↗</div><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></span></button>`).join('')}</div>`;
