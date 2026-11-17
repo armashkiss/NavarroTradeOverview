@@ -101,7 +101,10 @@ assert(d.processScenes.transit.find(x=>x.title==='Перелив и приёмк
 assert(!d.cases.some(x=>x.id==='receivable'),'debt case removed');
 assert(!d.details.cases.receivable,'debt detail removed');
 assert(d.cases.find(x=>x.id==='staff-competence').expandable===false,'staff case has no modal');
-assert.strictEqual(d.improvements.length,10,'ten initiatives');
+assert.strictEqual(d.improvements.length,6,'six initiatives');
+for(const id of ['deal','inventory-audit'])assert(!d.improvements.some(x=>x.id===id)&&!d.briefings.change[id],'removed procurement and measurement audit proposals');
+assert(!d.improvements.some(x=>x.id==='audit')&&!d.briefings.change.audit,'internal audit service proposal removed');
+assert(!d.improvements.some(x=>x.id==='raci')&&!d.briefings.change.raci,'RACI proposal removed');
 for(const id of ['accounting-policy','digital-ecosystem'])assert(d.briefings.change[id]&&d.improvements.some(x=>x.id===id),'new initiative has detailed content');
 for(const n of d.executives)assert(n.duties.length>=5&&n.outputs.length&&n.interfaces.length,'complete role profile');
 for(const f of d.dealflows){assert.strictEqual(f.steps.length,d.processScenes[f.id].length);f.steps.forEach((x,i)=>assert.strictEqual(x[0],d.processScenes[f.id][i].title,'stage names match'));}
@@ -121,7 +124,7 @@ assert(paymentCase.resolution.includes('ЭСФ не может отправля�
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-cases45'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-changes48'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
