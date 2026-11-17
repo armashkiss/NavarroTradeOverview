@@ -334,7 +334,7 @@ function cases(){
   }).join('');
   return `<div class="cases-slide" data-cases-view="overview">${head(3,'Кейсы <span style="color:#389f91">по направлениям</span>','Финансы, коммерция и менеджмент: ситуации, последствия и решения.')}<div class="tile-grid direction-first case-category-grid">${cards}</div></div>`;
  }
- const items=D.cases.filter(c=>c.category===category.id),columns=items.length===4?2:3;
+ const items=D.cases.filter(c=>c.category===category.id),columns=items.length<=2?Math.max(1,items.length):items.length===4?2:3;
  const cards=items.map(c=>{
   const content=`<div class="meta">${esc(c.group)}${c.expandable===false?'':'<span class="corner">↗</span>'}</div><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small>`;
   return c.expandable===false?`<article class="clickcard casecard casecard-static">${content}</article>`:`<button type="button" class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${esc(c.id)}">${content}</button>`;
