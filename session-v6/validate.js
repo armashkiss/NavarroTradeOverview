@@ -3,9 +3,11 @@ const read=p=>fs.readFileSync(path.join(__dirname,p),'utf8');
 for(const p of ['assets/data.js','assets/app.js'])new vm.Script(read(p),{filename:p});
 const context={window:{}};vm.createContext(context);vm.runInContext(read('assets/data.js'),context);
 const d=context.window.SESSION_DATA;
-assert.strictEqual(d.navigation.length,9,'9 navigation slides');
-assert.strictEqual(d.navigation[2].id,'orgmap','second content slide is full organizational map');
-assert.strictEqual(d.navigation[3].id,'organization','third content slide reveals hierarchy');
+assert.deepStrictEqual(Array.from(d.navigation,x=>x.id),['opening','directions','cases','changes','growth']);
+assert.deepStrictEqual(Array.from(d.navigation,x=>x.short),['00','01','02','03','04']);
+assert(!d.organizationOverview,'organization overview removed');
+assert(!d.cases.some(x=>x.id==='legal'),'contract approval case removed');
+for(const c of d.cases)assert(c.summary?.problem&&c.summary?.action,'inline case summary');
 assert(!d.navigation.some(x=>x.id==='dealflow'),'separate process slide removed');
 assert.strictEqual(d.dealflows.length,3,'three confirmed process maps');
 assert.strictEqual(d.processScenes.transit.length,8,'8 consolidated transit stages');
@@ -26,7 +28,7 @@ assert(d.executives.find(x=>x.id==='pcqa').duties.some(x=>/отбор проб/i
 assert(d.executives.find(x=>x.id==='afo').duties.some(x=>x.includes('ТЗК')),'fuel complex supervision included');
 assert(!d.executives.some(x=>x.id==='cfo'),'finance director removed');
 const finance=d.executives.find(x=>x.id==='finance');
-assert(finance.name==='Финансовый блок'&&finance.super==='ceo','finance block reports to CEO');
+assert(finance.name==='Финансовый департамент'&&finance.super==='ceo','finance block reports to CEO');
 assert.strictEqual(Array.from(finance.children).join(','),'accounting,fpa','two finance departments');
 for(const id of finance.children)assert.strictEqual(d.executives.find(x=>x.id===id).super,'finance');
 for(const n of d.executives)for(const id of n.children)assert.strictEqual(d.executives.find(x=>x.id===id).super,n.id,'consistent reporting hierarchy');
@@ -42,7 +44,7 @@ assert(d.growth.find(x=>x.id==='airports').goal.includes('ТЗК из Европ
 assert(d.briefings.growth.airports.why.includes('РГС'),'RGS included in aviation infrastructure briefing');
 assert(d.growth.find(x=>x.id==='foreign-airlines'),'foreign airlines');
 assert(d.cases.find(x=>x.id==='aviation-rfq'),'after-hours aviation request case');
-assert.strictEqual(d.cases.length,16,'16 working cases');
+assert.strictEqual(d.cases.length,15,'15 working cases');
 assert(d.cases.find(x=>x.id==='intercompany-edo'),'intercompany EDO case');
 assert(d.cases.find(x=>x.id==='intercompany-edo').resolution.includes('ЭДО'),'intercompany EDO solution');
 assert(!d.cases.find(x=>['base','jet-stock'].includes(x.id)),'excluded cases');
@@ -57,14 +59,14 @@ assert(paymentCase.resolution.includes('до перечисления денег
 assert(d.details.cases.duplicate.documents.some(x=>x.includes('МЕ (ДР)')),'recharged service evidence');
 for(const id of ['aviation-confirmation','team-coordination','transit-accounting','issue-escalation'])assert(d.cases.some(x=>x.id===id)&&d.details.cases[id]?.process,'new control case');
 const ui=read('assets/app.js');
-for(const marker of ['data-open-direction','richBrief','openProcessExplorer','processSelectStage','orgmap','requestFullscreen','data-process-step','data-process-close','e.key===\'PageDown\'','branchSerial'])assert(ui.includes(marker),`UI marker ${marker}`);
+for(const marker of ['data-open-direction','richBrief','openProcessExplorer','processSelectStage','requestFullscreen','data-process-step','data-process-close','e.key===\'PageDown\''])assert(ui.includes(marker),`UI marker ${marker}`);
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen control');
 assert(read('assets/style.css').includes('.process-modal-layout'),'process explorer layout');
 assert(read('assets/style.css').includes('full-canvas modal composition'),'full-height modal sizing');
 assert(ui.includes("const inlineDetailTypes=new Set(['company','change','growth','decision'])"),'slides 05-08 use inline focus');
 assert(ui.includes('slide-grid overview-only'),'inline slides have no detail column before card selection');
-assert(ui.includes("setDetail('exec',id,{expand:!n.children.length})"),'leaf profiles open directly');
-assert(ui.includes('case-grid cases-full-grid')&&!ui.includes("shell(cards,'case'"),'cases open directly without preview panel');
+
+assert(ui.includes('case-summary-grid')&&ui.includes("if(type==='case')return;"),'cases are inline summaries without modals');
 assert(ui.includes('function prepareInlineLayout'),'balanced inline text columns');
 assert(read('assets/style.css').includes('.inline-section-flow'),'inline column-flow styles');
 assert(read('index.html').includes('../session/assets/navarro-logo.png'),'official logo in persistent navigation');
@@ -98,11 +100,11 @@ for(const f of d.dealflows){assert.strictEqual(f.steps.length,d.processScenes[f.
 const caseIds=new Set(d.cases.map(x=>x.id));
 for(const x of d.improvements)if(x.caseId)assert(caseIds.has(x.caseId),'initiative case link resolves');
 for(const scenes of Object.values(d.processScenes))for(const stage of scenes)for(const id of stage.cases||[])assert(caseIds.has(id),'stage case link resolves');
-assert(d.cases.find(x=>x.id==='legal').title==='Долгое согласование договоров','contract approval wording');
+
 assert(d.cases.find(x=>x.id==='intercompany-edo').title==='Задержки документов внутри группы','intercompany document flow wording');
 assert(d.details.cases.tajik.lesson.includes('альтернативных покупателей'),'Tajikistan lesson expands client base');
 assert(ui.includes("block('Практический вывод'")&&!ui.includes('Урок для группы'),'constructive case conclusion label');
-assert(ui.includes('class="cases-slide"'),'uppercase cases presentation wrapper');
+assert(ui.includes('class="case-summary-slide"'),'inline summary presentation');
 for(const phrase of ['По материалам подразделений','Факты и выводы требуют проверки','Рабочие материалы','Не является протоколом решений','Инициатива — не утверждена'])assert(!ui.includes(phrase)&&!read('index.html').includes(phrase),`no presentation disclaimer: ${phrase}`);
 assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
 const presentationText=JSON.stringify(d);
@@ -111,7 +113,7 @@ assert(paymentCase.resolution.includes('АВР до ЭСФ'),'closing document s
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-controls33'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-summary36'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');

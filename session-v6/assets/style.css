@@ -852,3 +852,26 @@ body.process-open{overflow:hidden}
  .cases-full-grid .casecard b{font-size:15px;line-height:1.25}
  .cases-full-grid .casecard .meta{font-size:10.5px;line-height:1.25}
 }
+
+/* November reference: units and director positions, without staffing counts. */
+.structure-november .structure-shared{grid-template-columns:repeat(2,minmax(0,1fr))}
+.structure-november .structure-support p{font-size:13px;line-height:1.4;color:#6a8681;margin:9px 0 0}
+.structure-november .structure-support small{font-size:11px;line-height:1.4;color:#6a8681;display:block;margin-top:12px}
+.structure-november .structure-finance{padding:18px}
+.structure-november .structure-advisory{padding:18px}
+.structure-november .structure-department{min-height:175px}
+@media(max-width:580px){.structure-november .structure-shared{grid-template-columns:1fr}}
+
+/* Case summaries are readable directly on the slide. */
+.case-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding-bottom:12px}
+.case-summary-card{background:#fff;border:1px solid #dce8e3;border-radius:15px;padding:20px;min-width:0;display:flex;flex-direction:column;scroll-margin-top:18px;transition:border-color .2s,box-shadow .2s}
+.case-summary-topic{font-size:11px;line-height:1.4;font-weight:800;letter-spacing:.07em;color:#359487}
+.case-summary-card h2{font-size:19px;line-height:1.25;color:#193b4a;letter-spacing:-.02em;margin:10px 0}
+.case-summary-card p{font-size:15px;line-height:1.5;color:#536f78;margin:0}
+.case-summary-action{border-top:1px solid #dfebe5;margin-top:16px;padding-top:12px}
+.case-summary-action>span{display:block;color:#258776;font-size:11px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.case-summary-action p{color:#294f58}
+.case-summary-highlight{border-color:#2a9e86;box-shadow:0 0 0 3px #2a9e8625}
+@media(min-width:1600px){.case-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.case-summary-card p{font-size:16px}}
+@media(max-width:1050px){.case-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.case-summary-grid{grid-template-columns:1fr}.case-summary-card{padding:18px}}

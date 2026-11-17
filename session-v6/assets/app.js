@@ -6,6 +6,8 @@ const nodeById=Object.fromEntries(D.executives.map(e=>[e.id,e]));
 const itemById=(t,id)=>({direction:D.directions,exec:D.executives,case:D.cases,company:D.companies,change:D.improvements,growth:D.growth,decision:D.decisions})[t]?.find(x=>x.id===id);
 const current={slide:0,selected:{},orgParent:null,orgSelection:'ceo',flow:'transit',decisions:(()=>{try{return JSON.parse(localStorage.getItem('navarro-session-decisions')||'{}')}catch{return {}}})()};
 const slides=D.navigation;
+const slideAliases={orgmap:'directions',organization:'directions',partners:'cases',decisions:'changes'};
+const resolveSlide=id=>slideAliases[id]||id;
 const bullet=list=>`<ul>${list.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
 const block=(name,html)=>`<div class="section"><h4>${esc(name)}</h4>${html}</div>`;
 const p=s=>`<p>${esc(s)}</p>`;
@@ -159,6 +161,7 @@ function adaptDetailColumns(){
  }
 }
 function zoomToDetail(type,id){
+ if(type==='case')return;
  const layer=$('#detail-zoom'),win=layer.querySelector('.detail-window');
  const src=$('#inspector');
  const start=src?.getBoundingClientRect();
@@ -184,7 +187,7 @@ function zoomToDetail(type,id){
 }
 const inlineDetailTypes=new Set(['company','change','growth','decision']);
 function setDetail(type,id,{expand=true}={}){
- if(type==='case'&&itemById(type,id)?.expandable===false)return;
+ if(type==='case'){focusCase(id);return;}
  current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
  if(inlineDetailTypes.has(type)){setInlineDetail(type,id);return;}
@@ -255,70 +258,11 @@ function shell(content,type,id){
  const panel=inline&&focused?inspector(type,id):preview(type,id);
  return `<div class="slide-grid ${focused?'inline-focus':''}"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector" ${inline?`data-inline-type="${type}"`:''}>${panel}</aside></div>`;
 }
-function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button><button class="secondary" data-goto="organization">Структура руководства →</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">СТРАТЕГИЧЕСКАЯ СЕССИЯ<br>30 ОКТЯБРЯ 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>${String(D.cases.length).padStart(2,'0')}</strong><span>кейсов</span></div><div class="stat"><strong>05</strong><span>партнёрских контуров</span></div><div class="stat"><strong>08</strong><span>вопросов для решений</span></div></div>`;}
+function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">СТРАТЕГИЧЕСКАЯ СЕССИЯ<br>30 ОКТЯБРЯ 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>${String(D.cases.length).padStart(2,'0')}</strong><span>кейсов</span></div><div class="stat"><strong>${String(D.improvements.length).padStart(2,'0')}</strong><span>управленческих предложений</span></div><div class="stat"><strong>${String(slides.length).padStart(2,'0')}</strong><span>разделов презентации</span></div></div>`;}
 function directions(){
  const cards=`<div class="tile-grid direction-first">${D.directions.map(d=>`<button type="button" class="tile direction-launch" data-open-direction="${esc(d.id)}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="direction-foot">Этапы · предприятия · риски · кейсы <b>Открыть ↗</b></span></button>`).join('')}</div>
  <div class="direction-overview"><div><span class="direction-overview-kicker">РЕАЛЬНАЯ ЦЕПОЧКА</span><b>Покупатель → подтверждённый объём → исполнение → документы</b><p>Международный транзит и оптовка отражены по фактическому описанию Navarro. Коммерческие и операционные предложения показаны отдельно.</p></div><div><span class="direction-overview-kicker">ГЛАВНЫЕ РИСКИ</span><b>Тарифы · курс · простои · товарный учёт</b><p>Для каждого направления сопоставлены этапы, участники, риски и контрольные решения.</p></div></div>`;
  return head(1,'Три направления. <span style="color:#389f91">Одна группа.</span>','Международный транзит, оптовая торговля в РК и авиа-ГСМ: цепочки исполнения, участники и контрольные точки.')+cards;
-}
-
-function orgmap(){
- const name = id => esc(nodeById[id].name);
- const branch = directorId => {
-  const director = nodeById[directorId];
-  const department = nodeById[director.children[0]];
-  return `<div class="structure-branch"><div class="structure-director">${esc(director.name)}</div><div class="structure-link"></div><div class="structure-department"><strong>${esc(department.name)}</strong><div class="structure-units">${department.children.map(id=>`<div class="structure-unit">${name(id)}</div>`).join('')}</div></div></div>`;
- };
- return head(2,'Структура <span style="color:#389f91">одним взглядом.</span>','Руководители, департаменты и подразделения · целевая модель подчинённости')+
- `<div class="structure-map"><div class="structure-ceo"><small>NAVARRO TRADE</small><strong>${name('ceo')}</strong></div><div class="structure-trunk"></div><div class="structure-grid"><div class="structure-executive"><div class="structure-deputy">${name('deputy')}</div><div class="structure-branches">${branch('commercial-director')}${branch('operations-director')}</div><div class="structure-shared"><div><small>Первому заместителю</small>${name('international')}</div><div><small>Первому заместителю</small>${name('digital')}</div><div><small>Первому заместителю</small>${name('legal')}</div></div></div><aside class="structure-support"><div class="structure-finance"><strong>${name('finance')}</strong><div class="structure-units">${nodeById.finance.children.map(id=>`<div class="structure-unit">${name(id)}</div>`).join('')}</div></div><div class="structure-advisory">${name('advisor')}</div></aside></div></div>`;
-}
-
-function orgcard(n,cls=''){
- return `<button class="clickcard orgchild ${cls} ${current.orgSelection===n.id?'active':''}" data-org="${esc(n.id)}" aria-label="Открыть ${esc(n.name)}"><div class="meta">${esc(n.abbr)} · ${n.children.length?'ПОДРАЗДЕЛЕНИЕ':'ФУНКЦИЯ'}</div><b>${esc(n.name)}</b><small>${n.children.length?'Подчинённые подразделения и функции ↗':esc(n.lead||n.en)}</small><span class="org-card-chevron">↗</span></button>`;
-}
-function orgAncestors(id){const out=[];let n=nodeById[id];while(n&&n.id!=='ceo'){out.unshift(n);n=nodeById[n.super]}return out;}
-function orgdetail(){
- const id=current.orgParent;
- if(!id)return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="orgsubtop"><b>Блоки и руководители прямого подчинения</b><span>ПРЯМОЕ ПОДЧИНЕНИЕ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</span></div><p class="org-empty">Для каждого блока и руководителя показаны подчинённые подразделения, функции и зоны ответственности.</p></div>`;
- const n=nodeById[id];const child=n?.children||[];
- const chain=orgAncestors(id);
- return `<div class="org-detail org-focus-entry" aria-live="polite"><div class="org-crumbs"><button data-org="ceo">Генеральный директор</button>${chain.map(c=>`<span>›</span><button data-org="${esc(c.id)}" class="${id===c.id?'current':''}">${esc(c.abbr)}</button>`).join('')}</div><div class="orgsubtop"><div><span class="org-focus-kicker">ФОКУС ПОДРАЗДЕЛЕНИЯ</span><b>${esc(n.name)}</b><span class="org-focus-sub">${esc(n.lead)}</span></div><button class="orgback" data-orgback="1">← Назад</button></div>${child.length?`<div class="orgchildren">${child.map((c,k)=>orgcard(nodeById[c],`orgstep-${k}`)).join('')}</div>`:`<div class="org-leaf-note"><span class="org-leaf-icon">✓</span><p>Направление не имеет нижестоящих подразделений в проектной структуре; ответственность ограничена заявленными функциями.</p></div>`}</div>`;
-}
-function org(){
- let execs=nodeById.ceo.children.map(id=>nodeById[id]);
- let chart=`<div class="orgstage ${current.orgParent?'has-focus':''}" id="orgstage"><div class="orgintro"><span class="accent-label">ЦЕЛЕВАЯ ОРГАНИЗАЦИОННАЯ МОДЕЛЬ</span><span class="thin">Блоки, руководители и подчинённые подразделения</span></div><button class="org-ceo ${current.orgSelection==='ceo'?'active':''}" data-org="ceo"><span>ГЕНЕРАЛЬНЫЙ ДИРЕКТОР</span><b>Стратегия и общий результат</b></button><div class="orgbar"></div><div class="org-overview-label">НЕПОСРЕДСТВЕННО ПОДЧИНЯЮТСЯ ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</div><div class="org-execs ${current.orgParent?'branch-selected':''}">${execs.map(e=>`<button class="orgexec ${current.orgParent===e.id?'active':''}" data-org="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(e.abbr)}</small></button>`).join('')}</div><div id="orgbranch">${orgdetail()}</div></div>`;
- return head(3,'Структура руководства <span style="color:#389f91">по уровням.</span>','Проектная модель подчинённости, функций и ответственности руководителей.')+shell(chart,'exec',current.orgSelection||'ceo');
-}
-let branchSerial=0;
-async function orgClick(id){
- const n=nodeById[id];if(!n)return;
- current.orgSelection=id;
- const stage=$('#orgstage');const branch=$('#orgbranch');
- if(!stage||!branch){render();return;}
- let focus=id;
- if(id==='ceo')focus=null;
- else if(n.children.length)focus=id;
- else if(n.super==='ceo')focus=id;
- else focus=current.orgParent;
- current.orgParent=focus;
- document.querySelectorAll('.orgexec').forEach(el=>el.classList.toggle('active',el.dataset.org===focus||focus&&orgAncestors(focus).some(x=>x.id===el.dataset.org)));
- document.querySelectorAll('.org-ceo').forEach(el=>el.classList.toggle('active',id==='ceo'));
- document.querySelectorAll('.orgchild').forEach(el=>el.classList.toggle('active',el.dataset.org===id));
- stage.classList.toggle('has-focus',!!focus);
- const serial=++branchSerial;
- const oldHeight=branch.getBoundingClientRect().height;
- if(branch.animate&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-  try{await branch.animate([{opacity:1,transform:'translateY(0) scale(1)'},{opacity:.15,transform:'translateY(8px) scale(.965)'}],{duration:145,easing:'ease-in',fill:'forwards'}).finished}catch{}
- }
- if(serial!==branchSerial)return;
- branch.getAnimations().forEach(a=>a.cancel());
- branch.innerHTML=orgdetail();
- const newHeight=branch.scrollHeight;
- if(branch.animate&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-  branch.animate([{height:`${oldHeight}px`},{height:`${newHeight}px`}],{duration:475,easing:'cubic-bezier(.2,.8,.18,1)'});
-  branch.animate([{opacity:.18,transform:'translateY(17px) scale(.94)',filter:'blur(3px)'},{opacity:1,transform:'translateY(0) scale(1)',filter:'blur(0)'}],{duration:620,easing:'cubic-bezier(.16,1,.3,1)'});
- }
- await setDetail('exec',id,{expand:!n.children.length});
 }
 
 function dealflow(){
@@ -328,11 +272,15 @@ function dealflow(){
  `<div class="process-selector-grid">${cards}</div>${hints}`;
 }
 function cases(){
- const cards=D.cases.map(c=>{
-  const content=`<div class="meta">${esc(c.group)}${c.expandable===false?'':'<span class="corner">↗</span>'}</div><span class="case-metric">${esc(c.metric)}</span><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small>`;
-  return c.expandable===false ? `<article class="clickcard casecard casecard-static">${content}</article>` : `<button class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${c.id}">${content}</button>`;
- });
- return `<div class="cases-slide">${head(5,'Проблемы становятся <span style="color:#389f91">решениями.</span>','Ситуация, последствия и понятные действия для каждого кейса.')}<div class="case-grid cases-full-grid" style="--case-rows:${Math.ceil(D.cases.length/4)}">${cards.join('')}</div></div>`;
+ const cards=D.cases.map(c=>`<article id="case-${esc(c.id)}" class="case-summary-card"><div class="case-summary-topic">${esc(c.group)}</div><h2>${esc(c.title)}</h2><p>${esc(c.summary.problem)}</p><div class="case-summary-action"><span>Действие</span><p>${esc(c.summary.action)}</p></div></article>`).join('');
+ return `<div class="case-summary-slide">${head(2,'Кейсы <span style="color:#389f91">и выводы</span>','Ключевые проблемы и предлагаемые действия')}<div class="case-summary-grid">${cards}</div></div>`;
+}
+async function focusCase(id){
+ if(!D.cases.some(c=>c.id===id))return;
+ hideZoom({instant:true});
+ await navigate('cases');
+ const card=document.getElementById(`case-${id}`);
+ if(card){card.scrollIntoView({behavior:reduced()?'auto':'smooth',block:'center'});card.classList.add('case-summary-highlight');setTimeout(()=>card.classList.remove('case-summary-highlight'),2200);}
 }
 
 function partners(){let cards=`<div class="partner-grid">${D.companies.map(c=>`<button class="clickcard partner ${current.selected.company===c.id?'active':''}" data-item="company:${c.id}"><span class="badge">${esc(c.short)}</span><span><div class="meta">STERLING GROUP ↗</div><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></span></button>`).join('')}</div>`;
@@ -350,13 +298,15 @@ function render(){
  document.documentElement.style.setProperty('--slide-progress',current.slide+1);
  $('#count').textContent=`${String(current.slide+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
  $('#sidenav').innerHTML=slides.map((x,k)=>`<button class="navlink ${k===current.slide?'active':''}" data-goto="${x.id}" title="${esc(x.name)}"><span class="navno">${x.short}</span><span>${esc(x.name)}</span></button>`).join('');
- let body=({opening:cover,directions,orgmap,organization:org,cases,partners,changes,growth,decisions:decision})[s.id]();
+ let body=({opening:cover,directions,cases,changes,growth})[s.id]();
  $('#page').innerHTML=`<div class="page-inner slide-enter">${body}</div>`;
  requestAnimationFrame(()=>adaptInlineInspector());
  $('#page').scrollTop=0;$('#side').classList.remove('open');
 }
 async function navigate(id){
- let k=slides.findIndex(x=>x.id===id);if(k<0||k===current.slide)return;
+ id=resolveSlide(id);
+ let k=slides.findIndex(x=>x.id===id);if(k<0)return;
+ if(k===current.slide){if(location.hash!==`#/${id}`)history.replaceState(null,'',`#/${id}`);return;}
  hideZoom({instant:true});
  const serial=++slideSerial;
  const page=$('#page'),old=page.querySelector('.page-inner');
@@ -420,7 +370,7 @@ function processSelectStage(index,instant=false){
 
 function notify(message){let t=$('#toast');t.textContent=message;t.style.display='block';clearTimeout(notify.timer);notify.timer=setTimeout(()=>t.style.display='none',2300);}
 function exportDecisions(){let ts=new Date().toLocaleString('ru-RU');const st={pending:'К обсуждению',agreed:'Отмечено согласованным',review:'На доработку',hold:'Отложено'};let text=`# Sterling Group · Реестр решений\n\nДата экспорта: ${ts}\n\n`+D.decisions.map((d,i)=>`## ${i+1}. ${d.title}\n\n**Статус:** ${st[current.decisions[d.id]||'pending']}\n\n**Предлагаемый ответственный:** ${d.owner}\n\n**Вопрос:** ${d.prompt}\n\n**Срок / подтверждение:** __________\n`).join('\n');let blob=new Blob([text],{type:'text/markdown;charset=utf-8'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='Sterling_Decisions.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),2500);notify('Реестр решений скачан');}
-document.addEventListener('click',e=>{const direction=e.target.closest('[data-open-direction]');if(direction){const id=direction.dataset.openDirection;if(D.processScenes[id])openProcessExplorer(id,0);else{current.selected.direction=id;detailState={type:'direction',id};zoomToDetail('direction',id)}return;}if(e.target.closest('[data-process-close]')){closeProcessExplorer();return;}let ex=e.target.closest('[data-explore-flow]');if(ex){openProcessExplorer(ex.dataset.exploreFlow,+ex.dataset.processIndex||0);return;}let ps=e.target.closest('[data-process-step]');if(ps){processSelectStage(+ps.dataset.processStep);return;}let pf=e.target.closest('[data-process-flow]');if(pf){openProcessExplorer(pf.dataset.processFlow);return;}let pm=e.target.closest('[data-process-move]');if(pm){processSelectStage(processState.index + +pm.dataset.processMove);return;}if(e.target.closest('[data-detail-close]')){hideZoom();return;}if(e.target.closest('[data-inline-close]')){if(detailState.type)current.selected[detailState.type]=null;render();return;}if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}let linked=e.target.closest('[data-open-case]');if(linked){current.selected.case=linked.dataset.openCase;const dest=linked.dataset.openCase;Promise.resolve(navigate('cases')).then(()=>setDetail('case',dest));return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let org=e.target.closest('[data-org]');if(org){orgClick(org.dataset.org);return;}if(e.target.closest('[data-orgback]')){let n=nodeById[current.orgParent];let parent=n?.super||'ceo';orgClick(parent);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');return;}});
+document.addEventListener('click',e=>{const direction=e.target.closest('[data-open-direction]');if(direction){const id=direction.dataset.openDirection;if(D.processScenes[id])openProcessExplorer(id,0);else{current.selected.direction=id;detailState={type:'direction',id};zoomToDetail('direction',id)}return;}if(e.target.closest('[data-process-close]')){closeProcessExplorer();return;}let ex=e.target.closest('[data-explore-flow]');if(ex){openProcessExplorer(ex.dataset.exploreFlow,+ex.dataset.processIndex||0);return;}let ps=e.target.closest('[data-process-step]');if(ps){processSelectStage(+ps.dataset.processStep);return;}let pf=e.target.closest('[data-process-flow]');if(pf){openProcessExplorer(pf.dataset.processFlow);return;}let pm=e.target.closest('[data-process-move]');if(pm){processSelectStage(processState.index + +pm.dataset.processMove);return;}if(e.target.closest('[data-detail-close]')){hideZoom();return;}if(e.target.closest('[data-inline-close]')){if(detailState.type)current.selected[detailState.type]=null;render();return;}if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}let linked=e.target.closest('[data-open-case]');if(linked){focusCase(linked.dataset.openCase);return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');return;}});
 $('#prev').onclick=()=>navigate(slides[Math.max(0,current.slide-1)].id);$('#next').onclick=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const isEditable=(target)=>target?.closest?.('input,textarea,select,[contenteditable="true"]');
 const isInteractive=(target)=>target?.closest?.('button,a,[role="button"]');
@@ -456,5 +406,5 @@ document.addEventListener('keydown',e=>{
  if(e.key==='End'){e.preventDefault();navigate(slides[slides.length-1].id);return;}
 });
 window.addEventListener('hashchange',()=>{let id=location.hash.replace(/^#\/?/,'');if(id&&id!==slides[current.slide].id)navigate(id)});
-let init=location.hash.replace(/^#\/?/,'');current.slide=Math.max(0,slides.findIndex(s=>s.id===init));render();
+let init=resolveSlide(location.hash.replace(/^#\/?/,''));if(init)history.replaceState(null,'',`#/${init}`);current.slide=Math.max(0,slides.findIndex(s=>s.id===init));render();
 })();
