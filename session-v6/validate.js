@@ -10,9 +10,14 @@ assert(!d.navigation.some(x=>x.id==='organization'),'separate hierarchy slide re
 assert(!d.cases.some(x=>x.id==='legal'),'contract approval case removed');
 for(const c of d.cases)assert(c.summary?.problem&&c.summary?.action,'inline case summary');
 assert(!d.navigation.some(x=>x.id==='dealflow'),'separate process slide removed');
-assert.strictEqual(d.dealflows.length,3,'three confirmed process maps');
+assert.strictEqual(d.dealflows.length,2,'two operational process maps');
 assert.strictEqual(d.processScenes.transit.length,8,'8 consolidated transit stages');
-assert.strictEqual(d.processScenes.domestic.length,6,'6 domestic wholesale stages');
+assert(!d.processScenes.domestic&&!d.dealflows.some(x=>x.id==='domestic'),'wholesale process removed');
+assert.deepStrictEqual(Array.from(d.directions,x=>x.id),['transit','infrastructure','aviation']);
+assert(d.infrastructureBrief.regional.astana.capacity==='14 000 м³');
+assert(d.infrastructureBrief.mobile.receiving.cost==='195 млн ₸');
+assert(d.infrastructureBrief.mobile.dispensing.cost==='300 млн ₸');
+assert(d.infrastructureBrief.turkestan.status==='Планируемое размещение');
 assert.strictEqual(d.processScenes.aviation.length,7,'7 aviation fuel stages');
 assert.strictEqual(d.executives.filter(x=>x.super==='ceo').length,3,'3 direct CEO blocks');
 for(const id of ['commercial-director','operations-director','international','digital','legal'])assert.strictEqual(d.executives.find(x=>x.id===id).super,'deputy',`${id} reports to first deputy`);
@@ -86,12 +91,10 @@ assert(!JSON.stringify(d.navigation).includes('раскрытие'),'navigation 
 const duplicateFacts=d.details.cases.duplicate.facts;
 assert(!/Navarro|Ion Energy/i.test(duplicateFacts),'duplicate-functions case uses no company names');
 const transitText=JSON.stringify({direction:d.directions.find(x=>x.id==='transit'),flow:d.dealflows.find(x=>x.id==='transit'),scenes:d.processScenes.transit,details:d.details.directions.transit});
-const domesticText=JSON.stringify({direction:d.directions.find(x=>x.id==='domestic'),flow:d.dealflows.find(x=>x.id==='domestic'),scenes:d.processScenes.domestic,details:d.details.directions.domestic});
 assert(transitText.includes('Поставки с КНР'),'transit uses China supply wording');
 assert(!transitText.includes('SJS')&&transitText.includes('SGS'),'SGS spelling in transit');
 assert(transitText.includes('произведение пропарки вагонов'),'wagon steaming wording');
 assert(d.processScenes.transit.find(x=>x.title==='Перелив и приёмка продукта').owner.includes('Almaty Sterling Terminal'),'terminal participates in acceptance stage');
-assert(!domesticText.includes('НПЗ')&&domesticText.includes('поставщик'),'wholesale uses supplier wording');
 assert(!d.cases.some(x=>x.id==='receivable'),'debt case removed');
 assert(!d.details.cases.receivable,'debt detail removed');
 assert(d.cases.find(x=>x.id==='staff-competence').expandable===false,'staff case has no modal');
@@ -115,13 +118,13 @@ assert(paymentCase.resolution.includes('АВР до ЭСФ'),'closing document s
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-org40'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-infra41'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
 assert(ui.includes('setTimeout(adapt,220);setTimeout(adapt,620)'),'fullscreen layout is measured after the viewport transition');
 assert(css.includes('body.presentation-mode .slide-grid.inline-focus'),'fullscreen inline analysis overrides the narrow preview column');
 assert(css.includes('height:var(--inline-height,calc(100dvh - 132px))!important'),'inline panel obeys the measured slide height');
-console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; ${d.processScenes.transit.length} этапов транзита; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
+console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; ${d.processScenes.transit.length} этапов транзита; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
 
 assert.strictEqual(d.organizationOverview.nodes.find(x=>x.id==='logistics').parent,'coo','logistics manager belongs to operations department');

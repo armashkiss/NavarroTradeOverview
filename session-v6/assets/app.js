@@ -31,9 +31,17 @@ function richBrief(type,id){
    block('Роли и контроль',p(rolesControl))+
    block('Результат и ключевые показатели',p(resultKpi));
 }
+function infrastructureBrief(){
+ const b=D.infrastructureBrief,r=b.regional,m=b.mobile,t=b.turkestan;
+ const storage=site=>`<div class="infra-location"><h3>${esc(site.name)}</h3>${site.capacity?`<div class="infra-number">${esc(site.capacity)}</div>`:''}<p>${esc(site.description)}</p></div>`;
+ const facility=site=>`<div class="infra-facility"><h3>${esc(site.name)}</h3><div class="infra-throughput">${esc(site.throughput)}</div><p class="infra-price">${esc(site.cost)} <span>/ ${esc(site.usd)}</span></p></div>`;
+ return `<div class="infra-brief"><section class="infra-region"><div class="infra-label">Хранение и логистика</div><h2>${esc(r.title)}</h2>${storage(r.astana)}${storage(r.petropavlovsk)}</section><section class="infra-mobile"><div class="infra-label">Мобильная инфраструктура</div><h2>${esc(m.title)}</h2><div class="infra-number">${esc(m.capacity)}</div><p class="infra-caption">${esc(m.caption)}</p><div class="infra-facilities">${facility(m.receiving)}${facility(m.dispensing)}</div><p class="infra-technical">${esc(m.technical)}</p><p class="infra-note">${esc(m.costNote)}</p></section><section class="infra-turkestan"><div class="infra-label">${esc(t.status)}</div><h2>${esc(t.title)}</h2><p>${esc(t.description)}</p><div class="infra-airport-stat"><strong>${esc(t.passengers)}</strong><span>${esc(t.passengersCaption)}</span></div><div class="infra-airport-stat"><strong>${esc(t.designCapacity)}</strong><span>${esc(t.designCaption)}</span></div><p class="infra-runway">${esc(t.runway)}</p></section></div>`;
+}
 function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return `<div class="inspector-header"><span class="inspector-tag">УПРАВЛЕНЧЕСКИЙ КОНТЕКСТ</span><span class="inspector-index">N.</span></div><h2>Контекст раздела</h2><p class="sub">Процессы, ответственность, риски и предлагаемые решения.</p>`;
  let tag='',title='',sub='',inner='',e;
- if(type==='direction'){
+ if(type==='direction'&&id==='infrastructure'){
+  tag=i.tag;title=i.name;sub=i.intro;inner=infrastructureBrief();
+ }else if(type==='direction'){
   e=extra.directions?.[id];tag=i.tag;title=i.name;sub=i.intro;
   inner=pill(i.status)+block('Как работает направление',plain(e?.process||i.scope))+
     block('Ответственный контур',plain(i.owner))+
@@ -125,6 +133,9 @@ function adaptDetailColumns(){
  if(!win||!grid||layer.hidden)return;
  const source=layer.querySelector('.detail-source');
  const nodes=[...source.children].map(n=>n.cloneNode(true));
+ if(layer.dataset.focusType==='infrastructure'){
+  grid.replaceChildren(...nodes);layer.dataset.density='0';layer.classList.remove('detail-unavoidable-scroll');return;
+ }
  if(layer.dataset.focusType==='exec'){
   const duties=document.createElement('div'),context=document.createElement('div');
   duties.className='detail-lane exec-duties';context.className='detail-lane exec-context';
@@ -173,7 +184,8 @@ function zoomToDetail(type,id){
  layer.querySelector('#detail-title').textContent=title?.textContent||'';
  layer.querySelector('#detail-subtitle').textContent=sub?.textContent||'';
  ++detailSerial;
- layer.dataset.focusType=type;
+ layer.dataset.focusType=type==='direction'&&id==='infrastructure'?'infrastructure':type;
+ layer.querySelector('.focus-mark').textContent=layer.dataset.focusType==='infrastructure'?'N. / ИНФРАСТРУКТУРНЫЕ ПРОЕКТЫ':'N. / УПРАВЛЕНЧЕСКИЙ РАЗБОР';
  layer.hidden=false;document.body.classList.add('has-detail-zoom');
  win.getAnimations().forEach(a=>a.cancel());
  // Wait for fixed positioning to be measured, then animate from the former right panel.
@@ -259,9 +271,9 @@ function shell(content,type,id){
 }
 function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">СТРАТЕГИЧЕСКАЯ СЕССИЯ<br>30 ОКТЯБРЯ 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>${String(D.cases.length).padStart(2,'0')}</strong><span>кейсов</span></div><div class="stat"><strong>${String(D.improvements.length).padStart(2,'0')}</strong><span>управленческих предложений</span></div><div class="stat"><strong>${String(slides.length).padStart(2,'0')}</strong><span>разделов презентации</span></div></div>`;}
 function directions(){
- const cards=`<div class="tile-grid direction-first">${D.directions.map(d=>`<button type="button" class="tile direction-launch" data-open-direction="${esc(d.id)}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="direction-foot">Этапы · предприятия · риски · кейсы <b>Открыть ↗</b></span></button>`).join('')}</div>
- <div class="direction-overview"><div><span class="direction-overview-kicker">РЕАЛЬНАЯ ЦЕПОЧКА</span><b>Покупатель → подтверждённый объём → исполнение → документы</b><p>Международный транзит и оптовка отражены по фактическому описанию Navarro. Коммерческие и операционные предложения показаны отдельно.</p></div><div><span class="direction-overview-kicker">ГЛАВНЫЕ РИСКИ</span><b>Тарифы · курс · простои · товарный учёт</b><p>Для каждого направления сопоставлены этапы, участники, риски и контрольные решения.</p></div></div>`;
- return head(1,'Три направления. <span style="color:#389f91">Одна группа.</span>','Международный транзит, оптовая торговля в РК и авиа-ГСМ: цепочки исполнения, участники и контрольные точки.')+cards;
+ const cards=`<div class="tile-grid direction-first">${D.directions.map(d=>`<button type="button" class="tile direction-launch" data-open-direction="${esc(d.id)}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="direction-foot">${d.id==='infrastructure'?'Объекты · мощности · оборудование':'Этапы · предприятия · риски · кейсы'} <b>Открыть ↗</b></span></button>`).join('')}</div>
+ <div class="direction-overview"><div><span class="direction-overview-kicker">НАПРАВЛЕНИЯ РАБОТЫ</span><b>Транзит · инфраструктура · авиационное топливообеспечение</b><p>Операционные цепочки и инфраструктурный портфель Navarro Trade.</p></div><div><span class="direction-overview-kicker">ГЛАВНЫЕ РИСКИ</span><b>Тарифы · курс · простои · товарный учёт</b><p>В операционных направлениях показаны этапы и контрольные точки; в инфраструктуре — объекты и мощности.</p></div></div>`;
+ return head(1,'Три направления. <span style="color:#389f91">Одна группа.</span>','Международный транзит, инфраструктура и авиа-ГСМ: цепочки исполнения, участники и контрольные точки.')+cards;
 }
 
 function orgmap(){
