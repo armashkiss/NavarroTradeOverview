@@ -2050,6 +2050,12 @@ window.SESSION_DATA = {
         "kind": "department"
       },
       {
+        "id": "logistics",
+        "name": "Менеджер по логистике",
+        "parent": "coo",
+        "kind": "position"
+      },
+      {
         "id": "international",
         "name": "Управление международного развития и внешних связей",
         "parent": "deputy",

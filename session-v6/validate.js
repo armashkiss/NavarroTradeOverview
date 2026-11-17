@@ -5,7 +5,7 @@ const context={window:{}};vm.createContext(context);vm.runInContext(read('assets
 const d=context.window.SESSION_DATA;
 assert.deepStrictEqual(Array.from(d.navigation,x=>x.id),['opening','directions','orgmap','cases','changes','growth']);
 assert.deepStrictEqual(Array.from(d.navigation,x=>x.short),['00','01','02','03','04','05']);
-assert.strictEqual(d.organizationOverview.nodes.length,13,'approved single organization slide');
+assert.strictEqual(d.organizationOverview.nodes.length,14,'approved single organization slide');
 assert(!d.navigation.some(x=>x.id==='organization'),'separate hierarchy slide removed');
 assert(!d.cases.some(x=>x.id==='legal'),'contract approval case removed');
 for(const c of d.cases)assert(c.summary?.problem&&c.summary?.action,'inline case summary');
@@ -115,7 +115,7 @@ assert(paymentCase.resolution.includes('АВР до ЭСФ'),'closing document s
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-org38'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-org39'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
@@ -123,3 +123,5 @@ assert(ui.includes('setTimeout(adapt,220);setTimeout(adapt,620)'),'fullscreen la
 assert(css.includes('body.presentation-mode .slide-grid.inline-focus'),'fullscreen inline analysis overrides the narrow preview column');
 assert(css.includes('height:var(--inline-height,calc(100dvh - 132px))!important'),'inline panel obeys the measured slide height');
 console.log(`PASS • NAVARRO v6.9: ${d.navigation.length} экранов; ${d.processScenes.transit.length} этапов транзита; 6 этапов оптовки; 7 этапов авиа-ГСМ; ${d.cases.length} кейсов`);
+
+assert.strictEqual(d.organizationOverview.nodes.find(x=>x.id==='logistics').parent,'coo','logistics manager belongs to operations department');
