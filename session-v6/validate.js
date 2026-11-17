@@ -99,6 +99,9 @@ for(const marker of ['function processSelectStage','data-process-step=','data-pr
 for(const marker of ['process-static-explorer','process-step-static','class="process-static-scheme"','assets/transit-process-scheme.png'])assert(ui.includes(marker),`static transit marker ${marker}`);
 const transitScheme=fs.readFileSync(path.join(__dirname,'assets/transit-process-scheme.png'));
 assert.strictEqual(crypto.createHash('sha256').update(transitScheme).digest('hex'),'20b353e680f680278d38cf3765d091fdf7ae524c28af3c30bc637133173e2fdf','approved transit scheme asset');
+const organizationImage=fs.readFileSync(path.join(__dirname,'assets/organization-structure-november.png'));
+assert.strictEqual(crypto.createHash('sha256').update(organizationImage).digest('hex'),'e612e1955df9d263b8b9f45446fe8163c7a73a84783fd992709882f1fe64489a','approved organization chart PNG');
+assert(ui.includes('class="org-image-frame"')&&ui.includes('assets/organization-structure-november.png'),'organization slide uses the supplied PNG directly');
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen control');
 assert(read('assets/style.css').includes('.process-modal-layout'),'process explorer layout');
 assert(read('assets/style.css').includes('.process-static-scheme img')&&read('assets/style.css').includes('object-fit:contain'),'static scheme fits modal canvas');
@@ -162,7 +165,7 @@ assert(paymentCase.resolution.includes('ЭСФ не может отправля�
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-org63'),'v6.9 organization cache revision');
+assert(read('index.html').includes('style.css?v=6.9-org64'),'v6.9 organization PNG cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');

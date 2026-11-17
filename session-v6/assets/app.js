@@ -302,12 +302,7 @@ function directions(){
 }
 
 function orgmap(){
- const nodes=Object.fromEntries(D.organizationOverview.nodes.map(node=>[node.id,node]));
- const roleList=node=>node.roles?.length?`<ul>${node.roles.map(role=>`<li>${esc(role)}</li>`).join('')}</ul>`:'';
- const unit=id=>`<div class="org-source-unit"><strong>${esc(nodes[id].name)}</strong>${roleList(nodes[id])}</div>`;
- const direct=id=>`<section class="org-source-direct org-source-${esc(id)}"><h3>${esc(nodes[id].name)}</h3>${roleList(nodes[id])}</section>`;
- return head(2,'Организационная <span style="color:#389f91">структура</span>','Navarro Trade · подразделения и руководители · ноябрь 2026')+
- `<div class="org-source-map"><div class="org-source-top"><div class="org-source-ceo"><small>NAVARRO TRADE</small><strong>${esc(nodes.ceo.name)}</strong></div><div class="org-source-advisor">${esc(nodes.advisor.name)}</div></div><div class="org-source-trunk"></div><div class="org-source-grid"><section class="org-source-deputy"><h3>${esc(nodes.deputy.name)}</h3><div class="org-source-departments"><div class="org-source-department org-source-commercial"><header><strong>${esc(nodes.commercial.name)}</strong><span>${esc(nodes.commercial.roles[0])}</span></header>${unit('marketing')}</div><div class="org-source-department org-source-operations"><header><strong>${esc(nodes.coo.name)}</strong><span>${esc(nodes.coo.roles[0])}</span></header><div class="org-source-operations-units">${unit('pcqa')}${unit('afo')}${unit('logistics')}</div></div></div></section>${direct('international')}${direct('finance')}${direct('administration')}</div></div>`;
+ return `<div class="org-image-slide"><div class="org-image-heading"><div><div class="eyebrow">NAVARRO TRADE · 02 / 6</div><h1>Организационная <span>структура</span></h1></div><b>02</b></div><figure class="org-image-frame"><img src="assets/organization-structure-november.png" alt="Организационная структура Navarro Trade"></figure></div>`;
 }
 
 function dealflow(){
