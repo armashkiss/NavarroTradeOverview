@@ -161,7 +161,6 @@ function adaptDetailColumns(){
  }
 }
 function zoomToDetail(type,id){
- if(type==='case')return;
  const layer=$('#detail-zoom'),win=layer.querySelector('.detail-window');
  const src=$('#inspector');
  const start=src?.getBoundingClientRect();
@@ -187,7 +186,7 @@ function zoomToDetail(type,id){
 }
 const inlineDetailTypes=new Set(['company','change','growth','decision']);
 function setDetail(type,id,{expand=true}={}){
- if(type==='case'){focusCase(id);return;}
+ if(type==='case'&&(!itemById(type,id)||itemById(type,id).expandable===false))return;
  current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
  if(inlineDetailTypes.has(type)){setInlineDetail(type,id);return;}
@@ -272,15 +271,11 @@ function dealflow(){
  `<div class="process-selector-grid">${cards}</div>${hints}`;
 }
 function cases(){
- const cards=D.cases.map(c=>`<article id="case-${esc(c.id)}" class="case-summary-card"><div class="case-summary-topic">${esc(c.group)}</div><h2>${esc(c.title)}</h2><p>${esc(c.summary.problem)}</p><div class="case-summary-action"><span>Действие</span><p>${esc(c.summary.action)}</p></div></article>`).join('');
- return `<div class="case-summary-slide">${head(2,'Кейсы <span style="color:#389f91">и выводы</span>','Ключевые проблемы и предлагаемые действия')}<div class="case-summary-grid">${cards}</div></div>`;
-}
-async function focusCase(id){
- if(!D.cases.some(c=>c.id===id))return;
- hideZoom({instant:true});
- await navigate('cases');
- const card=document.getElementById(`case-${id}`);
- if(card){card.scrollIntoView({behavior:reduced()?'auto':'smooth',block:'center'});card.classList.add('case-summary-highlight');setTimeout(()=>card.classList.remove('case-summary-highlight'),2200);}
+ const cards=D.cases.map(c=>{
+  const content=`<div class="meta">${esc(c.group)}${c.expandable===false?'':'<span class="corner">↗</span>'}</div><span class="case-metric">${esc(c.metric)}</span><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small>`;
+  return c.expandable===false ? `<article class="clickcard casecard casecard-static">${content}</article>` : `<button class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${c.id}">${content}</button>`;
+ });
+ return `<div class="cases-slide">${head(5,'Проблемы становятся <span style="color:#389f91">решениями.</span>','Ситуация, последствия и понятные действия для каждого кейса.')}<div class="case-grid cases-full-grid" style="--case-rows:${Math.ceil(D.cases.length/4)}">${cards.join('')}</div></div>`;
 }
 
 function partners(){let cards=`<div class="partner-grid">${D.companies.map(c=>`<button class="clickcard partner ${current.selected.company===c.id?'active':''}" data-item="company:${c.id}"><span class="badge">${esc(c.short)}</span><span><div class="meta">STERLING GROUP ↗</div><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></span></button>`).join('')}</div>`;
@@ -370,7 +365,7 @@ function processSelectStage(index,instant=false){
 
 function notify(message){let t=$('#toast');t.textContent=message;t.style.display='block';clearTimeout(notify.timer);notify.timer=setTimeout(()=>t.style.display='none',2300);}
 function exportDecisions(){let ts=new Date().toLocaleString('ru-RU');const st={pending:'К обсуждению',agreed:'Отмечено согласованным',review:'На доработку',hold:'Отложено'};let text=`# Sterling Group · Реестр решений\n\nДата экспорта: ${ts}\n\n`+D.decisions.map((d,i)=>`## ${i+1}. ${d.title}\n\n**Статус:** ${st[current.decisions[d.id]||'pending']}\n\n**Предлагаемый ответственный:** ${d.owner}\n\n**Вопрос:** ${d.prompt}\n\n**Срок / подтверждение:** __________\n`).join('\n');let blob=new Blob([text],{type:'text/markdown;charset=utf-8'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='Sterling_Decisions.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),2500);notify('Реестр решений скачан');}
-document.addEventListener('click',e=>{const direction=e.target.closest('[data-open-direction]');if(direction){const id=direction.dataset.openDirection;if(D.processScenes[id])openProcessExplorer(id,0);else{current.selected.direction=id;detailState={type:'direction',id};zoomToDetail('direction',id)}return;}if(e.target.closest('[data-process-close]')){closeProcessExplorer();return;}let ex=e.target.closest('[data-explore-flow]');if(ex){openProcessExplorer(ex.dataset.exploreFlow,+ex.dataset.processIndex||0);return;}let ps=e.target.closest('[data-process-step]');if(ps){processSelectStage(+ps.dataset.processStep);return;}let pf=e.target.closest('[data-process-flow]');if(pf){openProcessExplorer(pf.dataset.processFlow);return;}let pm=e.target.closest('[data-process-move]');if(pm){processSelectStage(processState.index + +pm.dataset.processMove);return;}if(e.target.closest('[data-detail-close]')){hideZoom();return;}if(e.target.closest('[data-inline-close]')){if(detailState.type)current.selected[detailState.type]=null;render();return;}if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}let linked=e.target.closest('[data-open-case]');if(linked){focusCase(linked.dataset.openCase);return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');return;}});
+document.addEventListener('click',e=>{const direction=e.target.closest('[data-open-direction]');if(direction){const id=direction.dataset.openDirection;if(D.processScenes[id])openProcessExplorer(id,0);else{current.selected.direction=id;detailState={type:'direction',id};zoomToDetail('direction',id)}return;}if(e.target.closest('[data-process-close]')){closeProcessExplorer();return;}let ex=e.target.closest('[data-explore-flow]');if(ex){openProcessExplorer(ex.dataset.exploreFlow,+ex.dataset.processIndex||0);return;}let ps=e.target.closest('[data-process-step]');if(ps){processSelectStage(+ps.dataset.processStep);return;}let pf=e.target.closest('[data-process-flow]');if(pf){openProcessExplorer(pf.dataset.processFlow);return;}let pm=e.target.closest('[data-process-move]');if(pm){processSelectStage(processState.index + +pm.dataset.processMove);return;}if(e.target.closest('[data-detail-close]')){hideZoom();return;}if(e.target.closest('[data-inline-close]')){if(detailState.type)current.selected[detailState.type]=null;render();return;}if(e.target.closest('[data-expand-current]')){zoomToDetail(detailState.type,detailState.id);return;}let linked=e.target.closest('[data-open-case]');if(linked){const id=linked.dataset.openCase;if(!D.cases.some(c=>c.id===id&&c.expandable!==false))return;Promise.resolve(navigate('cases')).then(()=>setDetail('case',id));return;}let el=e.target.closest('[data-goto]');if(el){navigate(el.dataset.goto);return;}let flow=e.target.closest('[data-flow]');if(flow){switchFlow(flow.dataset.flow);return;}let item=e.target.closest('[data-item]');if(item){let [t,id]=item.dataset.item.split(':');setDetail(t,id);return;}if(e.target.closest('#export-decisions')){exportDecisions();return;}if(e.target.closest('#mobile-nav')){$('#side').classList.toggle('open');return;}});
 $('#prev').onclick=()=>navigate(slides[Math.max(0,current.slide-1)].id);$('#next').onclick=()=>navigate(slides[Math.min(slides.length-1,current.slide+1)].id);
 const isEditable=(target)=>target?.closest?.('input,textarea,select,[contenteditable="true"]');
 const isInteractive=(target)=>target?.closest?.('button,a,[role="button"]');

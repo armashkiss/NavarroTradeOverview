@@ -66,7 +66,8 @@ assert(read('assets/style.css').includes('full-canvas modal composition'),'full-
 assert(ui.includes("const inlineDetailTypes=new Set(['company','change','growth','decision'])"),'slides 05-08 use inline focus');
 assert(ui.includes('slide-grid overview-only'),'inline slides have no detail column before card selection');
 
-assert(ui.includes('case-summary-grid')&&ui.includes("if(type==='case')return;"),'cases are inline summaries without modals');
+assert(ui.includes('case-grid cases-full-grid')&&!ui.includes('function focusCase'),'case grid and modal detail restored');
+assert(!d.cases.some(x=>['legal','receivable'].includes(x.id)),'deleted cases stay removed');
 assert(ui.includes('function prepareInlineLayout'),'balanced inline text columns');
 assert(read('assets/style.css').includes('.inline-section-flow'),'inline column-flow styles');
 assert(read('index.html').includes('../session/assets/navarro-logo.png'),'official logo in persistent navigation');
@@ -104,7 +105,7 @@ for(const scenes of Object.values(d.processScenes))for(const stage of scenes)for
 assert(d.cases.find(x=>x.id==='intercompany-edo').title==='Задержки документов внутри группы','intercompany document flow wording');
 assert(d.details.cases.tajik.lesson.includes('альтернативных покупателей'),'Tajikistan lesson expands client base');
 assert(ui.includes("block('Практический вывод'")&&!ui.includes('Урок для группы'),'constructive case conclusion label');
-assert(ui.includes('class="case-summary-slide"'),'inline summary presentation');
+assert(ui.includes('class="cases-slide"'),'case overview presentation');
 for(const phrase of ['По материалам подразделений','Факты и выводы требуют проверки','Рабочие материалы','Не является протоколом решений','Инициатива — не утверждена'])assert(!ui.includes(phrase)&&!read('index.html').includes(phrase),`no presentation disclaimer: ${phrase}`);
 assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
 const presentationText=JSON.stringify(d);
@@ -113,7 +114,7 @@ assert(paymentCase.resolution.includes('АВР до ЭСФ'),'closing document s
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-summary36'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-cases37'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
