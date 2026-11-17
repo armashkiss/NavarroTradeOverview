@@ -107,7 +107,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
  }else if(type==='decision'){
   tag='УПРАВЛЕНЧЕСКОЕ РЕШЕНИЕ';title=i.title;sub=i.prompt;
   const status=current.decisions[i.id]||'pending';const names={pending:'К обсуждению',agreed:'Отмечено как согласованное',review:'На доработку',hold:'Отложено'};
-  const link={d1:['change','coo-owner'],d2:['change','tariff-fx'],d3:['change','tariff-fx'],d4:['change','inventory-audit'],d5:['change','clm'],d7:['growth','tolling'],d8:['growth','airports']}[id];
+  const link={d2:['change','tariff-fx'],d3:['change','tariff-fx'],d4:['change','inventory-audit'],d5:['change','clm'],d7:['growth','tolling'],d8:['growth','airports']}[id];
   const linked=link?rich[link[0]]?.[link[1]]:null;
   inner=pill(names[status])+block('Предмет решения',plain(i.prompt))+
     block('Предлагаемый ответственный',plain(i.owner))+
@@ -225,6 +225,7 @@ function setDetail(type,id,{expand=true}={}){
  if(type==='case'){const item=itemById(type,id);if(!item||item.expandable===false)return;if(slides[current.slide].id==='cases'&&current.caseCategory!==item.category){current.caseCategory=item.category;render();}}
  current.selected[type]=id;detailState={type,id};
  document.querySelectorAll('[data-item]').forEach(el=>el.classList.toggle('active',el.dataset.item===`${type}:${id}`));
+ if(type==='change'&&slides[current.slide].id==='cases'){zoomToDetail(type,id);return;}
  if(inlineDetailTypes.has(type)){setInlineDetail(type,id);return;}
  const box=$('#inspector');if(box){box.innerHTML=preview(type,id);box.setAttribute('aria-live','polite')}
  if(expand)zoomToDetail(type,id);
@@ -293,7 +294,7 @@ function shell(content,type,id){
  const panel=inline&&focused?inspector(type,id):preview(type,id);
  return `<div class="slide-grid ${focused?'inline-focus':''}"><div class="left-area">${content}</div><aside class="inspector ${inline?'inspector-inline':'inspector-preview'}" id="inspector" ${inline?`data-inline-type="${type}"`:''}>${panel}</aside></div>`;
 }
-function cover(){return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">СТРАТЕГИЧЕСКАЯ СЕССИЯ<br>30 ОКТЯБРЯ 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>${String(D.cases.length).padStart(2,'0')}</strong><span>кейсов</span></div><div class="stat"><strong>${String(D.improvements.length).padStart(2,'0')}</strong><span>управленческих предложений</span></div><div class="stat"><strong>${String(slides.length).padStart(2,'0')}</strong><span>разделов презентации</span></div></div>`;}
+function cover(){const proposals=D.improvements.filter(x=>x.category!=='digital').length;return `<div class="cover"><div class="covercopy"><div class="eyebrow">STERLING GROUP / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026</div><h1>От отдельных компаний<br>к <em>общей системе</em><br>ответственности.</h1><p>Бизнес-модель Navarro Trade. Реальные кейсы. Исполнение сделок. Взаимодействие предприятий. Решения руководства.</p><div class="cover-actions"><button class="primary" data-goto="directions">Начать презентацию ↗</button></div></div><div class="cover-identity"><img class="cover-logo" src="../session/assets/navarro-logo.png" alt="NAVARRO TRADE"><div class="coverstamp">СТРАТЕГИЧЕСКАЯ СЕССИЯ<br>30 ОКТЯБРЯ 2026</div></div></div><div class="quickstats"><div class="stat"><strong>03</strong><span>ключевых направления</span></div><div class="stat"><strong>${String(D.cases.length).padStart(2,'0')}</strong><span>кейсов</span></div><div class="stat"><strong>${String(proposals).padStart(2,'0')}</strong><span>управленческих предложений</span></div><div class="stat"><strong>${String(slides.length).padStart(2,'0')}</strong><span>разделов презентации</span></div></div>`;}
 function directions(){
  const cards=`<div class="tile-grid direction-first">${D.directions.map(d=>`<button type="button" class="tile direction-launch" data-open-direction="${esc(d.id)}"><span class="tag">${esc(d.tag)}</span><span class="big-number">${esc(d.num)}</span><h3>${esc(d.name)}</h3><span class="tile-desc">${esc(d.intro)}</span><span class="direction-foot">${d.id==='infrastructure'?'Действующие проекты · планы развития':d.id==='aviation'?'Клиенты · Ташкент · Гонконг':'Этапы · предприятия · риски · кейсы'} <b>Открыть ↗</b></span></button>`).join('')}</div>
  <div class="direction-overview"><div><span class="direction-overview-kicker">НАПРАВЛЕНИЯ РАБОТЫ</span><b>Транзит · инфраструктура · авиационное топливообеспечение</b><p>Операционные цепочки и инфраструктурный портфель Navarro Trade.</p></div><div><span class="direction-overview-kicker">ГЛАВНЫЕ РИСКИ</span><b>Тарифы · курс · простои · товарный учёт</b><p>В операционных направлениях показаны этапы и контрольные точки; в инфраструктуре — действующие проекты и планы развития.</p></div></div>`;
@@ -319,6 +320,11 @@ function dealflow(){
  `<div class="process-selector-grid">${cards}</div>${hints}`;
 }
 const caseCount=n=>`${n} ${n%10===1&&n%100!==11?'кейс':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'кейса':'кейсов'}`;
+const proposalCount=n=>`${n} ${n%10===1&&n%100!==11?'предложение':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'предложения':'предложений'}`;
+const caseCategoryItems=id=>[
+ ...D.cases.filter(c=>c.category===id).map(item=>({type:'case',item})),
+ ...D.improvements.filter(item=>item.category===id).map(item=>({type:'change',item}))
+];
 function selectCaseCategory(id){
  if(id&& !D.caseCategories.some(x=>x.id===id))return;
  current.caseCategory=id||null;current.selected.case=null;render();
@@ -329,24 +335,25 @@ function cases(){
  const category=D.caseCategories.find(x=>x.id===current.caseCategory);
  if(!category){
   const cards=D.caseCategories.map(group=>{
-   const count=D.cases.filter(c=>c.category===group.id).length;
-   return `<button type="button" class="tile direction-launch case-category-launch" data-case-category="${esc(group.id)}"><span class="tag">${esc(group.tag)}</span><span class="big-number">${esc(group.num)}</span><h3>${esc(group.name)}</h3><span class="tile-desc">${esc(group.intro)}</span><span class="direction-foot"><span>${caseCount(count)}</span><b>Открыть кейсы ↗</b></span></button>`;
+   const cases=D.cases.filter(c=>c.category===group.id).length,proposals=D.improvements.filter(c=>c.category===group.id).length;
+   return `<button type="button" class="tile direction-launch case-category-launch" data-case-category="${esc(group.id)}"><span class="tag">${esc(group.tag)}</span><span class="big-number">${esc(group.num)}</span><h3>${esc(group.name)}</h3><span class="tile-desc">${esc(group.intro)}</span><span class="direction-foot"><span>${caseCount(cases)}${proposals?` · ${proposalCount(proposals)}`:''}</span><b>Открыть ↗</b></span></button>`;
   }).join('');
-  return `<div class="cases-slide" data-cases-view="overview">${head(3,'Кейсы <span style="color:#389f91">по направлениям</span>','Финансы, коммерция и менеджмент: ситуации, последствия и решения.')}<div class="tile-grid direction-first case-category-grid">${cards}</div></div>`;
+  return `<div class="cases-slide" data-cases-view="overview">${head(3,'Кейсы и <span style="color:#389f91">предложения</span>','Финансы, коммерция и менеджмент: проблемные ситуации и практические решения.')}<div class="tile-grid direction-first case-category-grid">${cards}</div></div>`;
  }
- const items=D.cases.filter(c=>c.category===category.id),columns=items.length<=2?Math.max(1,items.length):items.length===4?2:3;
- const cards=items.map(c=>{
-  const content=`<div class="meta">${esc(c.group)}${c.expandable===false?'':'<span class="corner">↗</span>'}</div><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small>`;
-  return c.expandable===false?`<article class="clickcard casecard casecard-static">${content}</article>`:`<button type="button" class="clickcard casecard ${current.selected.case===c.id?'active':''}" data-item="case:${esc(c.id)}">${content}</button>`;
+ const items=caseCategoryItems(category.id),columns=items.length<=2?Math.max(1,items.length):items.length===4?2:3;
+ const cards=items.map(({type,item})=>{
+  const isCase=type==='case',isStatic=isCase&&item.expandable===false;
+  const content=`<div class="meta"><span class="card-kind ${isCase?'case-kind':'proposal-kind'}">${isCase?'КЕЙС':'ПРЕДЛОЖЕНИЕ'}</span> · ${esc(isCase?item.group:item.label)}${isStatic?'':'<span class="corner">↗</span>'}</div><b>${esc(isCase?item.title:item.name)}</b><small>${esc(isCase?item.subtitle:item.why)}</small>`;
+  return isStatic?`<article class="clickcard casecard casecard-static">${content}</article>`:`<button type="button" class="clickcard casecard ${current.selected[type]===item.id?'active':''}" data-item="${type}:${esc(item.id)}">${content}</button>`;
  });
- const tabs=D.caseCategories.map(group=>`<button type="button" data-case-category="${esc(group.id)}" aria-pressed="${group.id===category.id}">${esc(group.name)}<span>${D.cases.filter(c=>c.category===group.id).length}</span></button>`).join('');
- return `<div class="cases-slide" data-cases-view="category">${head(3,`${esc(category.name)} <span style="color:#389f91">/ кейсы</span>`,category.intro)}<div class="case-category-toolbar"><button type="button" class="case-category-back" data-case-category="all">← Все направления</button><nav class="case-category-tabs" aria-label="Направления кейсов">${tabs}</nav></div><div class="case-grid cases-full-grid category-case-grid" style="--category-columns:${columns};--case-rows:${Math.ceil(items.length/columns)}">${cards.join('')}</div></div>`;
+ const tabs=D.caseCategories.map(group=>`<button type="button" data-case-category="${esc(group.id)}" aria-pressed="${group.id===category.id}">${esc(group.name)}<span>${caseCategoryItems(group.id).length}</span></button>`).join('');
+ return `<div class="cases-slide" data-cases-view="category">${head(3,`${esc(category.name)} <span style="color:#389f91">/ кейсы и предложения</span>`,category.intro)}<div class="case-category-toolbar"><button type="button" class="case-category-back" data-case-category="all">← Все направления</button><nav class="case-category-tabs" aria-label="Направления кейсов и предложений">${tabs}</nav></div><div class="case-grid cases-full-grid category-case-grid" style="--category-columns:${columns};--case-rows:${Math.ceil(items.length/columns)}">${cards.join('')}</div></div>`;
 }
 
 function partners(){let cards=`<div class="partner-grid">${D.companies.map(c=>`<button class="clickcard partner ${current.selected.company===c.id?'active':''}" data-item="company:${c.id}"><span class="badge">${esc(c.short)}</span><span><div class="meta">STERLING GROUP ↗</div><b>${esc(c.title)}</b><small>${esc(c.subtitle)}</small></span></button>`).join('')}</div>`;
  return head(7,'Одна группа. <span style="color:#389f91">Пять точек контакта.</span>','Входящие и исходящие данные, договорные связи и зоны ответственности предприятий.')+shell(cards,'company',current.selected.company||'dostyq');}
-function changes(){let cards=`<div class="changes-grid">${D.improvements.map(c=>`<button class="clickcard ${current.selected.change===c.id?'active':''}" data-item="change:${c.id}"><div class="meta">${esc(c.label)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.why)}</small></button>`).join('')}</div>`;
- return head(7,'Предложения <span style="color:#389f91">для развития группы.</span>','Процессы, учёт, команда и цифровые сервисы группы.')+shell(cards,'change',current.selected.change||'clm');}
+function changes(){const projects=D.improvements.filter(c=>c.category==='digital');if(!projects.some(c=>c.id===current.selected.change))current.selected.change=null;let cards=`<div class="changes-grid digital-project-grid">${projects.map((c,index)=>`<button class="clickcard ${current.selected.change===c.id?'active':''}" data-item="change:${c.id}"><div class="meta"><span>0${index+1}</span> · ${esc(c.label)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.why)}</small></button>`).join('')}</div>`;
+ return head(4,'Цифровизация <span style="color:#389f91">/ проекты</span>','ЭДО, анализ рынка, управление задачами и показателями, ИИ-оркестрация.')+shell(cards,'change',current.selected.change||projects[0]?.id);}
 function growth(){let cards=`<div class="growth-grid">${D.growth.map(c=>`<button class="clickcard growth ${current.selected.growth===c.id?'active':''}" data-item="growth:${c.id}"><div class="meta">${esc(c.tag)} <span class="corner">↗</span></div><b>${esc(c.name)}</b><small>${esc(c.goal)}</small><div class="smallnote" style="margin-top:13px">${esc(c.state)}</div></button>`).join('')}</div>`;
  return head(7,'Новые рынки. <span style="color:#389f91">Новая инфраструктура.</span>','Инициативы развития авиационного топливообеспечения и международной торговой модели.')+shell(cards,'growth',current.selected.growth||D.growth[0]?.id);}
 function decision(){let items=`<div class="exportbar"><button class="primary" id="export-decisions">Экспортировать протокол ↓</button></div><div class="decisions-grid">${D.decisions.map(d=>`<div class="clickcard ${current.selected.decision===d.id?'active':''}" data-item="decision:${d.id}"><div class="meta">РЕШЕНИЕ / ${esc(d.id.toUpperCase())}</div><div class="decision-row"><strong>${esc(d.title)}</strong><span class="corner">↗</span></div><small>${esc(d.owner)}</small></div>`).join('')}</div>`;

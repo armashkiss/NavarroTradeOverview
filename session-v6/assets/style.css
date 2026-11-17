@@ -949,6 +949,20 @@ body.process-open{overflow:hidden}
 @media(max-width:840px){.case-category-grid{grid-template-columns:1fr}.case-category-grid .case-category-launch{min-height:245px}.case-category-grid .case-category-launch h3{margin:18px 0 12px;font-size:29px}.case-category-grid .direction-foot{flex-direction:row;align-items:center;padding-top:20px}}
 @media(max-width:580px){.cases-slide .category-case-grid{grid-template-columns:1fr}.case-category-tabs{gap:5px}.case-category-tabs button{padding:9px 10px;font-size:13px;gap:7px}.cases-slide .category-case-grid .casecard{padding:20px}.case-category-grid .case-category-launch .tile-desc{font-size:16px}}
 
+/* Slide 03 combines factual cases with proposals; slide 04 is reserved for digital projects. */
+.card-kind{display:inline-flex;align-items:center;border-radius:999px;padding:3px 7px;font-size:9px;font-weight:850;letter-spacing:.08em;line-height:1}
+.case-kind{background:#e6f4ef;color:#24796d}
+.proposal-kind{background:#e7eef4;color:#285868}
+.digital-project-grid .clickcard{border-top:4px solid #389f91;background:linear-gradient(145deg,#fff 0%,#f3faf7 100%)}
+.digital-project-grid .clickcard .meta>span:first-child{color:#2e9487;font-weight:850}
+@media(min-width:971px){
+ .changes-grid.digital-project-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(190px,1fr));gap:14px}
+ .changes-grid.digital-project-grid .clickcard{min-height:190px;padding:22px}
+ .changes-grid.digital-project-grid .clickcard b{font-size:22px;line-height:1.25}
+ .changes-grid.digital-project-grid .clickcard small{font-size:16px;line-height:1.45}
+ .slide-grid.inline-focus .changes-grid.digital-project-grid{grid-template-columns:1fr;grid-template-rows:none}
+}
+
 /* Aviation market brief, summarized from the supplied slide. */
 .detail-zoom[data-focus-type="aviation-markets"] .detail-window{bottom:auto;height:auto;max-height:calc(100dvh - 16px)}
 .detail-zoom[data-focus-type="aviation-markets"] .detail-columns{display:block;height:auto}

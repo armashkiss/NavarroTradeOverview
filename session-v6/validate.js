@@ -5,6 +5,8 @@ const context={window:{}};vm.createContext(context);vm.runInContext(read('assets
 const d=context.window.SESSION_DATA;
 assert.deepStrictEqual(Array.from(d.navigation,x=>x.id),['opening','directions','orgmap','cases','changes','growth']);
 assert.deepStrictEqual(Array.from(d.navigation,x=>x.short),['00','01','02','03','04','05']);
+assert.strictEqual(d.navigation.find(x=>x.id==='cases').name,'Кейсы и предложения');
+assert.strictEqual(d.navigation.find(x=>x.id==='changes').name,'Цифровизация');
 assert.strictEqual(d.organizationOverview.nodes.length,14,'approved single organization slide');
 assert(!d.navigation.some(x=>x.id==='organization'),'separate hierarchy slide removed');
 assert(!d.cases.some(x=>x.id==='legal'),'contract approval case removed');
@@ -57,6 +59,7 @@ assert.deepStrictEqual(Array.from(d.caseCategories,x=>x.id),['finance','commerce
 for(const c of d.cases)assert(d.caseCategories.some(x=>x.id===c.category),'every case belongs to one category');
 for(const id of ['tajik','tariffs','plan','aviation-rfq'])assert.strictEqual(d.cases.find(x=>x.id===id).category,'commerce','trade, transit and logistics cases belong to commerce');
 assert.deepStrictEqual(Array.from(d.caseCategories,g=>d.cases.filter(c=>c.category===g.id).length),[2,4,3]);
+assert.deepStrictEqual(Array.from(d.caseCategories,g=>d.cases.filter(c=>c.category===g.id).length+d.improvements.filter(c=>c.category===g.id).length),[4,4,4]);
 assert.strictEqual(d.directions.find(x=>x.id==='aviation').name,'Авиа-ГСМ, новые рынки сбыта');
 assert.deepStrictEqual(Object.keys(d.aviationMarkets),['tashkent','hongkong']);
 assert(d.aviationMarkets.tashkent.firstStep.includes('Saneg JetWhites'));
@@ -99,7 +102,7 @@ assert(read('assets/style.css').includes('grid-template-columns:minmax(275px,.48
 const css=read('assets/style.css');
 assert(css.includes('v6.6 — projection typography'),'projection typography marker');
 assert(css.includes('font-size:14.5px'),'large inline body type');
-assert(ui.includes('class="changes-grid"'),'compact changes overview grid');
+assert(ui.includes('class="changes-grid digital-project-grid"'),'digital projects overview grid');
 assert(ui.includes('class="decisions-grid"'),'compact decisions overview grid');
 for(const phrase of ['теперь открывается','отдельного слайда','без перезагрузки слайда','Нажмите на карточку:','В модальном экране'])assert(!ui.includes(phrase),`no UI changelog copy: ${phrase}`);
 assert(ui.includes('цепочки исполнения, участники и контрольные точки'),'business-only directions description');
@@ -114,11 +117,15 @@ assert(d.processScenes.transit.find(x=>x.title==='Перелив и приёмк
 assert(!d.cases.some(x=>x.id==='receivable'),'debt case removed');
 assert(!d.details.cases.receivable,'debt detail removed');
 assert(d.cases.find(x=>x.id==='staff-competence').expandable===false,'staff case has no modal');
-assert.strictEqual(d.improvements.length,6,'six initiatives');
+assert.strictEqual(d.improvements.length,7,'three proposals and four digital projects');
 for(const id of ['deal','inventory-audit'])assert(!d.improvements.some(x=>x.id===id)&&!d.briefings.change[id],'removed procurement and measurement audit proposals');
 assert(!d.improvements.some(x=>x.id==='audit')&&!d.briefings.change.audit,'internal audit service proposal removed');
 assert(!d.improvements.some(x=>x.id==='raci')&&!d.briefings.change.raci,'RACI proposal removed');
-for(const id of ['accounting-policy','digital-ecosystem'])assert(d.briefings.change[id]&&d.improvements.some(x=>x.id===id),'new initiative has detailed content');
+assert(!d.improvements.some(x=>x.id==='coo-owner')&&!d.briefings.change['coo-owner']&&!ui.includes('coo-owner'),'single operations owner proposal removed');
+assert(!d.improvements.some(x=>x.id==='digital-ecosystem')&&!d.briefings.change['digital-ecosystem'],'umbrella digital card replaced by four projects');
+for(const id of ['ppm','tariff-fx','accounting-policy','clm','market-intelligence','management-system','ai-orchestration'])assert(d.briefings.change[id]&&d.improvements.some(x=>x.id===id),`${id} has detailed content`);
+assert.deepStrictEqual(Array.from(d.improvements.filter(x=>x.category!=='digital'),x=>x.id),['ppm','tariff-fx','accounting-policy']);
+assert.deepStrictEqual(Array.from(d.improvements.filter(x=>x.category==='digital'),x=>x.id),['clm','market-intelligence','management-system','ai-orchestration']);
 for(const n of d.executives)assert(n.duties.length>=5&&n.outputs.length&&n.interfaces.length,'complete role profile');
 for(const f of d.dealflows){assert.strictEqual(f.steps.length,d.processScenes[f.id].length);f.steps.forEach((x,i)=>assert.strictEqual(x[0],d.processScenes[f.id][i].title,'stage names match'));}
 const caseIds=new Set(d.cases.map(x=>x.id));
@@ -131,13 +138,15 @@ assert(ui.includes("block('Практический вывод'")&&!ui.includes(
 assert(ui.includes('class="cases-slide"'),'case overview presentation');
 for(const phrase of ['По материалам подразделений','Факты и выводы требуют проверки','Рабочие материалы','Не является протоколом решений','Инициатива — не утверждена'])assert(!ui.includes(phrase)&&!read('index.html').includes(phrase),`no presentation disclaimer: ${phrase}`);
 assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
+assert(d.growth.find(x=>x.id==='tolling').goal.includes('РФ/РК'),'tolling card covers Russian and Kazakh oil');
+assert(JSON.stringify(d.briefings.growth.tolling).includes('РФ/РК')&&!JSON.stringify(d.briefings.growth.tolling).includes('нефть РК'),'tolling modal covers Russian and Kazakh oil throughout');
 const presentationText=JSON.stringify(d);
 assert(!/дублирован/i.test(presentationText),'duplicate work/reporting case removed');
 assert(paymentCase.resolution.includes('ЭСФ не может отправляться до утверждения АВР'),'closing document sequence case');
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-cases56'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-digital57'),'v6.9 digital cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
