@@ -59,7 +59,7 @@ function inspector(type,id){let i=itemById(type,id);if(!i&&type!=='flow')return 
     block('Последствия',plain(i.effect))+
     block('Предлагаемое решение',plain(i.resolution))+
     (e?.lesson?block('Практический вывод',plain(e.lesson)):'')+
-    block('Ответственный',plain(i.owner))+
+    block(id==='duplicate'?'Ответственные':'Ответственный',plain(i.owner))+
     (e?.documents?.length?block('Подтверждающие документы',bullet(e.documents)):'')+
     (e?.reference?`<p class="source-caption"><a href="${esc(e.reference.url)}" target="_blank" rel="noopener noreferrer">${esc(e.reference.label)}</a></p>`:'');
  }else if(type==='company'){

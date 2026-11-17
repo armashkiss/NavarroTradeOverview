@@ -62,7 +62,9 @@ for(const f of d.dealflows){for(const st of d.processScenes[f.id]){assert(st.tit
 for(const c of d.cases)if(c.expandable!==false)assert(d.details.cases[c.id]?.process,`case content ${c.id}`);
 const paymentCase=d.cases.find(x=>x.id==='duplicate');
 assert(paymentCase.resolution.includes('до перечисления денег'),'contract before payment');
-assert(d.details.cases.duplicate.documents.some(x=>x.includes('МЕ (ДР)')),'recharged service evidence');
+assert(d.details.cases.duplicate.documents.some(x=>x.includes('в адрес NT')),'recharged service evidence for NT');
+assert(!/МЕ|ДР|казначейство/.test(JSON.stringify({case:paymentCase,detail:d.details.cases.duplicate})),'payment case uses financial block and NT only');
+assert(paymentCase.owner.includes('финансовый блок'),'financial block owns payment controls');
 for(const id of ['aviation-confirmation','team-coordination','transit-accounting','issue-escalation'])assert(d.cases.some(x=>x.id===id)&&d.details.cases[id]?.process,'new control case');
 const ui=read('assets/app.js');
 for(const marker of ['data-open-direction','richBrief','openProcessExplorer','processSelectStage','requestFullscreen','data-process-step','data-process-close','e.key===\'PageDown\''])assert(ui.includes(marker),`UI marker ${marker}`);
@@ -114,11 +116,11 @@ for(const phrase of ['По материалам подразделений','Ф�
 assert(!JSON.stringify({growth:d.growth,briefings:d.briefings.growth,decisions:d.decisions}).includes('толлинг'),'no tolling wording in growth content');
 const presentationText=JSON.stringify(d);
 assert(!/дублирован/i.test(presentationText),'duplicate work/reporting case removed');
-assert(paymentCase.resolution.includes('АВР до ЭСФ'),'closing document sequence case');
+assert(paymentCase.resolution.includes('ЭСФ не может отправляться до утверждения АВР'),'closing document sequence case');
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-infra43'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-docs44a'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
