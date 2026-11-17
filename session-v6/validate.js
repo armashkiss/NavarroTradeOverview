@@ -50,7 +50,8 @@ assert(d.growth.find(x=>x.id==='airports').goal.includes('ТЗК из Европ
 assert(d.briefings.growth.airports.why.includes('РГС'),'RGS included in aviation infrastructure briefing');
 assert(d.growth.find(x=>x.id==='foreign-airlines'),'foreign airlines');
 assert(d.cases.find(x=>x.id==='aviation-rfq'),'after-hours aviation request case');
-assert.strictEqual(d.cases.length,15,'15 working cases');
+assert.strictEqual(d.cases.length,12,'12 working cases');
+for(const id of ['ops','team-coordination','transit-accounting'])assert(!d.cases.some(c=>c.id===id)&&!d.details.cases[id],'removed cases and modal content');
 assert(d.cases.find(x=>x.id==='intercompany-edo'),'intercompany EDO case');
 assert(d.cases.find(x=>x.id==='intercompany-edo').resolution.includes('ЭДО'),'intercompany EDO solution');
 assert(!d.cases.find(x=>['base','jet-stock'].includes(x.id)),'excluded cases');
@@ -65,7 +66,7 @@ assert(paymentCase.resolution.includes('до перечисления денег
 assert(d.details.cases.duplicate.documents.some(x=>x.includes('в адрес NT')),'recharged service evidence for NT');
 assert(!/МЕ|ДР|казначейство/.test(JSON.stringify({case:paymentCase,detail:d.details.cases.duplicate})),'payment case uses financial block and NT only');
 assert(paymentCase.owner.includes('финансовый блок'),'financial block owns payment controls');
-for(const id of ['aviation-confirmation','team-coordination','transit-accounting','issue-escalation'])assert(d.cases.some(x=>x.id===id)&&d.details.cases[id]?.process,'new control case');
+for(const id of ['aviation-confirmation','issue-escalation'])assert(d.cases.some(x=>x.id===id)&&d.details.cases[id]?.process,'new control case');
 const ui=read('assets/app.js');
 for(const marker of ['data-open-direction','richBrief','openProcessExplorer','processSelectStage','requestFullscreen','data-process-step','data-process-close','e.key===\'PageDown\''])assert(ui.includes(marker),`UI marker ${marker}`);
 assert(read('index.html').includes('id="fullscreen"'),'fullscreen control');
@@ -120,7 +121,7 @@ assert(paymentCase.resolution.includes('ЭСФ не может отправля�
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-docs44a'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-cases45'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
