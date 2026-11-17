@@ -15,6 +15,7 @@ assert.strictEqual(d.processScenes.transit.length,8,'8 consolidated transit stag
 assert(!d.processScenes.domestic&&!d.dealflows.some(x=>x.id==='domestic'),'wholesale process removed');
 assert.deepStrictEqual(Array.from(d.directions,x=>x.id),['transit','infrastructure','aviation']);
 assert.deepStrictEqual(Array.from(d.infrastructureBrief.planned.items,x=>x.name),['Талдыкорган','Караганда','Туркестан','Ушарал'],'projects ordered by readiness');
+assert(fs.existsSync(path.join(__dirname,d.infrastructureBrief.planned.items[0].image.src)),'Taldykorgan project image exists');
 assert(d.infrastructureBrief.current.astana.items.join(' ').includes('6 резервуаров РГС по 75 м³'),'Astana renovation tank configuration');
 assert(d.infrastructureBrief.current.astana.items.join(' ').includes('80 м³'),'acquired fuel truck');
 assert(d.infrastructureBrief.current.aktobe.description.includes('пока не планируется'),'Aktobe has no renovation plan');
@@ -135,7 +136,7 @@ assert(paymentCase.resolution.includes('ЭСФ не может отправля�
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-wingcore52'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-taldyk53'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');

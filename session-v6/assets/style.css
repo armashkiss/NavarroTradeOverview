@@ -1016,3 +1016,20 @@ body.process-open{overflow:hidden}
 }
 @media(max-width:900px){.acquisition-phases{grid-template-columns:1fr}.acquisition-phase ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.acquisition-phase li{margin-top:0}.acquisition-priorities>strong{flex-basis:100%}}
 @media(max-width:580px){.acquisition-phase ol{grid-template-columns:1fr;gap:0}.acquisition-phase li{margin-top:13px}.aviation-brief-tabs button{font-size:14px;padding:10px 12px}.acquisition-phase h3{font-size:18px}.acquisition-phase p{font-size:16px}.acquisition-priorities>span{flex-basis:100%}}
+
+/* Taldykorgan attachment: compact preview and an accessible native image dialog. */
+.infra-project-image{position:relative;align-self:center;flex:0 0 96px;height:58px;padding:2px;border:1px solid #cfdfd6;border-radius:8px;background:#fff;cursor:zoom-in;overflow:hidden}
+.infra-project-image img{display:block;width:100%;height:100%;object-fit:contain}
+.infra-project-image>span{position:absolute;right:3px;top:3px;display:grid;place-items:center;width:20px;height:20px;border-radius:5px;color:#fff;background:#24595a;font-size:15px;font-weight:750}
+.infra-project-image:hover{border-color:#359b84;box-shadow:0 3px 12px #24705d20}
+.infra-project-image:focus-visible{outline:3px solid #389f91;outline-offset:3px}
+.project-image-dialog{width:min(1260px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid #d4e5dc;border-radius:15px;background:#fff;color:#234752;box-shadow:0 25px 100px #031e3655;overflow:hidden}
+.project-image-dialog[open]{display:flex;flex-direction:column}
+.project-image-dialog::backdrop{background:#081d2bc9;backdrop-filter:blur(6px)}
+.project-image-dialog>header{display:flex;align-items:center;gap:18px;padding:13px 18px;border-bottom:1px solid #dfeae5;background:#f1f8f5;flex:none}
+.project-image-dialog h2{font-size:20px;line-height:1.3;margin:0;margin-right:auto;color:#244b52}
+.project-image-original{font-size:13px;font-weight:650;color:#3a7b6b;white-space:nowrap}
+.project-image-dialog header button{border:1px solid #c9ddd2;border-radius:8px;padding:10px 13px;background:#fff;color:#275b59;font:inherit;font-size:14px;font-weight:750;white-space:nowrap;cursor:pointer}
+.project-image-body{min-height:0;overflow:auto;background:#fff}
+.project-image-body img{display:block;width:100%;height:auto;max-height:calc(100dvh - 100px);object-fit:contain}
+@media(max-width:580px){.infra-project:has(.infra-project-image){flex-wrap:wrap}.infra-project-image{flex-basis:calc(100% - 42px);height:135px;margin-left:42px}.project-image-dialog>header{gap:10px;flex-wrap:wrap;padding:12px}.project-image-dialog h2{font-size:17px;flex-basis:100%}.project-image-original{margin-right:auto}.project-image-body img{max-height:calc(100dvh - 150px)}}
