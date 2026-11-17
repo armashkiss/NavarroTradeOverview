@@ -862,6 +862,48 @@ body.process-open{overflow:hidden}
 .structure-november .structure-department{min-height:175px}
 @media(max-width:580px){.structure-november .structure-shared{grid-template-columns:1fr}}
 
+/* Organization chart imported from the November 2026 source deck. */
+.org-source-map{--org-line:#9abbb4;height:calc(100dvh - 304px);min-height:360px;padding:12px 14px 14px;border:1px solid #d7e6e1;border-radius:18px;background:linear-gradient(145deg,#fff,#f1f8f6);box-shadow:0 8px 28px #173d3810;color:#183846}
+.org-source-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.org-source-ceo{grid-column:2;min-width:270px;padding:9px 24px;border-radius:11px;background:#143246;color:#fff;text-align:center;box-shadow:0 5px 14px #14324618}
+.org-source-ceo small{display:block;margin-bottom:3px;color:#9ce0d4;font-size:9px;font-weight:850;letter-spacing:.14em}
+.org-source-ceo strong{display:block;font-size:19px;line-height:1.2}
+.org-source-advisor{grid-column:3;justify-self:start;max-width:260px;padding:10px 15px;border:1px solid #b8d0ca;border-radius:10px;background:#fff;font-size:14px;font-weight:800;line-height:1.25;text-align:center}
+.org-source-trunk{width:2px;height:13px;margin:auto;background:var(--org-line)}
+.org-source-grid{position:relative;display:grid;grid-template-columns:minmax(0,2.25fr) minmax(0,.78fr) minmax(0,.68fr) minmax(0,.58fr);gap:12px;height:calc(100% - 62px)}
+.org-source-grid:before{content:"";position:absolute;top:0;left:24%;right:7%;height:2px;background:var(--org-line)}
+.org-source-deputy,.org-source-direct{position:relative;min-width:0;padding-top:14px}.org-source-deputy{display:flex;flex-direction:column}
+.org-source-deputy:before,.org-source-direct:before{content:"";position:absolute;top:0;left:50%;width:2px;height:14px;background:var(--org-line)}
+.org-source-deputy>h3,.org-source-direct>h3{position:relative;margin:0;border-radius:9px;background:#227e75;color:#fff;text-align:center;font-size:15px;line-height:1.25;font-weight:850}
+.org-source-deputy>h3{padding:8px 12px}
+.org-source-direct>h3{padding:9px 8px;background:#e5f1ec;color:#174a43;border:1px solid #a8c9c0}
+.org-source-departments{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.6fr);gap:10px;margin-top:9px;flex:1}
+.org-source-department{display:flex;flex-direction:column;min-width:0;padding:8px;border:1px solid #d0e1dc;border-radius:10px;background:#fff}
+.org-source-department header{min-height:48px;padding-bottom:7px;border-bottom:1px solid #dfeae6;text-align:center}
+.org-source-department header strong{display:block;font-size:14px;line-height:1.2;color:#173b48}
+.org-source-department header span{display:block;margin-top:4px;color:#438078;font-size:11px;font-weight:750;line-height:1.2}
+.org-source-unit{min-width:0;margin-top:7px;padding:7px 8px;border-radius:7px;background:#f1f7f5;border-left:3px solid #9bc6b9}
+.org-source-unit>strong{display:block;color:#244955;font-size:13px;line-height:1.22}
+.org-source-unit ul,.org-source-direct ul{list-style:none;margin:6px 0 0;padding:0}
+.org-source-unit li,.org-source-direct li{position:relative;padding-left:10px;color:#557078;font-size:11px;line-height:1.3}
+.org-source-unit li+li,.org-source-direct li+li{margin-top:4px}
+.org-source-unit li:before,.org-source-direct li:before{content:"";position:absolute;left:0;top:.5em;width:4px;height:4px;border-radius:50%;background:#3e998a}
+.org-source-commercial>.org-source-unit{flex:1}.org-source-operations-units{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.72fr);gap:6px;flex:1}.org-source-operations-units>.org-source-unit{height:calc(100% - 7px)}
+.org-source-direct{height:100%;padding-left:0}
+.org-source-direct{border:1px solid #d0e1dc;border-radius:10px;background:#fff;padding:14px 9px 10px}
+.org-source-direct:before{top:0;transform:translateY(-14px)}
+.org-source-direct ul{margin-top:10px}
+.org-source-direct li{font-size:12px;line-height:1.34}
+@media(min-width:971px) and (max-height:780px){
+ .org-source-map{padding:8px 10px 10px}.org-source-ceo{padding:6px 20px}.org-source-ceo strong{font-size:17px}.org-source-advisor{padding:7px 11px;font-size:12px}.org-source-trunk{height:8px}
+ .org-source-deputy,.org-source-direct{padding-top:10px}.org-source-deputy:before,.org-source-direct:before{height:10px}.org-source-direct:before{transform:translateY(-10px)}
+ .org-source-deputy>h3,.org-source-direct>h3{font-size:14px}.org-source-deputy>h3{padding:6px 9px}.org-source-direct>h3{padding:7px}
+ .org-source-departments{margin-top:6px;gap:7px}.org-source-department{padding:6px}.org-source-department header{min-height:39px;padding-bottom:5px}.org-source-department header strong{font-size:12px}.org-source-department header span{font-size:10px;margin-top:2px}
+ .org-source-unit{margin-top:5px;padding:6px 7px}.org-source-unit>strong{font-size:12px}.org-source-unit li{font-size:10px;line-height:1.24}.org-source-direct li{font-size:11px;line-height:1.28}.org-source-unit li+li,.org-source-direct li+li{margin-top:3px}.org-source-direct ul{margin-top:8px}
+}
+@media(max-width:900px){.org-source-grid{grid-template-columns:1fr 1fr}.org-source-grid:before,.org-source-deputy:before,.org-source-direct:before{display:none}.org-source-top{grid-template-columns:1fr}.org-source-ceo,.org-source-advisor{grid-column:1;justify-self:stretch;max-width:none}.org-source-grid{margin-top:10px}.org-source-deputy{grid-column:1/-1}.org-source-deputy,.org-source-direct{padding-top:0}}
+@media(max-width:580px){.org-source-grid,.org-source-departments,.org-source-operations-units{grid-template-columns:1fr}.org-source-deputy{grid-column:auto}}
+
 /* Infrastructure portfolio: one third current work, two thirds planned projects. */
 .detail-zoom[data-focus-type="infrastructure"] .detail-window{bottom:auto;height:auto;max-height:calc(100dvh - 16px)}
 .detail-zoom[data-focus-type="infrastructure"] .detail-columns{display:block;height:auto}

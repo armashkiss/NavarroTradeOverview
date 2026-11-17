@@ -1530,91 +1530,91 @@ window.SESSION_DATA = {
     "growth": {}
   },
   "organizationOverview": {
-    "source": "Организационная_структура_Ноябрь_2026г_.pptx",
+    "source": "Организационная_структура_Ноябрь_2026г_ (2).pptx",
     "nodes": [
       {
         "id": "ceo",
         "name": "Генеральный директор",
         "parent": null,
-        "kind": "director"
+        "kind": "director",
+        "roles": []
+      },
+      {
+        "id": "advisor",
+        "name": "Советник генерального директора",
+        "parent": "ceo",
+        "kind": "advisor",
+        "roles": []
       },
       {
         "id": "deputy",
-        "name": "Первый заместитель генерального директора",
+        "name": "Заместитель генерального директора",
         "parent": "ceo",
-        "kind": "director"
-      },
-      {
-        "id": "commercial-director",
-        "name": "Коммерческий директор",
-        "parent": "deputy",
-        "kind": "director"
+        "kind": "director",
+        "roles": []
       },
       {
         "id": "commercial",
         "name": "Коммерческий департамент",
-        "parent": "commercial-director",
-        "kind": "department"
-      },
-      {
-        "id": "procurement",
-        "name": "Отдел закупа и реализации нефтепродуктов",
-        "parent": "commercial",
-        "kind": "department"
-      },
-      {
-        "id": "operations-director",
-        "name": "Операционный директор",
         "parent": "deputy",
-        "kind": "director"
+        "kind": "department",
+        "roles": ["Коммерческий директор"]
+      },
+      {
+        "id": "marketing",
+        "name": "Отдел маркетинга нефтепродуктов",
+        "parent": "commercial",
+        "kind": "department",
+        "roles": ["Менеджер по сопровождению международных сделок", "Менеджер по развитию рынка"]
       },
       {
         "id": "coo",
         "name": "Операционный департамент",
-        "parent": "operations-director",
-        "kind": "department"
+        "parent": "deputy",
+        "kind": "department",
+        "roles": ["Операционный директор"]
       },
       {
         "id": "pcqa",
-        "name": "Отдел контроля количества и качества нефтепродуктов",
+        "name": "Отдел контроля качества нефтепродуктов",
         "parent": "coo",
-        "kind": "department"
+        "kind": "department",
+        "roles": ["Начальник отдела", "Менеджер по учёту и контролю качества", "Товарный оператор на местах"]
       },
       {
         "id": "afo",
-        "name": "Служба наземных операций",
+        "name": "Наземное обслуживание",
         "parent": "coo",
-        "kind": "department"
+        "kind": "department",
+        "roles": ["Технический специалист наземных операций"]
       },
       {
         "id": "logistics",
-        "name": "Менеджер по логистике",
+        "name": "Логистика",
         "parent": "coo",
-        "kind": "position"
+        "kind": "department",
+        "roles": []
       },
       {
         "id": "international",
         "name": "Управление международного развития и внешних связей",
-        "parent": "deputy",
-        "kind": "department"
-      },
-      {
-        "id": "digital",
-        "name": "Управление цифровизацией",
-        "parent": "deputy",
-        "kind": "department"
+        "parent": "ceo",
+        "kind": "department",
+        "roles": ["Директор по международному развитию", "Менеджер по привлечению"]
       },
       {
         "id": "finance",
         "name": "Финансовый департамент",
         "parent": "ceo",
-        "kind": "department"
+        "kind": "department",
+        "roles": ["Главный бухгалтер", "Заместитель главного бухгалтера", "Ведущий бухгалтер", "Финансовый аналитик"]
       },
       {
         "id": "administration",
-        "name": "Административно-управленческий персонал",
+        "name": "АУП",
         "parent": "ceo",
-        "kind": "department"
+        "kind": "department",
+        "roles": ["Главный инженер", "Юрист", "Менеджер по персоналу"]
       }
     ]
   },

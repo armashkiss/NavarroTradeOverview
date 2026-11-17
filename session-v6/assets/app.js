@@ -303,14 +303,11 @@ function directions(){
 
 function orgmap(){
  const nodes=Object.fromEntries(D.organizationOverview.nodes.map(node=>[node.id,node]));
- const name=id=>esc(nodes[id].name);
- const branch=directorId=>{
-  const department=D.organizationOverview.nodes.find(node=>node.parent===directorId);
-  const units=D.organizationOverview.nodes.filter(node=>node.parent===department.id);
-  return `<div class="structure-branch"><div class="structure-director">${name(directorId)}</div><div class="structure-link"></div><div class="structure-department"><strong>${name(department.id)}</strong><div class="structure-units">${units.map(node=>`<div class="structure-unit">${esc(node.name)}</div>`).join('')}</div></div></div>`;
- };
+ const roleList=node=>node.roles?.length?`<ul>${node.roles.map(role=>`<li>${esc(role)}</li>`).join('')}</ul>`:'';
+ const unit=id=>`<div class="org-source-unit"><strong>${esc(nodes[id].name)}</strong>${roleList(nodes[id])}</div>`;
+ const direct=id=>`<section class="org-source-direct org-source-${esc(id)}"><h3>${esc(nodes[id].name)}</h3>${roleList(nodes[id])}</section>`;
  return head(2,'Организационная <span style="color:#389f91">структура</span>','Navarro Trade · подразделения и руководители · ноябрь 2026')+
- `<div class="structure-map structure-november"><div class="structure-ceo"><small>NAVARRO TRADE</small><strong>${name('ceo')}</strong></div><div class="structure-trunk"></div><div class="structure-grid"><div class="structure-executive"><div class="structure-deputy">${name('deputy')}</div><div class="structure-branches">${branch('commercial-director')}${branch('operations-director')}</div><div class="structure-shared"><div><small>Первому заместителю</small>${name('international')}</div><div><small>Первому заместителю</small>${name('digital')}</div></div></div><aside class="structure-support"><div class="structure-finance"><strong>${name('finance')}</strong><p>Прямое подчинение генеральному директору</p></div><div class="structure-advisory"><strong>АУП</strong><p>${name('administration')}</p><small>Прямое подчинение генеральному директору</small></div></aside></div></div>`;
+ `<div class="org-source-map"><div class="org-source-top"><div class="org-source-ceo"><small>NAVARRO TRADE</small><strong>${esc(nodes.ceo.name)}</strong></div><div class="org-source-advisor">${esc(nodes.advisor.name)}</div></div><div class="org-source-trunk"></div><div class="org-source-grid"><section class="org-source-deputy"><h3>${esc(nodes.deputy.name)}</h3><div class="org-source-departments"><div class="org-source-department org-source-commercial"><header><strong>${esc(nodes.commercial.name)}</strong><span>${esc(nodes.commercial.roles[0])}</span></header>${unit('marketing')}</div><div class="org-source-department org-source-operations"><header><strong>${esc(nodes.coo.name)}</strong><span>${esc(nodes.coo.roles[0])}</span></header><div class="org-source-operations-units">${unit('pcqa')}${unit('afo')}${unit('logistics')}</div></div></div></section>${direct('international')}${direct('finance')}${direct('administration')}</div></div>`;
 }
 
 function dealflow(){
