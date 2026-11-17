@@ -17,19 +17,24 @@ window.SESSION_DATA = {
       "short": "01"
     },
     {
+      "id": "orgmap",
+      "name": "Оргструктура",
+      "short": "02"
+    },
+    {
       "id": "cases",
       "name": "Кейсы и выводы",
-      "short": "02"
+      "short": "03"
     },
     {
       "id": "changes",
       "name": "Решения и изменения",
-      "short": "03"
+      "short": "04"
     },
     {
       "id": "growth",
       "name": "Стратегический рост",
-      "short": "04"
+      "short": "05"
     }
   ],
   "directions": [
@@ -1986,6 +1991,89 @@ window.SESSION_DATA = {
         "source": "Основание: «Вопрос_5_NT (2).docx» и уточнение пользователя от 24.10.2026 по ТЗК и РГС в Астане."
       }
     }
+  },
+  "organizationOverview": {
+    "source": "Организационная_структура_Ноябрь_2026г_.pptx",
+    "nodes": [
+      {
+        "id": "ceo",
+        "name": "Генеральный директор",
+        "parent": null,
+        "kind": "director"
+      },
+      {
+        "id": "deputy",
+        "name": "Первый заместитель генерального директора",
+        "parent": "ceo",
+        "kind": "director"
+      },
+      {
+        "id": "commercial-director",
+        "name": "Коммерческий директор",
+        "parent": "deputy",
+        "kind": "director"
+      },
+      {
+        "id": "commercial",
+        "name": "Коммерческий департамент",
+        "parent": "commercial-director",
+        "kind": "department"
+      },
+      {
+        "id": "procurement",
+        "name": "Отдел закупа и реализации нефтепродуктов",
+        "parent": "commercial",
+        "kind": "department"
+      },
+      {
+        "id": "operations-director",
+        "name": "Операционный директор",
+        "parent": "deputy",
+        "kind": "director"
+      },
+      {
+        "id": "coo",
+        "name": "Операционный департамент",
+        "parent": "operations-director",
+        "kind": "department"
+      },
+      {
+        "id": "pcqa",
+        "name": "Отдел контроля количества и качества нефтепродуктов",
+        "parent": "coo",
+        "kind": "department"
+      },
+      {
+        "id": "afo",
+        "name": "Служба наземных операций",
+        "parent": "coo",
+        "kind": "department"
+      },
+      {
+        "id": "international",
+        "name": "Управление международного развития и внешних связей",
+        "parent": "deputy",
+        "kind": "department"
+      },
+      {
+        "id": "digital",
+        "name": "Управление ИТ-проектами",
+        "parent": "deputy",
+        "kind": "department"
+      },
+      {
+        "id": "finance",
+        "name": "Финансовый департамент",
+        "parent": "ceo",
+        "kind": "department"
+      },
+      {
+        "id": "administration",
+        "name": "Административно-управленческий персонал",
+        "parent": "ceo",
+        "kind": "department"
+      }
+    ]
   }
 };
 

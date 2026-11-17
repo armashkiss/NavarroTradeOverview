@@ -6,7 +6,7 @@ const nodeById=Object.fromEntries(D.executives.map(e=>[e.id,e]));
 const itemById=(t,id)=>({direction:D.directions,exec:D.executives,case:D.cases,company:D.companies,change:D.improvements,growth:D.growth,decision:D.decisions})[t]?.find(x=>x.id===id);
 const current={slide:0,selected:{},orgParent:null,orgSelection:'ceo',flow:'transit',decisions:(()=>{try{return JSON.parse(localStorage.getItem('navarro-session-decisions')||'{}')}catch{return {}}})()};
 const slides=D.navigation;
-const slideAliases={orgmap:'directions',organization:'directions',partners:'cases',decisions:'changes'};
+const slideAliases={organization:'orgmap',partners:'cases',decisions:'changes'};
 const resolveSlide=id=>slideAliases[id]||id;
 const bullet=list=>`<ul>${list.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
 const block=(name,html)=>`<div class="section"><h4>${esc(name)}</h4>${html}</div>`;
@@ -264,6 +264,18 @@ function directions(){
  return head(1,'Три направления. <span style="color:#389f91">Одна группа.</span>','Международный транзит, оптовая торговля в РК и авиа-ГСМ: цепочки исполнения, участники и контрольные точки.')+cards;
 }
 
+function orgmap(){
+ const nodes=Object.fromEntries(D.organizationOverview.nodes.map(node=>[node.id,node]));
+ const name=id=>esc(nodes[id].name);
+ const branch=directorId=>{
+  const department=D.organizationOverview.nodes.find(node=>node.parent===directorId);
+  const units=D.organizationOverview.nodes.filter(node=>node.parent===department.id);
+  return `<div class="structure-branch"><div class="structure-director">${name(directorId)}</div><div class="structure-link"></div><div class="structure-department"><strong>${name(department.id)}</strong><div class="structure-units">${units.map(node=>`<div class="structure-unit">${esc(node.name)}</div>`).join('')}</div></div></div>`;
+ };
+ return head(2,'Организационная <span style="color:#389f91">структура</span>','Navarro Trade · подразделения и руководители · ноябрь 2026')+
+ `<div class="structure-map structure-november"><div class="structure-ceo"><small>NAVARRO TRADE</small><strong>${name('ceo')}</strong></div><div class="structure-trunk"></div><div class="structure-grid"><div class="structure-executive"><div class="structure-deputy">${name('deputy')}</div><div class="structure-branches">${branch('commercial-director')}${branch('operations-director')}</div><div class="structure-shared"><div><small>Первому заместителю</small>${name('international')}</div><div><small>Первому заместителю</small>${name('digital')}</div></div></div><aside class="structure-support"><div class="structure-finance"><strong>${name('finance')}</strong><p>Прямое подчинение генеральному директору</p></div><div class="structure-advisory"><strong>АУП</strong><p>${name('administration')}</p><small>Прямое подчинение генеральному директору</small></div></aside></div></div>`;
+}
+
 function dealflow(){
  const cards=D.dealflows.map((f,j)=>`<button class="process-selector" data-explore-flow="${esc(f.id)}"><div class="process-cover-num">0${j+1}</div><div class="process-tag">${j===0?'КНР · ПОСТАВКИ · ЖЕЛЕЗНАЯ ДОРОГА':'КАЗАХСТАН · ОПТОВАЯ ТОРГОВЛЯ'}</div><h2>${esc(f.name)}</h2><p>${esc(f.lead)}</p><div class="process-selector-foot"><span>${f.steps.length} этапов</span><strong>Карта процесса ↗</strong></div></button>`).join('');
  const hints=`<div class="process-feature-grid"><div><span>01 / ЛОГИКА</span><strong>Фактическая последовательность</strong><small>Без придуманной универсальной схемы</small></div><div><span>02 / СВЯЗИ</span><strong>Точки контакта с предприятиями</strong><small>JetWay, поставщики, базы и логистические операторы</small></div><div><span>03 / РИСКИ</span><strong>Простой · тарифы · валютный курс · маржа</strong><small>Кейсы на соответствующих этапах</small></div></div>`;
@@ -293,7 +305,7 @@ function render(){
  document.documentElement.style.setProperty('--slide-progress',current.slide+1);
  $('#count').textContent=`${String(current.slide+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
  $('#sidenav').innerHTML=slides.map((x,k)=>`<button class="navlink ${k===current.slide?'active':''}" data-goto="${x.id}" title="${esc(x.name)}"><span class="navno">${x.short}</span><span>${esc(x.name)}</span></button>`).join('');
- let body=({opening:cover,directions,cases,changes,growth})[s.id]();
+ let body=({opening:cover,directions,orgmap,cases,changes,growth})[s.id]();
  $('#page').innerHTML=`<div class="page-inner slide-enter">${body}</div>`;
  requestAnimationFrame(()=>adaptInlineInspector());
  $('#page').scrollTop=0;$('#side').classList.remove('open');
