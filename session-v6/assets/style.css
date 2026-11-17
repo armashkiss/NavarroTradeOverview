@@ -862,7 +862,7 @@ body.process-open{overflow:hidden}
 .structure-november .structure-department{min-height:175px}
 @media(max-width:580px){.structure-november .structure-shared{grid-template-columns:1fr}}
 
-/* Infrastructure: project descriptions and equipment, without capacity metrics. */
+/* Infrastructure portfolio: one third current work, two thirds planned projects. */
 .detail-zoom[data-focus-type="infrastructure"] .detail-window{bottom:auto;height:auto;max-height:calc(100dvh - 16px)}
 .detail-zoom[data-focus-type="infrastructure"] .detail-columns{display:block;height:auto}
 .detail-zoom[data-focus-type="infrastructure"] .detail-content{flex:0 1 auto;overflow-y:auto;padding:16px 20px}
@@ -870,25 +870,45 @@ body.process-open{overflow:hidden}
 .detail-zoom[data-focus-type="infrastructure"] .detail-mainhead h2{font-size:clamp(28px,2.6vw,40px)}
 .detail-zoom[data-focus-type="infrastructure"] .detail-mainhead p{font-size:17px;line-height:1.35;max-width:none}
 .detail-zoom[data-focus-type="infrastructure"] .detail-bottom{display:none}
-.infra-brief{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch}
-.infra-brief>section{border:1px solid #d5e4de;background:#f3f8f5;border-radius:14px;padding:20px;min-width:0}
-.infra-brief .infra-mobile{background:#fff}
-.infra-brief .infra-label{font-size:11px;line-height:1.35;letter-spacing:.06em;font-weight:850;text-transform:uppercase;color:#278c7c;margin-bottom:8px}
-.infra-brief h2{font-size:23px;line-height:1.2;letter-spacing:-.025em;color:#193c4a;margin:0 0 16px}
-.infra-brief h3{font-size:18px;line-height:1.3;color:#28505b;margin:0 0 8px}
-.infra-brief p{font-size:18px;line-height:1.45;color:#4d6972;margin:8px 0 0}
-.infra-location+.infra-location,.infra-turkestan .infra-location{margin-top:18px;padding-top:16px;border-top:1px solid #d2e3da}
-.infra-facilities{display:grid;gap:12px;margin-top:16px}
-.infra-facility{padding:13px 15px;border:1px solid #d7e6df;border-radius:10px;background:#f1f7f4}
-.infra-facility h3{font-size:17px;margin-bottom:5px}
+.infra-portfolio{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px;align-items:stretch}
+.infra-portfolio>section{min-width:0;border:1px solid #d5e4de;border-radius:14px;padding:22px}
+.infra-current{background:#edf7f2}
+.infra-planned{background:#fff}
+.infra-label{font-size:11px;line-height:1.35;letter-spacing:.08em;font-weight:850;text-transform:uppercase;color:#278c7c;margin-bottom:7px}
+.infra-portfolio h2{font-size:24px;line-height:1.2;letter-spacing:-.025em;color:#193c4a;margin:0 0 18px}
+.infra-portfolio h3{font-size:21px;line-height:1.25;color:#28505b;margin:0}
+.infra-portfolio p,.infra-portfolio li{font-size:18px;line-height:1.45;color:#4d6972}
+.infra-portfolio p{margin:8px 0 0}
+.infra-current .infra-current-lead{color:#247665;font-weight:650}
+.infra-current .infra-renovation{margin-top:16px;color:#284e54;font-weight:650}
+.infra-current ul{margin:9px 0 0;padding-left:20px}
+.infra-current li{padding-left:2px;margin:7px 0}
+.infra-current li::marker{color:#279680}
+.infra-aktobe{border-top:1px solid #c8dfd3;margin-top:20px;padding-top:17px}
+.infra-planned h2{margin-bottom:7px}
+.infra-planned .infra-order{font-size:14px;color:#70868b;margin:0 0 16px}
+.infra-projects{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.infra-project{display:flex;gap:16px;align-items:flex-start;padding:18px;border:1px solid #d8e6df;border-radius:12px;background:#f6faf8}
+.infra-rank{flex:0 0 42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#dcefe5;color:#217662;font-size:20px;font-weight:850}
+.infra-project-copy{min-width:0;flex:1}
+.infra-project-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.infra-status{font-size:12px;line-height:1.35;color:#427568;background:#e7f2ec;border-radius:6px;padding:5px 8px;font-weight:650}
+.infra-project p{margin-top:8px}
 @media(min-width:971px) and (max-height:780px){
  .detail-zoom[data-focus-type="infrastructure"] .detail-tools{height:48px}
  .detail-zoom[data-focus-type="infrastructure"] .detail-content{padding:12px 18px}
- .infra-brief>section{padding:17px}
- .infra-brief h2{font-size:21px;margin-bottom:12px}
- .infra-brief p{font-size:17px;line-height:1.4}
- .infra-location+.infra-location,.infra-turkestan .infra-location{margin-top:15px;padding-top:13px}
- .infra-facility{padding:11px 12px}
+ .infra-portfolio>section{padding:17px}
+ .infra-portfolio h2{font-size:22px;margin-bottom:14px}
+ .infra-portfolio h3{font-size:20px}
+ .infra-portfolio p,.infra-portfolio li{font-size:17px;line-height:1.4}
+ .infra-current .infra-renovation{margin-top:12px}
+ .infra-current li{margin:6px 0}
+ .infra-aktobe{margin-top:15px;padding-top:14px}
+ .infra-planned h2{margin-bottom:6px}
+ .infra-planned .infra-order{font-size:13px;margin-bottom:13px}
+ .infra-projects{gap:10px}
+ .infra-project{padding:12px 15px;gap:13px}
+ .infra-project p{margin-top:6px}
 }
-@media(max-width:900px){.infra-brief{grid-template-columns:repeat(2,minmax(0,1fr))}.infra-turkestan{grid-column:1/-1}}
-@media(max-width:580px){.infra-brief{grid-template-columns:1fr}.infra-turkestan{grid-column:auto}.infra-brief>section{padding:17px}}
+@media(max-width:900px){.infra-portfolio{grid-template-columns:1fr}.infra-status{font-size:12px}.infra-portfolio>section{padding:18px}}
+@media(max-width:580px){.infra-project{padding:13px;gap:10px}.infra-rank{flex-basis:32px;height:32px;font-size:17px}.infra-portfolio h3{font-size:19px}.infra-portfolio p,.infra-portfolio li{font-size:16px}.infra-project-head{align-items:flex-start;flex-direction:column;gap:6px}}
