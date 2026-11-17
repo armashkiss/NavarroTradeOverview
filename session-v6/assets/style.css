@@ -912,3 +912,107 @@ body.process-open{overflow:hidden}
 }
 @media(max-width:900px){.infra-portfolio{grid-template-columns:1fr}.infra-status{font-size:12px}.infra-portfolio>section{padding:18px}}
 @media(max-width:580px){.infra-project{padding:13px;gap:10px}.infra-rank{flex-basis:32px;height:32px;font-size:17px}.infra-portfolio h3{font-size:19px}.infra-portfolio p,.infra-portfolio li{font-size:16px}.infra-project-head{align-items:flex-start;flex-direction:column;gap:6px}}
+
+/* Case overview follows the direction cards; solutions retain their flat list. */
+.cases-slide[data-cases-view]{text-transform:none}
+.case-category-grid{margin-top:18px}
+.case-category-grid .case-category-launch{min-height:380px;display:flex;flex-direction:column;text-align:left}
+.case-category-grid .case-category-launch h3{font-size:clamp(28px,2.5vw,40px);margin:24px 0 15px}
+.case-category-grid .case-category-launch .tag{font-size:11px;line-height:1.5;letter-spacing:.06em}
+.case-category-grid .case-category-launch .tile-desc{font-size:17px;line-height:1.5}
+.case-category-grid .direction-foot{margin-top:auto;padding-top:24px;gap:12px}
+.case-category-grid .direction-foot>span{font-size:15px;color:#548075}
+.case-category-grid .direction-foot b{font-size:15px}
+.case-category-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:12px 0 16px}
+.case-category-back{border:1px solid #ceded8;background:#fff;border-radius:10px;padding:11px 15px;font:inherit;font-size:14px;color:#2b7466;font-weight:750;cursor:pointer}
+.case-category-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.case-category-tabs button{display:flex;gap:12px;align-items:center;border:1px solid #d4e3dc;background:#fff;border-radius:9px;padding:10px 14px;font:inherit;font-size:14px;font-weight:650;color:#52766d;cursor:pointer}
+.case-category-tabs button[aria-pressed="true"]{color:#fff;background:#204c58;border-color:#204c58}
+.case-category-tabs span{font-size:12px;opacity:.75}
+.cases-slide .category-case-grid{height:auto;grid-template-columns:repeat(var(--category-columns),minmax(0,1fr));grid-template-rows:repeat(var(--case-rows),minmax(175px,1fr));min-height:0;gap:13px}
+.cases-slide .category-case-grid .casecard{min-height:175px;padding:22px;justify-content:center}
+.cases-slide .category-case-grid .casecard .meta{font-size:11px;margin-bottom:12px;line-height:1.4}
+.cases-slide .category-case-grid .casecard b{font-size:21px;line-height:1.3;letter-spacing:-.015em;text-wrap:pretty}
+.cases-slide .category-case-grid .casecard small{display:block;font-size:16px;line-height:1.4;margin-top:10px;color:#74908d;letter-spacing:0}
+.case-category-back:focus-visible,.case-category-tabs button:focus-visible{outline:3px solid #389f91;outline-offset:3px}
+@media(min-width:971px) and (max-height:780px){
+ .case-category-grid .case-category-launch{min-height:350px;padding:23px}
+ .case-category-grid .case-category-launch .tile-desc{font-size:16px}
+ .case-category-grid .case-category-launch h3{font-size:31px;margin:20px 0 12px}
+ .case-category-grid .case-category-launch .big-number{font-size:54px}
+ .cases-slide .category-case-grid .casecard{min-height:158px;padding:18px}
+ .cases-slide .category-case-grid{grid-template-rows:repeat(var(--case-rows),minmax(158px,1fr))}
+ .cases-slide .category-case-grid .casecard b{font-size:20px}
+ .cases-slide .category-case-grid .casecard small{font-size:15px}
+}
+@media(max-width:970px){.cases-slide .category-case-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none}.case-category-toolbar{align-items:flex-start;flex-direction:column}.case-category-grid .case-category-launch{min-height:320px}}
+@media(max-width:840px){.case-category-grid{grid-template-columns:1fr}.case-category-grid .case-category-launch{min-height:245px}.case-category-grid .case-category-launch h3{margin:18px 0 12px;font-size:29px}.case-category-grid .direction-foot{flex-direction:row;align-items:center;padding-top:20px}}
+@media(max-width:580px){.cases-slide .category-case-grid{grid-template-columns:1fr}.case-category-tabs{gap:5px}.case-category-tabs button{padding:9px 10px;font-size:13px;gap:7px}.cases-slide .category-case-grid .casecard{padding:20px}.case-category-grid .case-category-launch .tile-desc{font-size:16px}}
+
+/* Aviation market brief, summarized from the supplied slide. */
+.detail-zoom[data-focus-type="aviation-markets"] .detail-window{bottom:auto;height:auto;max-height:calc(100dvh - 16px)}
+.detail-zoom[data-focus-type="aviation-markets"] .detail-columns{display:block;height:auto}
+.detail-zoom[data-focus-type="aviation-markets"] .detail-content{flex:0 1 auto;overflow-y:auto;padding:16px 22px 20px}
+.detail-zoom[data-focus-type="aviation-markets"] .detail-mainhead{padding:14px 26px}
+.detail-zoom[data-focus-type="aviation-markets"] .detail-mainhead h2{font-size:clamp(28px,2.6vw,40px)}
+.detail-zoom[data-focus-type="aviation-markets"] .detail-mainhead p{font-size:18px;line-height:1.4}
+.detail-zoom[data-focus-type="aviation-markets"] .detail-bottom{display:none}
+.aviation-markets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.market-card{display:flex;flex-direction:column;min-width:0;border:1px solid #d6e4de;border-radius:15px;padding:24px;background:#f7faf8}
+.market-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.market-card-head h2{font-size:31px;line-height:1.2;letter-spacing:-.025em;color:#183d48;margin:0}
+.market-card-head>span{font-size:13px;line-height:1.4;font-weight:700;color:#306b60;border-radius:8px;background:#e0f0e8;padding:7px 11px}
+.market-facts p{font-size:19px;line-height:1.45;color:#486772;margin:0 0 13px}
+.market-facts strong{font-weight:800;color:#254c57}
+.market-entry{margin-top:auto;border-top:1px solid #cddfd6;padding-top:16px}
+.market-entry>span{display:block;font-size:12px;line-height:1.4;text-transform:uppercase;letter-spacing:.08em;color:#278a78;font-weight:850;margin-bottom:6px}
+.market-entry p{font-size:20px;line-height:1.4;color:#244e52;font-weight:750;margin:0}
+@media(min-width:971px) and (max-height:780px){
+ .detail-zoom[data-focus-type="aviation-markets"] .detail-tools{height:48px}
+ .detail-zoom[data-focus-type="aviation-markets"] .detail-mainhead{padding:12px 24px}
+ .detail-zoom[data-focus-type="aviation-markets"] .detail-content{padding:12px 18px 17px}
+ .market-card{padding:20px}
+ .market-card-head{margin-bottom:12px}
+ .market-card-head h2{font-size:29px}
+ .market-card-head>span{font-size:12px;padding:6px 9px}
+ .market-facts p{font-size:18px;line-height:1.4;margin-bottom:11px}
+ .market-entry{padding-top:13px}
+ .market-entry p{font-size:19px;line-height:1.4}
+}
+@media(max-width:800px){.aviation-markets{grid-template-columns:1fr}.market-card{padding:20px}.market-card-head h2{font-size:28px}.market-facts p{font-size:18px}.market-entry p{font-size:18px}}
+
+.aviation-brief-tabs{display:flex;gap:10px;margin:0 0 16px;flex-wrap:wrap}
+.aviation-brief-tabs button{border:1px solid #cedfd6;border-radius:9px;background:#fff;color:#46776a;padding:11px 17px;font:inherit;font-size:16px;font-weight:750;cursor:pointer}
+.aviation-brief-tabs button[aria-pressed="true"]{background:#204c58;border-color:#204c58;color:#fff}
+.aviation-brief-tabs button:focus-visible{outline:3px solid #389f91;outline-offset:3px}
+.acquisition-phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.acquisition-phase{min-width:0;border:1px solid #d6e4de;border-radius:14px;background:#f7faf8;padding:20px}
+.acquisition-phase-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:15px}
+.acquisition-phase-head span{font-size:12px;line-height:1.4;letter-spacing:.06em;text-transform:uppercase;color:#318577;font-weight:800}
+.acquisition-phase-head h2{font-size:25px;line-height:1.2;letter-spacing:-.025em;color:#1f4550;margin:5px 0 0}
+.acquisition-phase-head>b{font-size:42px;line-height:1.05;letter-spacing:-.05em;color:#c9e6da;font-weight:850}
+.acquisition-phase ol{list-style:none;counter-reset:client-step;margin:0;padding:0}
+.acquisition-phase li{border-top:1px solid #d5e4dd;padding:14px 0 0;margin-top:13px}
+.acquisition-phase li:first-child{margin-top:0}
+.acquisition-phase h3{font-size:18px;line-height:1.3;color:#2a4c56;margin:0 0 7px}
+.acquisition-phase p{font-size:17px;line-height:1.4;color:#56737a;margin:0}
+.acquisition-priorities{display:flex;align-items:center;gap:10px;margin-top:15px;flex-wrap:wrap}
+.acquisition-priorities>strong{font-size:12px;line-height:1.4;text-transform:uppercase;letter-spacing:.06em;color:#45776a;margin-right:4px}
+.acquisition-priorities>span{flex:1;min-width:150px;text-align:center;border-radius:9px;padding:11px;background:#e3f2e9;color:#2d6255;font-size:15px;line-height:1.35;font-weight:750}
+.aviation-acquisition .acquisition-timing{font-size:12px;line-height:1.4;color:#7b918b;margin:12px 0 0}
+@media(min-width:971px) and (max-height:780px){
+ .aviation-brief-tabs{margin-bottom:12px}
+ .aviation-brief-tabs button{font-size:15px;padding:9px 15px}
+ .acquisition-phase{padding:17px}
+ .acquisition-phase-head{padding-bottom:11px}
+ .acquisition-phase-head h2{font-size:23px}
+ .acquisition-phase-head>b{font-size:38px}
+ .acquisition-phase li{padding-top:11px;margin-top:11px}
+ .acquisition-phase h3{font-size:17px;margin-bottom:5px}
+ .acquisition-phase p{font-size:16px;line-height:1.35}
+ .acquisition-priorities{margin-top:12px}
+ .acquisition-priorities>span{font-size:14px;padding:9px}
+ .aviation-acquisition .acquisition-timing{font-size:11px;margin-top:9px}
+}
+@media(max-width:900px){.acquisition-phases{grid-template-columns:1fr}.acquisition-phase ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.acquisition-phase li{margin-top:0}.acquisition-priorities>strong{flex-basis:100%}}
+@media(max-width:580px){.acquisition-phase ol{grid-template-columns:1fr;gap:0}.acquisition-phase li{margin-top:13px}.aviation-brief-tabs button{font-size:14px;padding:10px 12px}.acquisition-phase h3{font-size:18px}.acquisition-phase p{font-size:16px}.acquisition-priorities>span{flex-basis:100%}}

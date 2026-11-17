@@ -51,6 +51,17 @@ assert(d.briefings.growth.airports.why.includes('РГС'),'RGS included in aviat
 assert(d.growth.find(x=>x.id==='foreign-airlines'),'foreign airlines');
 assert(d.cases.find(x=>x.id==='aviation-rfq'),'after-hours aviation request case');
 assert.strictEqual(d.cases.length,12,'12 working cases');
+assert.deepStrictEqual(Array.from(d.caseCategories,x=>x.id),['finance','commerce','management']);
+for(const c of d.cases)assert(d.caseCategories.some(x=>x.id===c.category),'every case belongs to one category');
+for(const id of ['regional','tajik','tariffs','plan','aviation-rfq'])assert.strictEqual(d.cases.find(x=>x.id===id).category,'commerce','trade, transit and logistics cases belong to commerce');
+assert.deepStrictEqual(Array.from(d.caseCategories,g=>d.cases.filter(c=>c.category===g.id).length),[3,5,4]);
+assert.strictEqual(d.directions.find(x=>x.id==='aviation').name,'Авиа-ГСМ, новые рынки сбыта');
+assert.deepStrictEqual(Object.keys(d.aviationMarkets),['tashkent','hongkong']);
+assert(d.aviationMarkets.tashkent.firstStep.includes('Saneg JetWhites'));
+assert(d.aviationMarkets.hongkong.firstStep.includes('PetroChina'));
+assert.strictEqual(d.aviationAcquisition.phases.length,3);
+assert.strictEqual(d.aviationAcquisition.phases.reduce((n,x)=>n+x.items.length,0),9);
+assert.strictEqual(d.aviationAcquisition.priorities.length,3);
 for(const id of ['ops','team-coordination','transit-accounting'])assert(!d.cases.some(c=>c.id===id)&&!d.details.cases[id],'removed cases and modal content');
 assert(d.cases.find(x=>x.id==='intercompany-edo'),'intercompany EDO case');
 assert(d.cases.find(x=>x.id==='intercompany-edo').resolution.includes('ЭДО'),'intercompany EDO solution');
@@ -124,7 +135,7 @@ assert(paymentCase.resolution.includes('ЭСФ не может отправля�
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-changes48'),'v6.9 readable cache revision');
+assert(read('index.html').includes('style.css?v=6.9-clients51'),'v6.9 readable cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(ui.includes('30 ОКТЯБРЯ 2026') && !ui.includes('22 ОКТЯБРЯ 2026'), 'cover date updated');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
