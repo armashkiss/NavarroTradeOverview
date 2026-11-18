@@ -12,13 +12,13 @@ window.SESSION_DATA = {
       "short": "00"
     },
     {
-      "id": "directions",
-      "name": "Направления",
+      "id": "orgmap",
+      "name": "Оргструктура",
       "short": "01"
     },
     {
-      "id": "orgmap",
-      "name": "Оргструктура",
+      "id": "directions",
+      "name": "Направления",
       "short": "02"
     },
     {
