@@ -115,7 +115,7 @@ assert(ui.includes('function prepareInlineLayout'),'balanced inline text columns
 assert(read('assets/style.css').includes('.inline-section-flow'),'inline column-flow styles');
 assert(read('index.html').includes('../session/assets/navarro-logo.png'),'official logo in persistent navigation');
 assert(ui.includes('class="cover-logo"'),'official logo on opening slide');
-assert(ui.includes('STERLING ENERGY GROUP LTD. / СТРАТЕГИЧЕСКАЯ И ОПЕРАЦИОННАЯ СЕССИЯ 2026'),'full Sterling Energy Group Ltd. name on cover');
+assert(ui.includes('STERLING ENERGY GROUP LTD. / СТРАТЕГИЧЕСКАЯ СЕССИЯ 2026')&&!ui.includes('И ОПЕРАЦИОННАЯ'),'strategic session wording on cover');
 assert(!ui.includes('class="quickstats"')&&!ui.includes('class="stat"'),'lower statistic blocks removed from the opening slide');
 assert(ui.includes('width>=720?3:width>=510?2:1'),'width-aware inline layout breakpoints');
 assert(read('assets/style.css').includes('grid-template-columns:minmax(275px,.48fr)'),'wider inline focus column');
@@ -167,7 +167,7 @@ assert(paymentCase.resolution.includes('ЭСФ не может отправля�
 for(const abbreviation of ['AS-IS','TO-BE','CAPEX','OPEX','KPI','CEO','COO','CFO','DCEO','FP&A','PCQA','AFO','RACI','SLA','PPM','AOP','DUPLICATION'])assert(!presentationText.includes(abbreviation),`expanded Russian term replaces ${abbreviation}`);
 assert(!/\bFX\b/.test(presentationText),'expanded Russian term replaces FX');
 assert(read('assets/style.css').includes('projector readability and fuller use'),'readable full-canvas styling');
-assert(read('index.html').includes('style.css?v=6.9-brand69'),'v6.9 brand cache revision');
+assert(read('index.html').includes('style.css?v=6.9-session70'),'v6.9 session cache revision');
 assert(d.meta.revision.startsWith('30.10.2026'), 'presentation revision date');
 assert(!ui.includes('30 ОКТЯБРЯ 2026')&&!ui.includes('22 ОКТЯБРЯ 2026'),'cover date removed');
 assert(!ui.includes('class="decision-controls"')&&!ui.includes('data-decision='),'decision cards contain no status buttons');
